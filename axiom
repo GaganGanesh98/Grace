@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+# AXIOM local dev CLI — CWD-independent; paths from this script only.
+set -euo pipefail
+
+if [[ -n "${BASH_VERSION:-}" ]] && [[ "${BASH_VERSINFO[0]}" -lt 4 ]]; then
+  echo "axiom: requires bash 4+ (found ${BASH_VERSION:-unknown})" >&2
+  exit 1
+fi
+
+readonly REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export REPO_ROOT
+
+# shellcheck source=scripts/lib/axiom-common.sh
+source "${REPO_ROOT}/scripts/lib/axiom-common.sh"
+
+cmd="${1:-}"
+shift || true
+
+case "${cmd}" in
+  "" | help | -h | --help) axiom_run_help ;;
+  dev)
+    # shellcheck source=scripts/lib/axiom-dev.sh
+    source "${REPO_ROOT}/scripts/lib/axiom-dev.sh"
+    axiom_run_dev "$@"
+    ;;
+  automint-worker-key)
+    if ! command -v uv >/dev/null 2>&1; then
+      echo "axiom: uv not found (install uv: https://docs.astral.sh/uv/)" >&2
+      exit 1
+    fi
+    (cd "${REPO_ROOT}/apps/backend" && uv run python -m axiom.cli.automint ensure)
+    ;;
+  rotate-worker-key)
+    if ! command -v uv >/dev/null 2>&1; then
+      echo "axiom: uv not found (install uv: https://docs.astral.sh/uv/)" >&2
+      exit 1
+    fi
+    (cd "${REPO_ROOT}/apps/backend" && uv run python -m axiom.cli.automint rotate)
+    ;;
+  stop)
+    # shellcheck source=scripts/lib/axiom-stop.sh
+    source "${REPO_ROOT}/scripts/lib/axiom-stop.sh"
+    axiom_run_stop "$@"
+    ;;
+  fresh)
+    # shellcheck source=scripts/lib/axiom-fresh.sh
+    source "${REPO_ROOT}/scripts/lib/axiom-fresh.sh"
+    axiom_run_fresh "$@"
+    ;;
+  status)
+    # shellcheck source=scripts/lib/axiom-status.sh
+    source "${REPO_ROOT}/scripts/lib/axiom-status.sh"
+    axiom_run_status "$@"
+    ;;
+  logs)
+    # shellcheck source=scripts/lib/axiom-logs.sh
+    source "${REPO_ROOT}/scripts/lib/axiom-logs.sh"
+    axiom_run_logs "$@"
+    ;;
+  test)
+    # shellcheck source=scripts/lib/axiom-test.sh
+    source "${REPO_ROOT}/scripts/lib/axiom-test.sh"
+    axiom_run_test "$@"
+    ;;
+  worker)
+    if [[ ! -x "${REPO_ROOT}/apps/backend/.venv/bin/python" ]]; then
+      echo "axiom: apps/backend/.venv/bin/python not found (cd apps/backend && uv sync)" >&2
+      exit 1
+    fi
+    if [[ -f "${REPO_ROOT}/.env.dev" ]]; then
+      set -a
+      # shellcheck disable=SC1091
+      source "${REPO_ROOT}/.env.dev"
+      set +a
+    fi
+    export DATABASE_URL="${AXIOM_DEV_DATABASE_URL}"
+    unset TEST_DATABASE_URL
+    cd "${REPO_ROOT}/apps/backend" && exec .venv/bin/python -m axiom.workers.agent_worker
+    ;;
+  crypto)
+    shift
+    sub="${1:-check}"
+    shift || true
+    case "${sub}" in
+      check)
+        (cd "${REPO_ROOT}/apps/backend" && uv run python -m axiom.services.crypto.compliance)
+        ;;
+      *)
+        echo "axiom crypto: unknown subcommand: ${sub}" >&2
+        exit 1
+        ;;
+    esac
+    ;;
+  *)
+    echo "axiom: unknown command: ${cmd}" >&2
+    axiom_run_help >&2
+    exit 1
+    ;;
+esac

@@ -1,0 +1,43 @@
+{
+  "policy": "/home/harsh/AXIOM-V2/packages/axiom-sdk/axiom_policy.yaml",
+  "report": "/home/harsh/AXIOM-V2/packages/axiom-sdk/axiom_report.json",
+  "results": [
+    {
+      "timestamp": "2026-04-19T03:23:49.366385+00:00",
+      "method": "GET",
+      "url": "https://httpbin.org/get",
+      "action_type": "tool.http",
+      "target": "",
+      "risk": "low",
+      "verdict": "error",
+      "receipt_id": null,
+      "status_code": null,
+      "error": "API error 404: The page could not be found\n\nNOT_FOUND\n\nsfo1::nf22l-1776569029295-4d0c98896715\n",
+      "duration_ms": null,
+      "body_hash": null,
+      "authorization_header_present": null,
+      "original_verdict": "error",
+      "replay_verdict": "deny",
+      "changed": true
+    },
+    {
+      "timestamp": "2026-04-19T03:23:50.389409+00:00",
+      "method": "POST",
+      "url": "https://httpbin.org/post",
+      "action_type": "tool.http",
+      "target": "",
+      "risk": "low",
+      "verdict": "error",
+      "receipt_id": null,
+      "status_code": null,
+      "error": "API error 404: The page could not be found\n\nNOT_FOUND\n\nsfo1::mbzkh-1776569030315-ef7e82315685\n",
+      "duration_ms": null,
+      "body_hash": null,
+      "authorization_header_present": null,
+      "original_verdict": "error",
+      "replay_verdict": "deny",
+      "changed": true
+    }
+  ],
+  "changed_count": 2
+}

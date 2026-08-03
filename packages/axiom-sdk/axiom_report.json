@@ -1,0 +1,49 @@
+{
+  "axiom_version": "0.1.0",
+  "agent_id": "test_agent.py",
+  "start_time": "2026-04-19T03:23:48.962900+00:00",
+  "end_time": "2026-04-19T03:23:51.117646+00:00",
+  "total_calls": 2,
+  "summary": {
+    "allowed": 0,
+    "denied": 0,
+    "held": 0,
+    "errors": 2
+  },
+  "calls": [
+    {
+      "timestamp": "2026-04-19T03:23:49.366385+00:00",
+      "method": "GET",
+      "url": "https://httpbin.org/get",
+      "action_type": "tool.http",
+      "target": "",
+      "risk": "low",
+      "verdict": "error",
+      "receipt_id": null,
+      "status_code": null,
+      "error": "API error 404: The page could not be found\n\nNOT_FOUND\n\nsfo1::nf22l-1776569029295-4d0c98896715\n",
+      "duration_ms": null,
+      "body_hash": null,
+      "authorization_header_present": null
+    },
+    {
+      "timestamp": "2026-04-19T03:23:50.389409+00:00",
+      "method": "POST",
+      "url": "https://httpbin.org/post",
+      "action_type": "tool.http",
+      "target": "",
+      "risk": "low",
+      "verdict": "error",
+      "receipt_id": null,
+      "status_code": null,
+      "error": "API error 404: The page could not be found\n\nNOT_FOUND\n\nsfo1::mbzkh-1776569030315-ef7e82315685\n",
+      "duration_ms": null,
+      "body_hash": null,
+      "authorization_header_present": null
+    }
+  ],
+  "unique_targets": [],
+  "action_type_breakdown": {
+    "tool.http": 2
+  }
+}

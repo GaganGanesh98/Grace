@@ -1,0 +1,4 @@
+# test_keys.py contains NO real keys — only assertion tests for the keys.py loader
+# (tests that missing env vars raise MissingSigningKeysError). Scoped allowlist only;
+# mirrors detect-private-key exclude in .pre-commit-config.yaml.
+apps/backend/tests/receipt/test_keys.py

@@ -1,0 +1,18 @@
+name: "Starter Safe"
+version: 1
+description: "Auto-allow low/medium risk. Hold high risk. Deny critical."
+rules:
+  - name: "deny-critical"
+    condition: "risk == 'critical'"
+    verdict: "deny"
+    reason: "Critical risk actions are always denied"
+  - name: "hold-high"
+    condition: "risk == 'high'"
+    verdict: "hold"
+    reason: "High risk actions require human approval"
+  - name: "allow-medium"
+    condition: "risk == 'medium'"
+    verdict: "allow"
+  - name: "allow-low"
+    condition: "risk == 'low'"
+    verdict: "allow"

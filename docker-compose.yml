@@ -1,0 +1,57 @@
+services:
+  postgres:
+    # pgvector/pgvector image = Postgres + the `vector` extension preinstalled,
+    # required for semantic policy matching (CREATE EXTENSION vector).
+    image: pgvector/pgvector:pg18
+    container_name: axiom-postgres
+    environment:
+      POSTGRES_USER: axiom
+      POSTGRES_PASSWORD: axiom_dev_only
+      POSTGRES_DB: axiom
+    ports:
+      - "5433:5432"
+    volumes:
+      - axiom_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U axiom -d axiom"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: axiom-redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - axiom_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Self-hosted n8n for the escalation flow (local dev, no external deps).
+  # UI at http://localhost:5678. Import n8n/escalation-workflow.json and activate.
+  # The backend runs on the host (uvicorn :8000); n8n reaches it via
+  # host.docker.internal, and the backend reaches n8n at http://localhost:5678.
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: axiom-n8n
+    ports:
+      - "5678:5678"
+    environment:
+      N8N_SECURE_COOKIE: "false"
+      GENERIC_TIMEZONE: "UTC"
+      # Shared secret used by the sample workflow to sign its callback (HMAC).
+      # Must match the backend's N8N_CALLBACK_SECRET.
+      N8N_CALLBACK_SECRET: "dev_escalation_secret_change_me"
+    volumes:
+      - axiom_n8n_data:/home/node/.n8n
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  axiom_pg_data:
+  axiom_redis_data:
+  axiom_n8n_data:

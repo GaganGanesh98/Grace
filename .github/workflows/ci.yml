@@ -1,0 +1,227 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: axiom
+          POSTGRES_PASSWORD: ci_only
+          POSTGRES_DB: axiom_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U axiom"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "0.11.7"
+
+      - name: Set up Python
+        run: uv python install 3.13
+
+      - name: Sync deps
+        working-directory: apps/backend
+        run: uv sync --all-groups
+
+      - name: Ruff lint
+        working-directory: apps/backend
+        run: uv run ruff check .
+
+      - name: Ruff format check
+        working-directory: apps/backend
+        run: uv run ruff format --check .
+
+      - name: Mypy
+        working-directory: apps/backend
+        run: uv run mypy src
+
+      - name: Import-linter architecture
+        working-directory: apps/backend
+        run: uv run lint-imports --config ../../.importlinter
+
+      - name: Pytest with coverage
+        working-directory: apps/backend
+        env:
+          TEST_DATABASE_URL: postgresql+asyncpg://axiom:ci_only@localhost:5432/axiom_test
+          TEST_REDIS_URL: redis://localhost:6379/0
+          DATABASE_URL: postgresql+asyncpg://axiom:ci_only@localhost:5432/axiom_test
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: ci-secret-key-not-for-production-use-only-xxxxxxxxxxxxxxxx
+          JWT_SECRET: ci-jwt-secret-not-for-production-use-only
+          ENCRYPTION_KEY: ci-encryption-key-not-for-production
+          GOOGLE_CLIENT_ID: test-google-client
+          GOOGLE_CLIENT_SECRET: test-google-secret
+        run: uv run pytest --cov-fail-under=80 --cov-report=xml
+
+      - name: Per-file coverage - auth.py
+        working-directory: apps/backend
+        env:
+          TEST_DATABASE_URL: postgresql+asyncpg://axiom:ci_only@localhost:5432/axiom_test
+          TEST_REDIS_URL: redis://localhost:6379/0
+          DATABASE_URL: postgresql+asyncpg://axiom:ci_only@localhost:5432/axiom_test
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: ci-secret-key-not-for-production-use-only-xxxxxxxxxxxxxxxx
+          JWT_SECRET: ci-jwt-secret-not-for-production-use-only
+          ENCRYPTION_KEY: ci-encryption-key-not-for-production
+          GOOGLE_CLIENT_ID: test-google-client
+          GOOGLE_CLIENT_SECRET: test-google-secret
+        run: >-
+          uv run pytest --override-ini="addopts=" --cov=axiom.services.auth
+          --cov-fail-under=95 tests/ -q
+
+      - name: Per-file coverage - google_oauth.py
+        working-directory: apps/backend
+        env:
+          TEST_DATABASE_URL: postgresql+asyncpg://axiom:ci_only@localhost:5432/axiom_test
+          TEST_REDIS_URL: redis://localhost:6379/0
+          DATABASE_URL: postgresql+asyncpg://axiom:ci_only@localhost:5432/axiom_test
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: ci-secret-key-not-for-production-use-only-xxxxxxxxxxxxxxxx
+          JWT_SECRET: ci-jwt-secret-not-for-production-use-only
+          ENCRYPTION_KEY: ci-encryption-key-not-for-production
+          GOOGLE_CLIENT_ID: test-google-client
+          GOOGLE_CLIENT_SECRET: test-google-secret
+        run: >-
+          uv run pytest --override-ini="addopts=" --cov=axiom.services.google_oauth
+          --cov-fail-under=90 tests/ -q
+
+      - name: Per-package coverage - services.crypto
+        working-directory: apps/backend
+        env:
+          TEST_DATABASE_URL: postgresql+asyncpg://axiom:ci_only@localhost:5432/axiom_test
+          TEST_REDIS_URL: redis://localhost:6379/0
+          DATABASE_URL: postgresql+asyncpg://axiom:ci_only@localhost:5432/axiom_test
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: ci-secret-key-not-for-production-use-only-xxxxxxxxxxxxxxxx
+          JWT_SECRET: ci-jwt-secret-not-for-production-use-only
+          ENCRYPTION_KEY: ci-encryption-key-not-for-production
+          GOOGLE_CLIENT_ID: test-google-client
+          GOOGLE_CLIENT_SECRET: test-google-secret
+        run: >-
+          uv run pytest --override-ini="addopts=" --cov=axiom.services.crypto
+          --cov-fail-under=95 tests/crypto/ -q
+
+      - name: Per-package coverage - services.policy
+        working-directory: apps/backend
+        env:
+          TEST_DATABASE_URL: postgresql+asyncpg://axiom:ci_only@localhost:5432/axiom_test
+          TEST_REDIS_URL: redis://localhost:6379/0
+          DATABASE_URL: postgresql+asyncpg://axiom:ci_only@localhost:5432/axiom_test
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: ci-secret-key-not-for-production-use-only-xxxxxxxxxxxxxxxx
+          JWT_SECRET: ci-jwt-secret-not-for-production-use-only
+          ENCRYPTION_KEY: ci-encryption-key-not-for-production
+          GOOGLE_CLIENT_ID: test-google-client
+          GOOGLE_CLIENT_SECRET: test-google-secret
+        run: >-
+          uv run pytest --override-ini="addopts=" --cov=axiom.services.policy
+          --cov-fail-under=90 tests/policy/ -q
+
+      - name: Per-package coverage - services.prompt_injection
+        working-directory: apps/backend
+        env:
+          TEST_DATABASE_URL: postgresql+asyncpg://axiom:ci_only@localhost:5432/axiom_test
+          TEST_REDIS_URL: redis://localhost:6379/0
+          DATABASE_URL: postgresql+asyncpg://axiom:ci_only@localhost:5432/axiom_test
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: ci-secret-key-not-for-production-use-only-xxxxxxxxxxxxxxxx
+          JWT_SECRET: ci-jwt-secret-not-for-production-use-only
+          ENCRYPTION_KEY: ci-encryption-key-not-for-production
+          GOOGLE_CLIENT_ID: test-google-client
+          GOOGLE_CLIENT_SECRET: test-google-secret
+        run: >-
+          uv run pytest --override-ini="addopts=" --cov=axiom.services.prompt_injection
+          --cov-fail-under=95 tests/prompt_injection/ -q
+
+      - name: pip-audit
+        working-directory: apps/backend
+        run: uv run pip-audit --strict
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: apps/frontend/package-lock.json
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm run build
+      - name: npm audit (critical only)
+        run: npm audit --audit-level=critical
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: TruffleHog
+        uses: trufflesecurity/trufflehog@v3.84.2
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --only-verified
+
+  trivy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: CRITICAL,HIGH
+          exit-code: "0"
+          ignore-unfixed: true
+
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install pre-commit
+        run: pip install pre-commit
+      - name: Run all hooks
+        run: pre-commit run --all-files

@@ -1,0 +1,68 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=1024"]
+      - id: check-case-conflict
+      # test_keys.py contains NO real keys — only assertion tests for the keys.py loader
+      # (tests that missing env vars raise MissingSigningKeysError). The hook regex
+      # matches on variable names like `axiom_ed25519_private_pem`. Scoped exclude only.
+      - id: detect-private-key
+        exclude: ^apps/backend/tests/receipt/test_keys\.py$
+      - id: mixed-line-ending
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.12
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+        files: ^apps/backend/
+      - id: ruff-format
+        files: ^apps/backend/
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.13.0
+    hooks:
+      - id: mypy
+        args: [--config-file, apps/backend/pyproject.toml, apps/backend/src]
+        pass_filenames: false
+        additional_dependencies:
+          - pydantic>=2.10
+          - pydantic-settings>=2.7.0
+          - sqlalchemy>=2.0
+          - structlog>=24.4.0
+          - types-passlib
+          - types-python-jose
+          - httpx>=0.28.0
+          - redis>=5.2.0
+          - slowapi>=0.1.9
+          - fastapi>=0.115.0
+          - cryptography>=42.0.0
+          - rfc8785>=0.1.4
+          - dilithium-py>=1.4.0
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
+
+  - repo: local
+    hooks:
+      - id: no-broad-except
+        name: Block bare except and except Exception outside main.py
+        entry: bash -c 'if grep -rn -E "except:|except Exception" apps/backend/src/axiom/ --exclude=main.py | grep -v "# noqa"; then echo "Bare except found - use specific exception"; exit 1; fi'
+        language: system
+        pass_filenames: false
+
+      - id: no-print-statements
+        name: Block print() in source code
+        entry: bash -c 'if grep -rn "^[^#]*print(" apps/backend/src/axiom/ --exclude-dir=__pycache__; then echo "print() found - use structlog logger"; exit 1; fi'
+        language: system
+        pass_filenames: false

@@ -1,0 +1,54 @@
+; Contracts 1 (crypto leaf) and 3 (pipeline protocols) require packages that land in Phase 1.75.
+; import-linter forbids non-existent source_modules — enable those blocks once the modules exist.
+; See docs/decisions.md ADR-021.
+
+[importlinter]
+root_packages =
+    axiom
+
+[importlinter:contract:1]
+name = Models do not import services or routers
+type = forbidden
+source_modules =
+    axiom.models
+forbidden_modules =
+    axiom.services
+    axiom.routers
+    axiom.middleware
+
+[importlinter:contract:2]
+name = Layered architecture
+type = layers
+layers =
+    axiom.routers
+    axiom.services
+    axiom.models
+    axiom.core
+
+; Phase 1.75 — crypto must not depend on routers, middleware, or models.
+[importlinter:contract:3]
+name = Crypto leaf package
+type = forbidden
+source_modules =
+    axiom.services.crypto
+forbidden_modules =
+    axiom.routers
+    axiom.middleware
+    axiom.models
+
+; Phase 2 — pipeline stage protocols are the leaf composition surface.
+; They must stay free of routers, middleware, models, and the DB layer so that
+; the six stages can be imported, tested, and re-composed without dragging in
+; a FastAPI dependency graph. Adapters (DB-backed stages, HTTP response builders)
+; live in higher layers and import FROM protocols, never the other way around.
+[importlinter:contract:4]
+name = Pipeline protocols pure
+type = forbidden
+source_modules =
+    axiom.services.pipeline.protocols
+forbidden_modules =
+    axiom.routers
+    axiom.middleware
+    axiom.models
+    axiom.db
+    axiom.main

@@ -1,0 +1,7 @@
+name: "Read Only"
+version: 1
+description: "Shadow mode. Allow everything but record everything."
+rules:
+  - name: "allow-all"
+    condition: "true"
+    verdict: "allow"

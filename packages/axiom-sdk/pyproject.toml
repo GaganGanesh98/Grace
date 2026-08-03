@@ -1,0 +1,57 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "grace-sdk"
+version = "0.1.0"
+description = "Python SDK for AXIOM — real-time hard governance and execution engine for AI agents"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [
+    { name = "AXIOM Control Systems Inc." },
+]
+keywords = ["ai", "governance", "agents", "compliance", "post-quantum", "cryptography"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Security",
+    "Topic :: Software Development :: Libraries",
+]
+dependencies = [
+    "requests>=2.28.0",
+    "click>=8.0",
+    "pyyaml>=6.0",
+]
+
+[project.scripts]
+axiom = "axiom.cli:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov",
+    "responses>=0.23",
+    "editables>=0.3",
+    "httpx>=0.24.0",
+]
+
+[project.urls]
+Homepage = "https://axiom.dev"
+Documentation = "https://docs.axiom.dev"
+Repository = "https://github.com/GaganGanesh98/Grace"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/axiom"]
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: tests that call a running AXIOM API (local or remote)",
+]

@@ -1,0 +1,491 @@
+/* V1b Electric Blue — login only; CSS-only decoration + animations */
+
+@keyframes loginBlink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes loginCardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes loginCornerFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.pageRoot {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: #040408;
+  color: #ffffff;
+  isolation: isolate;
+}
+
+/* Auth pages stay on AXIOM's canonical dark substrate regardless of theme class. */
+:global(html.light) .pageRoot {
+  background-color: var(--surface-page);
+  color: var(--text-primary);
+}
+
+:global(html.light) .card {
+  background: rgba(10, 14, 22, 0.7);
+  border-color: rgba(74, 183, 255, 0.12);
+  color: var(--text-primary);
+}
+
+:global(html.light) .ambientGrid,
+:global(html.light) .ambientGlow {
+  opacity: 0.45;
+}
+
+.ambientGrid {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 70% 65% at 50% 45%, black 20%, transparent 72%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 65% at 50% 45%, black 20%, transparent 72%);
+}
+
+.ambientGlow {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(
+      ellipse 55% 50% at 50% 42%,
+      rgba(74, 183, 255, 0.035) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 40% 45% at 52% 48%,
+      rgba(74, 183, 255, 0.028) 0%,
+      transparent 58%
+    );
+}
+
+.cornerMeta {
+  pointer-events: none;
+  position: fixed;
+  z-index: 1;
+  top: 28px;
+  left: 32px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: rgba(74, 183, 255, 0.35);
+  opacity: 0;
+  animation: loginCornerFade 2s ease-out 1.4s forwards;
+}
+
+.cornerMetaBr {
+  pointer-events: none;
+  position: fixed;
+  z-index: 1;
+  right: 32px;
+  bottom: 28px;
+  text-align: right;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  line-height: 1.7;
+  color: rgba(74, 183, 255, 0.35);
+  opacity: 0;
+  animation: loginCornerFade 2s ease-out 1.4s forwards;
+}
+
+.cornerMetaBrDim {
+  color: rgba(74, 183, 255, 0.2);
+}
+
+@media (max-width: 600px) {
+  .cornerMeta,
+  .cornerMetaBr {
+    display: none;
+  }
+}
+
+.cardShell {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 420px;
+  min-width: 0;
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  border-radius: 4px;
+  border: 1px solid rgba(74, 183, 255, 0.12);
+  background: rgba(10, 14, 22, 0.7);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  padding: 44px 40px 36px;
+  box-sizing: border-box;
+  animation: loginCardEnter 1.2s ease-out 0.3s both;
+}
+
+.cardAccent {
+  position: absolute;
+  top: 0;
+  left: 20%;
+  right: 20%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(74, 183, 255, 0.4) 50%,
+    transparent 100%
+  );
+  border-radius: 1px;
+}
+
+.wordmarkRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 40px;
+}
+
+.wordmarkLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.wordmarkIcon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.diamondOuter {
+  width: 22px;
+  height: 22px;
+  transform: rotate(45deg);
+  border: 1px solid #4ab7ff;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+
+.diamondInner {
+  width: 6px;
+  height: 6px;
+  background: #4ab7ff;
+  transform: rotate(-45deg);
+}
+
+.wordmarkTitle {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 4px;
+  color: #ffffff;
+}
+
+:global(html.light) .wordmarkTitle {
+  color: #0a0e16;
+}
+
+.wordmarkVer {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: #5a6680;
+}
+
+.heading {
+  font-family: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 200;
+  font-size: 30px;
+  letter-spacing: -0.6px;
+  line-height: 1.15;
+  color: #ffffff;
+  margin: 0 0 8px;
+}
+
+:global(html.light) .heading {
+  color: #0a0e16;
+}
+
+.tagline {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #4ab7ff;
+  margin: 0 0 36px;
+}
+
+.labelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+
+.labelText {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #6b90b8;
+}
+
+.resetLink {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #4ab7ff;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.resetLink:hover {
+  color: #8fceff;
+}
+
+.fieldGroup {
+  margin-bottom: 14px;
+}
+
+.fieldGroupBeforeSubmit {
+  margin-bottom: 0;
+}
+
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 4px;
+  border: 1px solid rgba(74, 183, 255, 0.18);
+  background: rgba(0, 0, 0, 0.5);
+  padding: 11px 13px;
+  color: #ffffff;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 14px;
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+:global(html.light) .input {
+  background: rgba(255, 255, 255, 0.9);
+  color: #0a0e16;
+  border-color: rgba(30, 100, 160, 0.35);
+}
+
+.input:focus-visible {
+  outline: 2px solid var(--neutral-100);
+  outline-offset: 2px;
+}
+
+.input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+:global(html.light) .input::placeholder {
+  color: rgba(10, 14, 22, 0.45);
+}
+
+.input[aria-invalid="true"] {
+  border-color: rgb(248 113 113);
+  box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.2);
+}
+
+.errorText {
+  margin: 6px 0 0;
+  font-size: 0.875rem;
+  line-height: 1.35;
+  color: rgb(248 113 113);
+}
+
+.primaryBtn {
+  width: 100%;
+  margin-top: 22px;
+  padding: 13px;
+  border: none;
+  border-radius: 4px;
+  background: #4ab7ff;
+  color: #040408;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    letter-spacing 0.2s ease;
+}
+
+.primaryBtn:hover:not(:disabled) {
+  background: #8fceff;
+  box-shadow: 0 0 40px rgba(74, 183, 255, 0.35);
+  letter-spacing: 4px;
+}
+
+.primaryBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.dividerLine {
+  flex: 1;
+  height: 1px;
+  background: rgba(74, 183, 255, 0.1);
+}
+
+.dividerOr {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #3a4758;
+}
+
+.googleBtn {
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 13px;
+  border-radius: 4px;
+  border: 1px solid rgba(74, 183, 255, 0.22);
+  background: #f4f7fb;
+  color: #0a0e16;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    letter-spacing 0.2s ease;
+}
+
+.googleBtnIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.googleBtnIcon svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.googleBtnLabel {
+  flex: 0 1 auto;
+}
+
+:global(html.light) .googleBtn {
+  background: #ffffff;
+  border-color: rgba(30, 100, 160, 0.35);
+  color: #0a0e16;
+}
+
+.googleBtn:hover {
+  background: #ffffff;
+  border-color: rgba(74, 183, 255, 0.45);
+  box-shadow: 0 0 24px rgba(74, 183, 255, 0.2);
+  letter-spacing: 2.5px;
+}
+
+.liveRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(74, 183, 255, 0.1);
+}
+
+.liveDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4ab7ff;
+  box-shadow: 0 0 8px rgba(74, 183, 255, 0.6);
+  animation: loginBlink 1.5s ease-in-out infinite;
+}
+
+.liveText {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: #6b90b8;
+}
+
+.signupRow {
+  margin-top: 18px;
+  text-align: center;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 13px;
+  color: #6b90b8;
+}
+
+.signupLink {
+  color: #4ab7ff;
+  text-decoration: none;
+}
+
+.signupLink:hover {
+  color: #8fceff;
+  text-decoration: underline;
+}

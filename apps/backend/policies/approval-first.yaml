@@ -1,0 +1,12 @@
+name: "Approval First"
+version: 1
+description: "Hold everything for human approval. Nothing executes without sign-off."
+rules:
+  - name: "deny-critical"
+    condition: "risk == 'critical'"
+    verdict: "deny"
+    reason: "Critical risk actions are always denied"
+  - name: "hold-everything"
+    condition: "true"
+    verdict: "hold"
+    reason: "All actions require human approval under this policy"

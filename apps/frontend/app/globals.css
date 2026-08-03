@@ -1,0 +1,219 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  :root {
+    --axiom-font-scale: 1;
+
+    /* Surfaces */
+    --surface-page: #0a1628;
+    --surface-chrome: #070f1c;
+    --surface-card: #0f1d2e;
+    --surface-elevated: #16263a;
+    --surface-input: #0c1a2a;
+    --surface-overlay: rgba(7, 15, 28, 0.88);
+    --surface-code: #0a1421;
+
+    /* Neutrals */
+    --neutral-100: #e8ebf0;
+    --neutral-200: #c6cdd6;
+    --neutral-400: #8b95a3;
+    --neutral-500: #6b7585;
+    --neutral-600: #4d5667;
+    --neutral-700: #363e4d;
+    --neutral-800: #242a36;
+    --neutral-900: #161b24;
+
+    /* Borders */
+    --border-subtle: #1a2230;
+    --border-default: #243044;
+    --border-strong: #36425a;
+    --border-critical: #9aabc2;
+
+    /* Text */
+    --text-primary: #e8ebf0;
+    --text-secondary: #a8b3c2;
+    --text-tertiary: #6b7585;
+    --text-disabled: #3d4658;
+    --text-inverse: #0a1628;
+    --text-link: #a8b3c2;
+
+    /* Brand cyan — RESERVED for live indicator only */
+    --cyan-400: #22d3ee;
+    --cyan-glow: rgba(34, 211, 238, 0.18);
+
+    /* Semantic — DENIED */
+    --status-denied-fg: #fa4d56;
+    --status-denied-border: #da1e28;
+    --status-denied-bg: rgba(218, 30, 40, 0.10);
+
+    /* Semantic — HELD */
+    --status-held-fg: #f1c21b;
+    --status-held-border: #d2a106;
+    --status-held-bg: rgba(210, 161, 6, 0.10);
+
+    /* Semantic — OK */
+    --status-ok-fg: #42be65;
+    --status-ok-border: #24a148;
+    --status-ok-bg: rgba(36, 161, 72, 0.08);
+
+    /* Semantic — START / DISCONNECTED */
+    --status-neutral-fg: #a8b3c2;
+    --status-neutral-border: #6b7585;
+    --status-neutral-bg: rgba(168, 179, 194, 0.06);
+
+    /* Semantic — INFO */
+    --status-info-fg: #78a9ff;
+    --status-info-border: #4589ff;
+    --status-info-bg: rgba(69, 137, 255, 0.10);
+
+    /* Typography */
+    --font-sans: 'IBM Plex Sans', ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, 'Menlo', 'Monaco', 'Courier New', monospace;
+
+    /* Spacing — 4px base */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-12: 48px;
+    --space-16: 64px;
+
+    /* Radii */
+    --radius-none: 0px;
+    --radius-xs: 2px;
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-pill: 9999px;
+
+    /* Motion */
+    --motion-instant: 80ms;
+    --motion-fast: 120ms;
+    --motion-base: 180ms;
+    --motion-slow: 240ms;
+    --ease-default: cubic-bezier(0.2, 0, 0.38, 0.9);
+    --ease-out: cubic-bezier(0, 0, 0.38, 0.9);
+    --ease-in: cubic-bezier(0.2, 0, 1, 0.9);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+
+    /* Density anchors */
+    --density-row: 36px;
+    --density-row-header: 32px;
+    --density-list: 48px;
+    --density-list-compact: 40px;
+    --density-nav-top: 48px;
+    --density-sidebar: 224px;
+    --density-sidebar-collapsed: 56px;
+    --density-drawer: 480px;
+    --density-modal: 560px;
+
+    /* shadcn-compatible aliases backed by AXIOM v1 canonical tokens */
+    --background: var(--surface-page);
+    --foreground: var(--text-primary);
+    --card: var(--surface-card);
+    --card-foreground: var(--text-primary);
+    --popover: var(--surface-card);
+    --popover-foreground: var(--text-primary);
+    --primary: var(--neutral-100);
+    --primary-foreground: var(--text-inverse);
+    --secondary: var(--surface-elevated);
+    --secondary-foreground: var(--text-primary);
+    --muted: var(--neutral-900);
+    --muted-foreground: var(--text-secondary);
+    --accent: var(--surface-elevated);
+    --accent-foreground: var(--text-primary);
+    --destructive: var(--status-denied-fg);
+    --destructive-foreground: var(--text-primary);
+    --border: var(--border-default);
+    --input: var(--border-default);
+    --ring: var(--neutral-100);
+    --radius: var(--radius-lg);
+  }
+  * {
+    border-color: var(--border);
+  }
+  html,
+  body {
+    background: var(--surface-page);
+    color: var(--text-primary);
+    min-height: 100vh;
+  }
+  html {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.5;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+
+  /*
+   * Phase 7.7 design-token bridge.
+   * Existing components keep their --axiom-* references, while this alias layer
+   * redirects them to the canonical v1 tokens from docs/design-tokens.md.
+   * --axiom-electric now resolves to neutral white; cyan is isolated behind
+   * --axiom-live for SSE/STREAMING/EXECUTING indicators only.
+   */
+  [data-axiom-dashboard] {
+    --axiom-bg: var(--surface-page);
+    --axiom-bg-card: var(--surface-card);
+    --axiom-bg-alt: var(--surface-elevated);
+    --axiom-border: var(--border-subtle);
+    --axiom-border-strong: var(--border-default);
+    --axiom-text: var(--text-primary);
+    --axiom-text-muted: var(--text-secondary);
+    --axiom-text-label: var(--text-secondary);
+    --axiom-text-dim: var(--text-tertiary);
+    --axiom-electric: var(--neutral-100);
+    --axiom-live: var(--cyan-400);
+    --axiom-success: var(--status-ok-fg);
+    --axiom-warn: var(--status-held-fg);
+    --axiom-danger: var(--status-denied-fg);
+  }
+
+  /* Dashboard font scale: --axiom-font-scale is set on :root by FontScaleProvider; text-axiom-* uses it */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes live-breath {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.live-dot {
+  animation: live-breath 2s ease-in-out infinite;
+  background: var(--axiom-live, var(--cyan-400));
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+}

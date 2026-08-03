@@ -1,0 +1,62 @@
+{
+  "name": "Axiom Escalation (demo auto-approve)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "axiom-escalation",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "b1a1e001-0000-4000-8000-000000000001",
+      "name": "Escalation Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [260, 300],
+      "webhookId": "axiom-escalation"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Incoming escalation payload from Axiom (POST body).\nconst payload = $input.first().json.body ?? $input.first().json;\n\n// --- Notification (demo stub) ---\n// In a real flow, replace this with a Slack or Email node.\nconsole.log('AXIOM escalation:', payload.severity, payload.action?.type, '->', payload.link);\n\n// --- Decision (demo auto-approve) ---\n// Swap for real logic or a human-in-the-loop branch as needed.\nconst decision = {\n  receipt_id: payload.receipt_id,\n  decision: 'approved',\n  reason: 'auto-approved by n8n demo workflow',\n};\n\n// Sign the EXACT bytes we will send, so the HMAC matches on the Axiom side.\nconst bodyString = JSON.stringify(decision);\nconst crypto = require('crypto');\nconst secret = $env.N8N_CALLBACK_SECRET || 'dev_escalation_secret_change_me';\nconst signature = 'sha256=' + crypto.createHmac('sha256', secret).update(bodyString).digest('hex');\n\nreturn [{ json: { callback_url: payload.callback_url, bodyString, signature } }];"
+      },
+      "id": "b1a1e001-0000-4000-8000-000000000002",
+      "name": "Notify + Sign Decision",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [520, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.callback_url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-Axiom-Signature", "value": "={{ $json.signature }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.bodyString }}",
+        "options": {}
+      },
+      "id": "b1a1e001-0000-4000-8000-000000000003",
+      "name": "POST Decision to Axiom",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [780, 300]
+    }
+  ],
+  "connections": {
+    "Escalation Webhook": {
+      "main": [[{ "node": "Notify + Sign Decision", "type": "main", "index": 0 }]]
+    },
+    "Notify + Sign Decision": {
+      "main": [[{ "node": "POST Decision to Axiom", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {},
+  "active": false
+}
