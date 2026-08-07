@@ -9,6 +9,7 @@ from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from typing import Annotated, Any
 from urllib.parse import unquote, urlparse
+from uuid import UUID
 
 import httpx
 import structlog
@@ -45,6 +46,7 @@ from axiom.gateway.proxy import (
 from axiom.gateway.upstream_audit import build_upstream_audit
 from axiom.gateway.vault import inject_credentials
 from axiom.middleware.body_size import BodySizeLimitMiddleware
+from axiom.services import vault as vault_service
 from axiom.services.api_key import APIKeyContext
 from axiom.services.governance.receipt import load_governance_merkle_from_db
 from axiom.services.redis_client import close_redis
@@ -387,6 +389,103 @@ async def _gateway_deps(
     return api_ctx, body
 
 
+def _governance_gate(gov: Any) -> tuple[dict[str, str], Response | None]:
+    """Turn a governance outcome into the receipt header plus any short-circuit response.
+
+    Returns ``(hdr_receipt, None)`` when the verdict is allow and the caller
+    should proceed, or ``(hdr_receipt, response)`` for deny (403) and hold (202).
+    """
+    receipt_id = (
+        gov.deny.receipt_id
+        if gov.deny
+        else gov.hold.receipt_id
+        if gov.hold
+        else gov.allow.receipt_id
+        if gov.allow
+        else None
+    )
+    assert receipt_id is not None
+    hdr_receipt = {"X-Axiom-Receipt-Id": str(receipt_id)}
+    if gov.kind == "deny":
+        return hdr_receipt, _json_error(
+            status.HTTP_403_FORBIDDEN,
+            {"error": "governance_denied", "receipt_id": str(receipt_id)},
+            headers=hdr_receipt,
+        )
+    if gov.kind == "hold":
+        return hdr_receipt, _json_error(
+            status.HTTP_202_ACCEPTED,
+            {
+                "status": "held",
+                "receipt_id": str(receipt_id),
+                "message": "Awaiting approval",
+            },
+            headers=hdr_receipt,
+        )
+    return hdr_receipt, None
+
+
+async def _apply_named_vault_credential(
+    db: AsyncSession,
+    *,
+    request: Request,
+    api_ctx: APIKeyContext,
+    receipt_id: UUID,
+    out_headers: dict[str, str],
+    hdr_receipt: dict[str, str],
+) -> tuple[UUID | None, Response | None]:
+    """Resolve the caller-named vault key and set Authorization on the outbound request.
+
+    Credential injection for the generic proxy is opt-in and explicit: the caller
+    names the key via ``X-Axiom-Vault-Key``. The target host is never used to
+    infer which credential to use — host-based inference would let a request to
+    an attacker-controlled URL select a credential the caller was not entitled
+    to. With no header we inject nothing, which is the default and preserves the
+    original fail-safe behaviour.
+
+    Callers must invoke this only after the SSRF guard has accepted the target
+    and governance has returned allow, so a blocked or denied request never
+    causes a vault read.
+
+    Returns ``(vault_key_id, None)`` on success (``vault_key_id`` is None when no
+    header was supplied), or ``(None, response)`` when the named key does not
+    resolve within the caller's own vault.
+    """
+    name = (request.headers.get("x-axiom-vault-key") or "").strip()
+    if not name:
+        return None, None
+
+    resolved = await vault_service.get_key_and_id_by_name(db, api_ctx.created_by_user_id, name)
+    if resolved is None:
+        # Not found rather than forbidden: a key belonging to another tenant is
+        # indistinguishable from one that does not exist, so the vault cannot be
+        # enumerated through this endpoint.
+        await seal_after_transport_failure(
+            db,
+            receipt_id=receipt_id,
+            project_id=api_ctx.project_id,
+            error_message="vault_key_not_found",
+        )
+        return None, _json_error(
+            status.HTTP_404_NOT_FOUND,
+            {
+                "error": "vault_key_not_found",
+                "message": "No active vault key with that name.",
+                "receipt_id": str(receipt_id),
+            },
+            headers=hdr_receipt,
+        )
+
+    raw_key, vault_key_id = resolved
+    out_headers["Authorization"] = f"Bearer {raw_key}"
+    logger.info(
+        "gateway.generic_proxy.credential_injected",
+        project_id=str(api_ctx.project_id),
+        vault_key_id=str(vault_key_id),
+    )
+    return vault_key_id, None
+
+
 @app.api_route("/v1/proxy/{proxy_target:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
 async def generic_proxy(
     proxy_target: str,
@@ -411,33 +510,9 @@ async def generic_proxy(
         classification=classification,
         agent_id=agent_id,
     )
-    receipt_id = (
-        gov.deny.receipt_id
-        if gov.deny
-        else gov.hold.receipt_id
-        if gov.hold
-        else gov.allow.receipt_id
-        if gov.allow
-        else None
-    )
-    assert receipt_id is not None
-    hdr_receipt = {"X-Axiom-Receipt-Id": str(receipt_id)}
-    if gov.kind == "deny":
-        return _json_error(
-            status.HTTP_403_FORBIDDEN,
-            {"error": "governance_denied", "receipt_id": str(receipt_id)},
-            headers=hdr_receipt,
-        )
-    if gov.kind == "hold":
-        return _json_error(
-            status.HTTP_202_ACCEPTED,
-            {
-                "status": "held",
-                "receipt_id": str(receipt_id),
-                "message": "Awaiting approval",
-            },
-            headers=hdr_receipt,
-        )
+    hdr_receipt, gate_response = _governance_gate(gov)
+    if gate_response is not None:
+        return gate_response
     assert gov.allow is not None
     allow = gov.allow
     client: httpx.AsyncClient = _http_client_for(request)
@@ -448,6 +523,20 @@ async def generic_proxy(
     for drop in ("authorization", "Authorization"):
         out_headers.pop(drop, None)
     out_url = raw
+
+    # Credential injection is opt-in and explicit; see the helper's docstring.
+    # Reaching this point means the SSRF guard passed and governance allowed.
+    vault_key_id, vault_error = await _apply_named_vault_credential(
+        db,
+        request=request,
+        api_ctx=api_ctx,
+        receipt_id=allow.receipt_id,
+        out_headers=out_headers,
+        hdr_receipt=hdr_receipt,
+    )
+    if vault_error is not None:
+        return vault_error
+
     executed_at = datetime.now(UTC)
     if is_stream:
 
@@ -481,6 +570,7 @@ async def generic_proxy(
                 "risk": classification.risk,
                 "http_status": status_code,
                 "streaming": True,
+                "vault_key_id": str(vault_key_id) if vault_key_id else None,
             }
             async with session_scope() as sdb:
                 await seal_after_success(
@@ -539,6 +629,7 @@ async def generic_proxy(
         "risk": classification.risk,
         "http_status": upstream.status_code,
         "streaming": False,
+        "vault_key_id": str(vault_key_id) if vault_key_id else None,
     }
     async with session_scope() as sdb:
         await seal_after_success(

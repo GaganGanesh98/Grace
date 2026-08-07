@@ -204,6 +204,37 @@ async def get_key_and_id_for_provider(
     return raw, row.id
 
 
+async def get_key_and_id_by_name(
+    db: AsyncSession, user_id: UUID, name: str
+) -> tuple[str, UUID] | None:
+    """Return (decrypted_key, vault_key_id) for an active key named ``name``, or None.
+
+    Used by the generic proxy, where the caller names the credential explicitly
+    rather than having it inferred from a provider. Unlike the provider lookup
+    this does not filter on ``kind``: an arbitrary HTTP target may legitimately
+    need a 'tool' or 'custom' credential, and the caller has already stated
+    which key it wants by name.
+
+    Scoping to ``user_id`` is the tenancy boundary — a name belonging to another
+    user resolves to None, which callers surface as not-found rather than
+    forbidden so the vault cannot be enumerated.
+    """
+    row = await db.scalar(
+        select(VaultKey)
+        .where(
+            VaultKey.user_id == user_id,
+            VaultKey.name == name,
+            VaultKey.is_active.is_(True),
+        )
+        .order_by(VaultKey.created_at.desc())
+        .limit(1)
+    )
+    if row is None:
+        return None
+    raw = aes_vault.decrypt(row.encrypted_key, _encryption_key()).decode("utf-8")
+    return raw, row.id
+
+
 async def get_vault_key(db: AsyncSession, user_id: UUID, key_id: UUID) -> VaultKeyDisplay:
     row = await db.get(VaultKey, key_id)
     if row is None or row.user_id != user_id:
