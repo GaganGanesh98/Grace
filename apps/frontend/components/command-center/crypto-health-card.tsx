@@ -12,7 +12,7 @@ import { useCryptoHealthQuery } from "@/lib/queries/command-center";
 
 const GREEN = "#6db862";
 const AMBER = "#d4a030";
-const RED = "#e05050";
+const RED = "#da1e28";
 
 type CryptoHealthCardProps = { projectId: string | null };
 

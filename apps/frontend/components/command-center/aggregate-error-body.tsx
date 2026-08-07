@@ -43,7 +43,7 @@ export function AggregateErrorBody({ error, onRetry, isForbidden = false }: Aggr
   return (
     <div className="space-y-2" role="alert">
       <p className="text-axiom-14 text-[var(--axiom-text-muted)]">
-        <span className="inline-block h-1.5 w-1.5 translate-y-px rounded-full bg-[#e05050] align-middle" />
+        <span className="inline-block h-1.5 w-1.5 translate-y-px rounded-full bg-[#da1e28] align-middle" />
         <span className="ms-1.5">Couldn&apos;t load data</span>
       </p>
       <p className="text-axiom-11 text-[var(--axiom-text-dim)]">{statusForDisplay(error, false)}</p>

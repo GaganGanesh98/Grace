@@ -69,7 +69,9 @@ describe("PostureCard", () => {
   it("uses red ring for 5+ violations", () => {
     mockReturn({ data: { calls_governed: 20, runs_completed: 0, violations: 7 } });
     const { container } = render(<PostureCard projectId="p1" />);
-    const ring = container.querySelector("div[style*=\"#e05050\"], div[style*='e05050']");
+    // Phase 8.0: the ad-hoc #e05050 was folded onto the canonical denied
+    // border token (--status-denied-border, #da1e28).
+    const ring = container.querySelector("div[style*=\"#da1e28\"], div[style*='da1e28']");
     expect(ring).toBeTruthy();
   });
 

@@ -98,7 +98,7 @@ export function PolicyCard({ projectId }: PolicyCardProps): ReactElement {
               <span className="inline-flex flex-wrap items-center gap-1.5">
                 <span>Escalated</span>
                 {breakdown && breakdown.denied_count > 0 ? (
-                  <span className="text-axiom-12 text-[#e05050]">
+                  <span className="text-axiom-12 text-[#da1e28]">
                     {breakdown.denied_count} denied
                   </span>
                 ) : null}

@@ -31,17 +31,17 @@ export default function AgentDefinitionDetailPage(): ReactElement {
       </Link>
 
       {q.isPending ? (
-        <div className="h-32 animate-pulse rounded-lg bg-[#0A0A14]" />
+        <div className="h-32 animate-pulse rounded-lg bg-[#0b0c0e]" />
       ) : q.error ? (
         <p className="text-red-400">{q.error.message}</p>
       ) : !q.data ? (
-        <p className="text-[#6B7490]">Not found.</p>
+        <p className="text-[#82878f]">Not found.</p>
       ) : (
         <>
           <div>
-            <p className="font-mono text-axiom-11 uppercase text-[#6B7490]">Agent</p>
-            <h1 className="mt-2 font-mono text-axiom-24 font-medium text-[#F0F2F8]">{q.data.name}</h1>
-            <p className="mt-2 font-mono text-axiom-14 text-[#A0A8BC]">{q.data.model}</p>
+            <p className="font-mono text-axiom-11 uppercase text-[#82878f]">Agent</p>
+            <h1 className="mt-2 font-mono text-axiom-24 font-medium text-[#ecedef]">{q.data.name}</h1>
+            <p className="mt-2 font-mono text-axiom-14 text-[#a8adb5]">{q.data.model}</p>
             {q.data.is_archived ? (
               <p className="mt-2 font-mono text-axiom-13 uppercase text-amber-400">Archived — run disabled</p>
             ) : null}
@@ -70,18 +70,18 @@ export default function AgentDefinitionDetailPage(): ReactElement {
           aria-modal="true"
           aria-labelledby="run-goal-title"
         >
-          <div className="w-full max-w-lg rounded-lg border border-border-subtle bg-[#080810] p-6">
-            <h2 id="run-goal-title" className="font-mono text-axiom-14 uppercase tracking-wide text-[#F0F2F8]">
+          <div className="w-full max-w-lg rounded-lg border border-border-subtle bg-[#08090b] p-6">
+            <h2 id="run-goal-title" className="font-mono text-axiom-14 uppercase tracking-wide text-[#ecedef]">
               Run goal
             </h2>
             <div className="mt-4">
-              <Label className="font-mono text-axiom-11 uppercase text-[#6B7490]">Goal</Label>
+              <Label className="font-mono text-axiom-11 uppercase text-[#82878f]">Goal</Label>
               <Input
                 value={goal}
                 onChange={(e) => {
                   setGoal(e.target.value);
                 }}
-                className="mt-2 border-[rgba(255,255,255,0.1)] bg-[#0A0A14]"
+                className="mt-2 border-[rgba(255,255,255,0.1)] bg-[#0b0c0e]"
                 placeholder="What should the agent do?"
               />
             </div>
