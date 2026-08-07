@@ -7,7 +7,11 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { Button } from "@/components/ui/button";
 
+// Phase 8.0: UI sans moved from IBM Plex Sans to Inter; IBM Plex Mono stays
+// for cryptographic material. Both exports are kept mocked so the layout can
+// be swapped back without editing this mock again.
 vi.mock("next/font/google", () => ({
+  Inter: () => ({ variable: "__font_sans_variable" }),
   IBM_Plex_Sans: () => ({ variable: "__font_sans_variable" }),
   IBM_Plex_Mono: () => ({ variable: "__font_mono_variable" }),
 }));
@@ -50,7 +54,7 @@ afterEach(() => {
 });
 
 describe("Phase 7.7.0 design tokens migration", () => {
-  it("applies Plex font variables to the root layout html", async () => {
+  it("applies the sans + mono font variables to the root layout html", async () => {
     const { default: RootLayout } = await import("@/app/layout");
 
     const html = renderToStaticMarkup(

@@ -10,40 +10,47 @@
 
 @layer base {
   :root {
-    --axiom-font-scale: 1;
+    --grace-font-scale: 1;
 
-    /* Surfaces */
-    --surface-page: #0a1628;
-    --surface-chrome: #070f1c;
-    --surface-card: #0f1d2e;
-    --surface-elevated: #16263a;
-    --surface-input: #0c1a2a;
-    --surface-overlay: rgba(7, 15, 28, 0.88);
-    --surface-code: #0a1421;
+    /*
+     * Surfaces — neutral near-black with a subtle cool cast (Phase 8.0).
+     * The former #0a1628 navy family tinted every surface blue, which muddied
+     * the semantic status ramp sitting on it. These are near-neutral so the
+     * status colours read as signal without raising their saturation.
+     * Contrast verified, not eyeballed — see docs/verification/contrast.md.
+     */
+    --surface-page: #0b0c0e;
+    --surface-chrome: #08090b;
+    --surface-card: #111214;
+    --surface-elevated: #17181b;
+    --surface-input: #0e0f11;
+    --surface-overlay: rgba(8, 9, 11, 0.88);
+    --surface-code: #0c0d0f;
 
     /* Neutrals */
-    --neutral-100: #e8ebf0;
-    --neutral-200: #c6cdd6;
-    --neutral-400: #8b95a3;
-    --neutral-500: #6b7585;
-    --neutral-600: #4d5667;
-    --neutral-700: #363e4d;
-    --neutral-800: #242a36;
-    --neutral-900: #161b24;
+    --neutral-100: #ecedef;
+    --neutral-200: #c9cbcf;
+    --neutral-400: #8c9096;
+    --neutral-500: #6c7076;
+    --neutral-600: #4e5257;
+    --neutral-700: #37393e;
+    --neutral-800: #26282c;
+    --neutral-900: #1a1b1e;
 
     /* Borders */
-    --border-subtle: #1a2230;
-    --border-default: #243044;
-    --border-strong: #36425a;
-    --border-critical: #9aabc2;
+    --border-subtle: #1c1e22;
+    --border-default: #2a2d32;
+    --border-strong: #3c4046;
+    --border-critical: #9ba1aa;
 
-    /* Text */
-    --text-primary: #e8ebf0;
-    --text-secondary: #a8b3c2;
-    --text-tertiary: #6b7585;
-    --text-disabled: #3d4658;
-    --text-inverse: #0a1628;
-    --text-link: #a8b3c2;
+    /* Text — AA body (4.5:1) on every surface except --text-disabled, which
+       WCAG 1.4.3 exempts as an inactive control. */
+    --text-primary: #ecedef;
+    --text-secondary: #a8adb5;
+    --text-tertiary: #82878f;
+    --text-disabled: #4a4e55;
+    --text-inverse: #0b0c0e;
+    --text-link: #a8adb5;
 
     /* Brand cyan — RESERVED for live indicator only */
     --cyan-400: #22d3ee;
@@ -65,9 +72,9 @@
     --status-ok-bg: rgba(36, 161, 72, 0.08);
 
     /* Semantic — START / DISCONNECTED */
-    --status-neutral-fg: #a8b3c2;
-    --status-neutral-border: #6b7585;
-    --status-neutral-bg: rgba(168, 179, 194, 0.06);
+    --status-neutral-fg: #a8adb5;
+    --status-neutral-border: #6c7076;
+    --status-neutral-bg: rgba(168, 173, 181, 0.06);
 
     /* Semantic — INFO */
     --status-info-fg: #78a9ff;
@@ -75,8 +82,10 @@
     --status-info-bg: rgba(69, 137, 255, 0.10);
 
     /* Typography */
-    --font-sans: 'IBM Plex Sans', ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    --font-mono: 'IBM Plex Mono', ui-monospace, 'Menlo', 'Monaco', 'Courier New', monospace;
+    /* Inter for UI text, IBM Plex Mono for cryptographic material. Loaded by
+       next/font in app/layout.tsx under --font-inter / --font-plex-mono. */
+    --font-sans: var(--font-inter), ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: var(--font-plex-mono), ui-monospace, 'Menlo', 'Monaco', 'Courier New', monospace;
 
     /* Spacing — 4px base */
     --space-1: 4px;
@@ -120,7 +129,7 @@
     --density-drawer: 480px;
     --density-modal: 560px;
 
-    /* shadcn-compatible aliases backed by AXIOM v1 canonical tokens */
+    /* shadcn-compatible aliases backed by Grace v1 canonical tokens */
     --background: var(--surface-page);
     --foreground: var(--text-primary);
     --card: var(--surface-card);
@@ -187,7 +196,7 @@
     --axiom-danger: var(--status-denied-fg);
   }
 
-  /* Dashboard font scale: --axiom-font-scale is set on :root by FontScaleProvider; text-axiom-* uses it */
+  /* Dashboard font scale: --grace-font-scale is set on :root by FontScaleProvider; text-axiom-* uses it */
 }
 
 @media (prefers-reduced-motion: reduce) {

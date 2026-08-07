@@ -59,7 +59,7 @@ export function AgentForm({
 
   return (
     <form
-      className="space-y-4 rounded-lg border border-[rgba(255,255,255,0.08)] bg-[#0A0A14] p-6"
+      className="space-y-4 rounded-lg border border-[rgba(255,255,255,0.08)] bg-[#0b0c0e] p-6"
       onSubmit={handleSubmit(async (vals) => {
         const vk = vaultKeys.find((x) => x.id === vals.vault_key_id);
         const unsupported = vk && !["openai", "anthropic", "google", "groq", "xai"].includes(vk.service);
@@ -85,37 +85,37 @@ export function AgentForm({
       ) : null}
 
       <div>
-        <Label className="font-mono text-axiom-11 uppercase text-[#6B7490]">Name</Label>
+        <Label className="font-mono text-axiom-11 uppercase text-[#82878f]">Name</Label>
         <Controller
           name="name"
           control={control}
           render={({ field }) => (
-            <Input {...field} className="mt-1 border-[rgba(255,255,255,0.1)] bg-[#080810]" />
+            <Input {...field} className="mt-1 border-[rgba(255,255,255,0.1)] bg-[#08090b]" />
           )}
         />
         {errors.name ? <p className="mt-1 text-axiom-13 text-red-400">{errors.name.message}</p> : null}
       </div>
 
       <div>
-        <Label className="font-mono text-axiom-11 uppercase text-[#6B7490]">Model</Label>
+        <Label className="font-mono text-axiom-11 uppercase text-[#82878f]">Model</Label>
         <Controller
           name="model"
           control={control}
           render={({ field }) => (
-            <Input {...field} className="mt-1 border-[rgba(255,255,255,0.1)] bg-[#080810]" />
+            <Input {...field} className="mt-1 border-[rgba(255,255,255,0.1)] bg-[#08090b]" />
           )}
         />
       </div>
 
       <div>
-        <Label className="font-mono text-axiom-11 uppercase text-[#6B7490]">Vault key</Label>
+        <Label className="font-mono text-axiom-11 uppercase text-[#82878f]">Vault key</Label>
         <Controller
           name="vault_key_id"
           control={control}
           render={({ field }) => (
             <select
               {...field}
-              className="mt-1 w-full rounded-md border border-[rgba(255,255,255,0.1)] bg-[#080810] px-3 py-2 font-mono text-axiom-14 text-[#F0F2F8]"
+              className="mt-1 w-full rounded-md border border-[rgba(255,255,255,0.1)] bg-[#08090b] px-3 py-2 font-mono text-axiom-14 text-[#ecedef]"
             >
               {vaultKeys.map((k) => (
                 <option key={k.id} value={k.id}>
@@ -131,7 +131,7 @@ export function AgentForm({
       </div>
 
       <div>
-        <Label className="font-mono text-axiom-11 uppercase text-[#6B7490]">System prompt</Label>
+        <Label className="font-mono text-axiom-11 uppercase text-[#82878f]">System prompt</Label>
         <Controller
           name="system_prompt"
           control={control}
@@ -139,13 +139,13 @@ export function AgentForm({
             <textarea
               {...field}
               rows={4}
-              className="mt-1 w-full rounded-md border border-[rgba(255,255,255,0.1)] bg-[#080810] px-3 py-2 text-axiom-14 text-[#F0F2F8]"
+              className="mt-1 w-full rounded-md border border-[rgba(255,255,255,0.1)] bg-[#08090b] px-3 py-2 text-axiom-14 text-[#ecedef]"
             />
           )}
         />
       </div>
 
-      <p className="font-mono text-axiom-11 uppercase text-[#6B7490]">
+      <p className="font-mono text-axiom-11 uppercase text-[#82878f]">
         Tools bundled: http_fetch, web_search, file_write (Phase 6.5 default)
       </p>
 

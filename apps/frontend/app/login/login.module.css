@@ -39,19 +39,19 @@
   padding: 16px;
   overflow-x: hidden;
   overflow-y: auto;
-  background-color: #040408;
+  background-color: #08090b;
   color: #ffffff;
   isolation: isolate;
 }
 
-/* Auth pages stay on AXIOM's canonical dark substrate regardless of theme class. */
+/* Auth pages stay on Grace's canonical dark substrate regardless of theme class. */
 :global(html.light) .pageRoot {
   background-color: var(--surface-page);
   color: var(--text-primary);
 }
 
 :global(html.light) .card {
-  background: rgba(10, 14, 22, 0.7);
+  background: rgba(17, 18, 20, 0.7);
   border-color: rgba(74, 183, 255, 0.12);
   color: var(--text-primary);
 }
@@ -146,7 +146,7 @@
   width: 100%;
   border-radius: 4px;
   border: 1px solid rgba(74, 183, 255, 0.12);
-  background: rgba(10, 14, 22, 0.7);
+  background: rgba(17, 18, 20, 0.7);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   padding: 44px 40px 36px;
@@ -219,14 +219,14 @@
 }
 
 :global(html.light) .wordmarkTitle {
-  color: #0a0e16;
+  color: #0b0c0e;
 }
 
 .wordmarkVer {
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 10px;
   letter-spacing: 1.5px;
-  color: #5a6680;
+  color: #6c7076;
 }
 
 .heading {
@@ -240,7 +240,7 @@
 }
 
 :global(html.light) .heading {
-  color: #0a0e16;
+  color: #0b0c0e;
 }
 
 .tagline {
@@ -263,7 +263,7 @@
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 10px;
   letter-spacing: 2px;
-  color: #6b90b8;
+  color: #8c9096;
 }
 
 .resetLink {
@@ -308,7 +308,7 @@
 
 :global(html.light) .input {
   background: rgba(255, 255, 255, 0.9);
-  color: #0a0e16;
+  color: #0b0c0e;
   border-color: rgba(30, 100, 160, 0.35);
 }
 
@@ -322,19 +322,19 @@
 }
 
 :global(html.light) .input::placeholder {
-  color: rgba(10, 14, 22, 0.45);
+  color: rgba(11, 12, 14, 0.45);
 }
 
 .input[aria-invalid="true"] {
-  border-color: rgb(248 113 113);
-  box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.2);
+  border-color: rgb(250 77 86);
+  box-shadow: 0 0 0 2px rgba(250, 77, 86, 0.2);
 }
 
 .errorText {
   margin: 6px 0 0;
   font-size: 0.875rem;
   line-height: 1.35;
-  color: rgb(248 113 113);
+  color: rgb(250 77 86);
 }
 
 .primaryBtn {
@@ -344,7 +344,7 @@
   border: none;
   border-radius: 4px;
   background: #4ab7ff;
-  color: #040408;
+  color: #08090b;
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 12px;
   font-weight: 500;
@@ -385,7 +385,7 @@
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 10px;
   letter-spacing: 2px;
-  color: #3a4758;
+  color: #37393e;
 }
 
 .googleBtn {
@@ -399,8 +399,8 @@
   padding: 13px;
   border-radius: 4px;
   border: 1px solid rgba(74, 183, 255, 0.22);
-  background: #f4f7fb;
-  color: #0a0e16;
+  background: #ecedef;
+  color: #0b0c0e;
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 12px;
   font-weight: 500;
@@ -436,7 +436,7 @@
 :global(html.light) .googleBtn {
   background: #ffffff;
   border-color: rgba(30, 100, 160, 0.35);
-  color: #0a0e16;
+  color: #0b0c0e;
 }
 
 .googleBtn:hover {
@@ -469,7 +469,7 @@
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 10px;
   letter-spacing: 1.5px;
-  color: #6b90b8;
+  color: #8c9096;
 }
 
 .signupRow {
@@ -477,7 +477,7 @@
   text-align: center;
   font-family: var(--font-sans), system-ui, sans-serif;
   font-size: 13px;
-  color: #6b90b8;
+  color: #8c9096;
 }
 
 .signupLink {
