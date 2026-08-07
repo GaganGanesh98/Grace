@@ -69,9 +69,18 @@ class Settings(BaseSettings):
     )
 
     # Documented for production / future use (session cookies are set by the Next.js BFF today).
-    axiom_cookie_secure: bool = Field(default=False, validation_alias=AliasChoices("AXIOM_COOKIE_SECURE"))
-    axiom_cookie_samesite: str = Field(default="lax", validation_alias=AliasChoices("AXIOM_COOKIE_SAMESITE"))
-    axiom_cookie_domain: str = Field(default="", validation_alias=AliasChoices("AXIOM_COOKIE_DOMAIN"))
+    axiom_cookie_secure: bool = Field(
+        default=False,
+        validation_alias=AliasChoices("AXIOM_COOKIE_SECURE"),
+    )
+    axiom_cookie_samesite: str = Field(
+        default="lax",
+        validation_alias=AliasChoices("AXIOM_COOKIE_SAMESITE"),
+    )
+    axiom_cookie_domain: str = Field(
+        default="",
+        validation_alias=AliasChoices("AXIOM_COOKIE_DOMAIN"),
+    )
 
     # --- Phase 2 governance-engine signing + evidence keys ---
     # Single AXIOM-wide keys for Phase 2. Per-project keys land in Phase 2.5.
@@ -92,20 +101,39 @@ class Settings(BaseSettings):
     preflight_cache_ttl_seconds: int = 3600
 
     # Governance gateway (port 8001) — vault uses same key material as AXIOM_EVIDENCE_KEY_B64
-    gateway_port: int = Field(default=8001, validation_alias=AliasChoices("AXIOM_GATEWAY_PORT", "GATEWAY_PORT"))
+    gateway_port: int = Field(
+        default=8001,
+        validation_alias=AliasChoices("AXIOM_GATEWAY_PORT", "GATEWAY_PORT"),
+    )
     gateway_rate_limit_per_minute: int = Field(
         default=200,
-        validation_alias=AliasChoices("AXIOM_GATEWAY_RATE_LIMIT_PER_MINUTE", "GATEWAY_RATE_LIMIT_PER_MINUTE"),
+        validation_alias=AliasChoices(
+            "AXIOM_GATEWAY_RATE_LIMIT_PER_MINUTE",
+            "GATEWAY_RATE_LIMIT_PER_MINUTE",
+        ),
     )
     gateway_request_timeout_seconds: int = Field(
         default=120,
-        validation_alias=AliasChoices("AXIOM_GATEWAY_REQUEST_TIMEOUT_SECONDS", "GATEWAY_REQUEST_TIMEOUT_SECONDS"),
+        validation_alias=AliasChoices(
+            "AXIOM_GATEWAY_REQUEST_TIMEOUT_SECONDS",
+            "GATEWAY_REQUEST_TIMEOUT_SECONDS",
+        ),
     )
     gateway_max_body_bytes: int = Field(
         default=10_485_760,
         validation_alias=AliasChoices("AXIOM_GATEWAY_MAX_BODY_BYTES", "GATEWAY_MAX_BODY_BYTES"),
     )
-    gateway_enabled: bool = Field(default=True, validation_alias=AliasChoices("AXIOM_GATEWAY_ENABLED", "GATEWAY_ENABLED"))
+    gateway_enabled: bool = Field(
+        default=True,
+        validation_alias=AliasChoices("AXIOM_GATEWAY_ENABLED", "GATEWAY_ENABLED"),
+    )
+
+    # MCP governance server (Phase 7.0). Mounted at /mcp on the main API.
+    # Tools require API keys scoped 'mcp:read' / 'mcp:write'.
+    mcp_enabled: bool = Field(
+        default=True,
+        validation_alias=AliasChoices("AXIOM_MCP_ENABLED", "MCP_ENABLED"),
+    )
 
     # Plaintext project API key for the agent worker → governance gateway (localhost).
     worker_gateway_api_key: SecretStr | None = Field(
@@ -117,7 +145,10 @@ class Settings(BaseSettings):
     )
 
     # Optional Tavily key for agent worker web search (can also be supplied via project vault).
-    tavily_api_key: SecretStr | None = Field(default=None, validation_alias=AliasChoices("TAVILY_API_KEY"))
+    tavily_api_key: SecretStr | None = Field(
+        default=None,
+        validation_alias=AliasChoices("TAVILY_API_KEY"),
+    )
 
     # Key rotation notice for Command Center (ISO-8601 date YYYY-MM-DD; optional).
     axiom_key_rotation_date: str | None = Field(
@@ -132,7 +163,10 @@ class Settings(BaseSettings):
     # Phase 7.6 — project SSE; override to e.g. 2 in tests
     events_heartbeat_interval_seconds: float = Field(
         default=20.0,
-        validation_alias=AliasChoices("AXIOM_EVENTS_HEARTBEAT_SECONDS", "EVENTS_HEARTBEAT_INTERVAL_SECONDS"),
+        validation_alias=AliasChoices(
+            "AXIOM_EVENTS_HEARTBEAT_SECONDS",
+            "EVENTS_HEARTBEAT_INTERVAL_SECONDS",
+        ),
     )
 
     # --- Semantic policy matching (pgvector) ---
