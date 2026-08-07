@@ -2,12 +2,12 @@
 
 import { type ReactElement } from "react";
 
-import { useAxiomEventsContext } from "@/lib/events/axiom-events-context";
+import { useGraceEventsContext } from "@/lib/events/grace-events-context";
 import { cn } from "@/lib/utils";
 
-import type { AxiomEventsStatus } from "@/lib/events/event-types";
+import type { GraceEventsStatus } from "@/lib/events/event-types";
 
-function tooltipFor(st: AxiomEventsStatus): string {
+function tooltipFor(st: GraceEventsStatus): string {
   if (st === "connected") {
     return "Live updates connected";
   }
@@ -21,7 +21,7 @@ function tooltipFor(st: AxiomEventsStatus): string {
 }
 
 export function ConnectionIndicator(): ReactElement {
-  const { status, showIndicator, connect } = useAxiomEventsContext();
+  const { status, showIndicator, connect } = useGraceEventsContext();
 
   if (!showIndicator) {
     return <div className="h-0 w-0" aria-hidden />;

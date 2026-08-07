@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { keysForType } from "@/lib/events/use-axiom-events";
+import { keysForType } from "@/lib/events/use-grace-events";
 import { dashboardKeys } from "@/lib/dashboard-query-keys";
 
 beforeEach(() => {
@@ -19,7 +19,7 @@ describe("Project workspace (Phase 7.12)", () => {
   });
 });
 
-describe("useAxiomEvents invalidation map (extract)", () => {
+describe("useGraceEvents invalidation map (extract)", () => {
   it("run.started includes recent and project list prefixes", () => {
     const k = keysForType("run.started", "p1", ["24h"]);
     const sk = k.map((x) => JSON.stringify(x));

@@ -4,24 +4,24 @@ import { createContext, useContext, useEffect, useState, type ReactElement, type
 
 import { useProjectWorkspace } from "@/components/project-workspace-provider";
 
-import { useAxiomEvents } from "./use-axiom-events";
+import { useGraceEvents } from "./use-grace-events";
 
-import type { AxiomEvent, AxiomEventsStatus } from "./event-types";
+import type { GraceEvent, GraceEventsStatus } from "./event-types";
 
-type AxiomEventsValue = {
-  status: AxiomEventsStatus;
+type GraceEventsValue = {
+  status: GraceEventsStatus;
   /** Muted (hidden) only during the first "connecting" after mount / project change. */
   showIndicator: boolean;
-  lastEvent: AxiomEvent | null;
+  lastEvent: GraceEvent | null;
   connect: () => void;
   disconnect: () => void;
 };
 
-const Ctx = createContext<AxiomEventsValue | null>(null);
+const Ctx = createContext<GraceEventsValue | null>(null);
 
-export function AxiomEventsProvider({ children }: { children: ReactNode }): ReactElement {
+export function GraceEventsProvider({ children }: { children: ReactNode }): ReactElement {
   const { activeProjectId } = useProjectWorkspace();
-  const { status, lastEvent, connect, disconnect } = useAxiomEvents({ projectId: activeProjectId });
+  const { status, lastEvent, connect, disconnect } = useGraceEvents({ projectId: activeProjectId });
   const [leftInitial, setLeftInitial] = useState(false);
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export function AxiomEventsProvider({ children }: { children: ReactNode }): Reac
   const st = hasProject ? status : "disconnected";
   const showIndicator = hasProject && (leftInitial || st !== "connecting");
 
-  const v: AxiomEventsValue = {
+  const v: GraceEventsValue = {
     status: st,
     showIndicator,
     lastEvent,
@@ -49,10 +49,10 @@ export function AxiomEventsProvider({ children }: { children: ReactNode }): Reac
   return <Ctx.Provider value={v}>{children}</Ctx.Provider>;
 }
 
-export function useAxiomEventsContext(): AxiomEventsValue {
+export function useGraceEventsContext(): GraceEventsValue {
   const c = useContext(Ctx);
   if (!c) {
-    throw new Error("useAxiomEventsContext must be used within AxiomEventsProvider");
+    throw new Error("useGraceEventsContext must be used within GraceEventsProvider");
   }
   return c;
 }
