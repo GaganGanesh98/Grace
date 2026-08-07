@@ -14,8 +14,8 @@ const mockCtx = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("@/lib/events/axiom-events-context", () => ({
-  useAxiomEventsContext: () => mockCtx.value,
+vi.mock("@/lib/events/grace-events-context", () => ({
+  useGraceEventsContext: () => mockCtx.value,
 }));
 
 describe("ConnectionIndicator", () => {

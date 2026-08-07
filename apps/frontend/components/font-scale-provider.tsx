@@ -35,7 +35,7 @@ export function FontScaleProvider({ children }: { children: ReactNode }): ReactE
     const s = readFontScaleFromStorage();
     setScaleState(s);
     if (typeof document !== "undefined") {
-      document.documentElement.style.setProperty("--axiom-font-scale", String(s));
+      document.documentElement.style.setProperty("--grace-font-scale", String(s));
     }
   }, []);
 
@@ -43,10 +43,10 @@ export function FontScaleProvider({ children }: { children: ReactNode }): ReactE
     if (typeof document === "undefined") {
       return;
     }
-    document.documentElement.style.setProperty("--axiom-font-scale", String(scale));
+    document.documentElement.style.setProperty("--grace-font-scale", String(scale));
     const dash = document.querySelector("[data-axiom-dashboard]");
     if (dash instanceof HTMLElement) {
-      dash.style.setProperty("--axiom-font-scale", String(scale));
+      dash.style.setProperty("--grace-font-scale", String(scale));
     }
     try {
       window.localStorage.setItem(FONT_SCALE_LS_KEY, String(scale));
