@@ -1,4 +1,4 @@
-# Architecture Decision Records (AXIOM V2)
+# Architecture Decision Records (Grace)
 
 ## ADR-001 — Python 3.13 (not 3.14) for Phase 1–2
 
@@ -260,3 +260,29 @@ payload_hash = sha256(evidence_nonce || evidence_ciphertext || evidence_key_id.e
 
 All three inputs are persisted on the `receipts` row, so this is checkable without decrypting the evidence or exposing ciphertext to the caller. It is **not** the hash of the canonical signed body — the signed body *contains* the base64 payload_hash, so hashing it would be circular. Missing evidence components **fail closed** (`False`): an unverifiable receipt is not a verified one. Applied identically in `routers/verify.py` and `axiom.mcp.tools._payload_hash_matches`.
 **Consequences:** This is a behaviour change to a public endpoint. Receipts whose evidence envelope does not reproduce the stored hash — including any legacy receipt written without complete evidence columns — will now report `verified: false` where they previously reported `true`. That is the correct answer, but it means the change can surface pre-existing data problems on deploy; check for receipts with null `evidence_nonce` / `evidence_ciphertext` / `evidence_key_id` before shipping. The check now genuinely detects post-hoc tampering with stored ciphertext, key id, or nonce (regression tests in `tests/mcp/test_mcp_tools.py`).
+
+---
+
+## ADR-029 — Grace rebrand renames user-facing copy only; identifiers with a contract are deferred
+
+**Status:** Accepted
+**Context:** The product is Grace; the codebase says AXIOM in roughly 1100 places. Those occurrences are not equivalent. Some are copy on a page, some are a Python module path, some are a wire header a deployed client already reads, and one — the `axm_live_` / `axm_test_` key prefix — is data sitting in `api_keys.key_prefix` in production. A repo-wide `sed s/axiom/grace/g` would break `uvicorn axiom.main:app`, the Alembic env, the installed console scripts, and every API key in the database simultaneously, with no way to bisect which rename caused which failure.
+**Decision:** Phase 8.0 renames only what carries no runtime contract:
+
+- **User-facing copy** — page titles, wordmarks, body strings, the FastAPI/gateway OpenAPI titles, the `explain_no_policy` response text, `DEV_PROJECT_NAME`, and prose in current-state docs.
+- **Frontend-internal identifiers** — the `lib/events` context/hook filenames and their exported types, and the `--axiom-font-scale` CSS custom property.
+
+Everything below is **deliberately deferred**, each to its own phase with its own verification:
+
+| Thing | Count / risk | Why it cannot be a find-replace |
+|---|---|---|
+| `axiom` Python package | 1067 import sites | Changes `uvicorn axiom.main:app`, `alembic/env.py`, `[project.scripts]`, the `packages/axiom-sdk` distribution name, and the namespace-collision guard in `tests/conftest.py`. |
+| `axm_live_` / `axm_test_` | 28 code sites + **live DB rows** | This is data. `api_keys.key_prefix` stores the first 16 chars and `verify_key` narrows on it; changing the constant orphans every existing key. Needs a dual-prefix accept window or a deliberate re-mint. |
+| `AXIOM_*` env vars (~40) | `.env`, Railway, docker-compose, CI | Every deployment target has these set. Needs `AliasChoices("GRACE_X", "AXIOM_X")` for a compat window, then a later removal. |
+| `X-Axiom-Receipt-Id`, `X-Axiom-Vault-Key`, `X-Axiom-Agent-Id`, `X-Axiom-Signature` | wire protocol | Emitted by the gateway, read by clients and the agent worker. Needs dual-emit / dual-read before the old form is dropped. |
+| `axiom-postgres`, `axiom-redis`, `axiom_pg_data`, DB name/user `axiom` | local + deployed state | Renaming the volume orphans the data; renaming the DB user needs a migration. |
+| `./axiom` CLI | muscle memory + docs | Cheap, but should land with the package rename so there is one cutover, not two. |
+
+**Sequencing when Tier 3 is picked up:** package rename first (largest, purely mechanical, fully covered by the test suite), then env vars behind aliases, then headers with dual-emit, and the key prefix **last** because it is the only one that touches stored data.
+
+**Consequences:** The running app shows no user-visible "AXIOM", while the code, wire protocol, env, and stored credentials continue to say axiom — an intentional, documented inconsistency rather than a half-finished rename. Two further items were left deliberately and are worth knowing about: the localStorage key `"axiom-font-scale"` in `lib/axiom-storage.ts` is persisted client state, and renaming it would silently reset every user's font-scale preference; and the `text-axiom-*` Tailwind utilities and `--axiom-*` token bridge in `globals.css` are internal but touch enough components that they belong with the Part 4 design work, not a rename commit. Historical documents (`docs/ANTIPATTERN_LIBRARY.md`, `docs/v1-salvage-report.md`) keep their AXIOM references, because rewriting the product name inside a post-mortem — including a quoted V1 tagline and the named "AXIOM UNIVERSAL PROTOCOL" anti-pattern — would falsify the record.
