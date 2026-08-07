@@ -11,7 +11,11 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - axiom_pg_data:/var/lib/postgresql/data
+      # Postgres 18+ images store data in a major-version subdirectory
+      # (/var/lib/postgresql/18/docker) so that `pg_upgrade --link` works without
+      # crossing a mount boundary. Mounting at /var/lib/postgresql/data — the
+      # pre-18 convention — leaves the volume unused and the container exits 1.
+      - axiom_pg_data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U axiom -d axiom"]
       interval: 5s
