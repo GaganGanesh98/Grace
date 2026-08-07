@@ -39,7 +39,7 @@ def classify_gateway_request(
 ) -> GatewayClassification:
     """Derive governance action_type, risk, and logical target for a gateway hop."""
     p = provider.lower()
-    if p in _REGISTRY_PROVIDERS and p != "custom":
+    if p in _REGISTRY_PROVIDERS:
         action = f"tool.llm.{p}"
         return GatewayClassification(
             action_type=action,
