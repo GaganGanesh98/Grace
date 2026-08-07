@@ -350,7 +350,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="AXIOM Governance Gateway",
+    title="Grace Governance Gateway",
     version="0.1.0",
     lifespan=lifespan,
     docs_url="/docs" if _settings.environment != "production" else None,

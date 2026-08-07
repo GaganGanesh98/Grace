@@ -20,7 +20,7 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AXIOM",
+  title: "Grace",
   description: "Cryptographic governance proof layer for AI agents.",
 };
 
