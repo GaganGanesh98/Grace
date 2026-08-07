@@ -88,7 +88,7 @@ class ExplanationEngine:
     def explain_no_policy(self) -> str:
         return (
             "Action denied. No policy is configured for this project; "
-            "AXIOM fails closed when no rule is in effect. "
+            "Grace fails closed when no rule is in effect. "
             "To remediate: configure at least one active policy for this project "
             "before calling /v1/govern."
         )

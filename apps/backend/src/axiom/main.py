@@ -108,7 +108,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(
-    title="AXIOM API",
+    title="Grace API",
     version="0.1.0",
     description="Cryptographic governance proof layer for AI agents.",
     docs_url="/docs" if settings.environment != "production" else None,
