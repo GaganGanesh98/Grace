@@ -52,3 +52,18 @@ forbidden_modules =
     axiom.models
     axiom.db
     axiom.main
+
+; Phase 7.0 — the MCP server is a delivery mechanism, peer to routers.
+; It may consume services; nothing below it may reach back up into it. If a
+; service ever needs to import axiom.mcp, that is a signal the logic belongs
+; in the service layer where both the HTTP and MCP surfaces can share it.
+[importlinter:contract:5]
+name = MCP is a delivery layer
+type = forbidden
+source_modules =
+    axiom.services
+    axiom.models
+    axiom.core
+    axiom.middleware
+forbidden_modules =
+    axiom.mcp

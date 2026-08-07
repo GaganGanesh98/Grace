@@ -18,10 +18,14 @@ from typing import Protocol
 import httpx
 
 from axiom.config import get_settings
+from axiom.core.embedding_dim import EMBEDDING_DIM as _EMBEDDING_DIM
 
 # BAAI/bge-small-en-v1.5 native dim; OpenAI text-embedding-3-small supports
-# dimensions=384. Kept in sync with the Alembic migration's EMBEDDING_DIM.
-EMBEDDING_DIM = 384
+# dimensions=384. The constant itself lives in axiom.core so that
+# axiom.models.policy can declare its Vector column without importing a
+# service (see .importlinter contracts 1 and 2); re-exported here so existing
+# `from axiom.services.embeddings import EMBEDDING_DIM` callers keep working.
+EMBEDDING_DIM = _EMBEDDING_DIM
 
 
 class EmbeddingError(RuntimeError):
@@ -117,9 +121,7 @@ def _embed_sync(texts: list[str]) -> list[list[float]]:
         raise EmbeddingError(str(exc)) from exc
     for vector in vectors:
         if len(vector) != EMBEDDING_DIM:
-            raise EmbeddingError(
-                f"provider returned dim {len(vector)}, expected {EMBEDDING_DIM}"
-            )
+            raise EmbeddingError(f"provider returned dim {len(vector)}, expected {EMBEDDING_DIM}")
     return vectors
 
 

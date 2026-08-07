@@ -18,6 +18,7 @@ async def bootstrap_project_with_api_key(
     *,
     policy_rules: list[dict[str, Any]] | None = None,
     agent_name: str = "agent-1",
+    scopes: list[str] | None = None,
 ) -> dict[str, str]:
     """Create user + project + policy + agent + API key. Return a dict of ids
     and the full API key string.
@@ -69,7 +70,10 @@ async def bootstrap_project_with_api_key(
     key = await client.post(
         f"/api/v1/projects/{project_id}/api-keys",
         headers=h,
-        json={"name": "testkey", "scopes": ["govern:write"]},
+        json={
+            "name": "testkey",
+            "scopes": scopes if scopes is not None else ["govern:write"],
+        },
     )
     assert key.status_code == 201, key.text
     kid = key.json()["data"]["id"]
