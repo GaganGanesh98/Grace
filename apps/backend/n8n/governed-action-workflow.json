@@ -1,0 +1,190 @@
+{
+  "name": "Grace — Governed Action (reusable)",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            { "name": "project_id" },
+            { "name": "agent_id" },
+            { "name": "action_type" },
+            { "name": "target" },
+            { "name": "parameters" },
+            { "name": "risk" },
+            { "name": "mode" }
+          ]
+        }
+      },
+      "id": "trigger",
+      "name": "When Called By Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build and sign the governed-action request.\n// The signature covers the EXACT bytes sent, so build the string once and\n// send that same string as a raw body — re-serialising downstream breaks HMAC.\nconst input = $input.first().json;\n\n// workflow_run_id is the idempotency key. $execution.id is stable across a\n// retry of the SAME execution, which is precisely the replay Grace must not\n// double-govern.\nconst action = {\n  workflow_id: $workflow.id,\n  workflow_run_id: $execution.id,\n  project_id: input.project_id,\n  agent_id: input.agent_id || 'n8n',\n  action_type: input.action_type,\n  target: input.target,\n  parameters: input.parameters || {},\n  risk: input.risk || 'medium',\n  mode: input.mode || 'enforce',\n};\n\nconst bodyString = JSON.stringify(action);\nconst crypto = require('crypto');\nconst secret = $env.N8N_ACTION_SECRET || 'dev_action_secret_change_me';\nconst signature = 'sha256=' + crypto.createHmac('sha256', secret).update(bodyString).digest('hex');\n\nconst base = $env.GRACE_API_URL || 'http://host.docker.internal:8000';\n\nreturn [{ json: { url: base + '/webhooks/n8n/govern-action', bodyString, signature } }];"
+      },
+      "id": "sign",
+      "name": "Sign Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-Axiom-Signature", "value": "={{ $json.signature }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.bodyString }}",
+        "options": {}
+      },
+      "id": "ask",
+      "name": "Ask Grace",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "version": 2 },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.verdict }}",
+                    "rightValue": "allow",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "outputKey": "allow"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "version": 2 },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.verdict }}",
+                    "rightValue": "correct",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "outputKey": "correct"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "version": 2 },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.verdict }}",
+                    "rightValue": "deny",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "outputKey": "deny"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "version": 2 },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.verdict }}",
+                    "rightValue": "hold",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "outputKey": "hold"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "switch",
+      "name": "Switch On Verdict",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [940, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ALLOW — hand the original parameters back to the calling workflow.\nreturn [{ json: { approved: true, receipt_id: $json.receipt_id, verify_url: $json.verify_url, parameters: $('Sign Request').first().json.bodyString ? JSON.parse($('Sign Request').first().json.bodyString).parameters : {} } }];"
+      },
+      "id": "allow",
+      "name": "Allowed",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1200, 120]
+    },
+    {
+      "parameters": {
+        "jsCode": "// CORRECT — the policy rewrote the parameters. Use these, not the originals.\n// Reserved: the current YAML policy engine does not emit this verdict yet.\nreturn [{ json: { approved: true, receipt_id: $json.receipt_id, verify_url: $json.verify_url, parameters: $json.corrected_parameters || {} } }];"
+      },
+      "id": "correct",
+      "name": "Corrected",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1200, 260]
+    },
+    {
+      "parameters": {
+        "jsCode": "// DENY — fail the calling workflow loudly. The receipt is the evidence.\nthrow new Error('Grace denied this action: ' + ($json.reason || 'no reason given') + ' (receipt ' + $json.receipt_id + ')');"
+      },
+      "id": "deny",
+      "name": "Denied",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1200, 400]
+    },
+    {
+      "parameters": {
+        "amount": 60,
+        "unit": "seconds"
+      },
+      "id": "hold",
+      "name": "Wait For Decision",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1200, 540]
+    }
+  ],
+  "connections": {
+    "When Called By Another Workflow": {
+      "main": [[{ "node": "Sign Request", "type": "main", "index": 0 }]]
+    },
+    "Sign Request": {
+      "main": [[{ "node": "Ask Grace", "type": "main", "index": 0 }]]
+    },
+    "Ask Grace": {
+      "main": [[{ "node": "Switch On Verdict", "type": "main", "index": 0 }]]
+    },
+    "Switch On Verdict": {
+      "main": [
+        [{ "node": "Allowed", "type": "main", "index": 0 }],
+        [{ "node": "Corrected", "type": "main", "index": 0 }],
+        [{ "node": "Denied", "type": "main", "index": 0 }],
+        [{ "node": "Wait For Decision", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {},
+  "active": false
+}

@@ -85,6 +85,90 @@ sign/verify) and `tests/test_escalation_callback.py` (approve/reject/escalate
 resolution, and the failure cases — missing signature → 401, invalid signature
 → 401, unknown receipt → 404, no secret → 503).
 
+## Governed actions from n8n (Phase 9.1)
+
+The escalation flow above is Grace calling *out*. This is the reverse: any n8n
+workflow — finance, ops, sales — asks Grace to govern an action **before** it
+takes it, and switches on the verdict. Every call leaves a receipt, so a
+workflow's actions are as auditable as an agent's.
+
+### End-to-end
+
+```
+n8n workflow (invoice approval, refund, outbound email, …)
+        │
+   Execute Workflow ──> "Grace — Governed Action" sub-workflow
+                                │
+                     sign body (HMAC-SHA256, N8N_ACTION_SECRET)
+                                │
+        POST /webhooks/n8n/govern-action
+        { workflow_id, workflow_run_id, project_id, agent_id,
+          action_type, target, parameters, risk, mode }
+                                │
+        verify X-Axiom-Signature -> claim workflow_run_id (Redis, 24h)
+                                │
+             execute_governed_action  (the same service /v1/governance/govern uses)
+                                │
+        { verdict, receipt_id, reason, verify_url, corrected_parameters }
+                                │
+                    Switch on verdict:
+                      allow   -> proceed
+                      correct -> proceed with corrected_parameters (reserved)
+                      deny    -> fail the workflow, with the reason + receipt
+                      hold    -> wait; the escalation flow above resolves it
+```
+
+### Which endpoint do I use?
+
+| Caller | Endpoint | Auth | Creates a receipt? |
+|---|---|---|---|
+| Your own code / SDK | `POST /v1/governance/govern` | Project API key | Yes |
+| An n8n / Zapier / Temporal workflow | `POST /webhooks/n8n/govern-action` | HMAC over the raw body | Yes |
+| Anything, "what would happen if…" | `POST /v1/preflight` | Project API key | No — advisory |
+| An agent tool at runtime | `check_governance` in `workers/tools/base.py` | Worker gateway key | Yes |
+
+All of them evaluate the same policy through the same service
+(`services/governance/execute.py`), so a workflow cannot get a different answer
+than an agent would for the same action.
+
+### Design notes
+
+- **Separate secret.** `N8N_ACTION_SECRET`, not `N8N_CALLBACK_SECRET`. The
+  callback can only resolve a receipt Grace already created; this endpoint can
+  originate one for any project. Unset returns `503` and never falls back.
+- **Idempotency on the orchestrator's run id.** n8n retries; a retry must not
+  produce a second receipt for one real-world action. `workflow_run_id` is
+  claimed in Redis (`axiom:n8n:action:{workflow_id}:{workflow_run_id}`, 24h) and
+  a replay returns the original receipt with `replayed: true`. A concurrent
+  duplicate gets `409`.
+- **`mode: "advise"`** maps to the engine's shadow mode: the action is evaluated
+  and recorded truthfully, but the response reads `allow` so the workflow
+  proceeds. Use it before letting a policy block production traffic.
+- **Provenance.** `workflow_id` and `workflow_run_id` are written to the
+  intent's metadata, so "which workflow did this?" is answerable from the audit
+  chain rather than from n8n's logs.
+
+### Non-goals
+
+Grace does not schedule these calls, retain workflow state beyond the
+idempotency key, retry on the workflow's behalf, or model steps, branches, and
+resumption. n8n owns orchestration (AP-1.8, `docs/ANTIPATTERN_LIBRARY.md`).
+
+### Config
+
+```bash
+N8N_ACTION_SECRET=dev_action_secret_change_me       # shared with n8n
+N8N_ACTION_IDEMPOTENCY_TTL_SECONDS=86400            # optional
+```
+
+Import `n8n/governed-action-workflow.json` once and call it from any workflow —
+see `n8n/README.md`.
+
+**Tests:** `tests/test_n8n_action_webhook.py` (verdict + receipt, tampered body
+-> 401, escalation secret rejected, missing secret -> 503, replayed run id ->
+one receipt, concurrent duplicate -> 409, claim released on failure, advise mode,
+workflow provenance on the intent).
+
 ## Semantic policy matching (pgvector)
 
 When an agent action is evaluated, the exact/rule-based policy engine

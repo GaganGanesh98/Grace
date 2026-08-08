@@ -316,6 +316,27 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("GRACE_N8N_CALLBACK_SECRET", "N8N_CALLBACK_SECRET"),
     )
 
+    # --- Reusable governed-action webhook (Phase 9.1) ---
+    # Deliberately a different secret from n8n_callback_secret: the escalation
+    # callback only resolves a receipt Grace already created, while this one can
+    # originate a governed action for any project. Different blast radius,
+    # different key. Unset means the endpoint returns 503 — it never falls back
+    # to the escalation secret.
+    n8n_action_secret: SecretStr | None = Field(
+        default=None,
+        validation_alias=AliasChoices("GRACE_N8N_ACTION_SECRET", "N8N_ACTION_SECRET"),
+    )
+    # How long a workflow run id stays claimed, so an n8n retry returns the
+    # original receipt instead of minting a second one. 24h comfortably outlasts
+    # n8n's own retry/backoff window without pinning Redis memory.
+    n8n_action_idempotency_ttl_seconds: int = Field(
+        default=86_400,
+        validation_alias=AliasChoices(
+            "GRACE_N8N_ACTION_IDEMPOTENCY_TTL_SECONDS",
+            "N8N_ACTION_IDEMPOTENCY_TTL_SECONDS",
+        ),
+    )
+
     @field_validator("backend_cors_origins", mode="before")
     @classmethod
     def parse_cors_origins(cls, value: Any) -> list[str]:

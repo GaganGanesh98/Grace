@@ -50,6 +50,13 @@ services:
       # Shared secret used by the sample workflow to sign its callback (HMAC).
       # Must match the backend's N8N_CALLBACK_SECRET.
       N8N_CALLBACK_SECRET: "dev_escalation_secret_change_me"
+      # Separate secret for the reusable governed-action sub-workflow (Phase 9.1).
+      # Deliberately NOT the callback secret: that one only resolves a receipt
+      # Grace already made, this one can originate a governed action.
+      N8N_ACTION_SECRET: "dev_action_secret_change_me"
+      # Where the sub-workflow posts. host.docker.internal reaches the API
+      # running on the host from inside the n8n container.
+      GRACE_API_URL: "http://host.docker.internal:8000"
     volumes:
       - axiom_n8n_data:/home/node/.n8n
     extra_hosts:
