@@ -40,6 +40,7 @@ export function AgentForm({
 }: AgentFormProps): ReactElement {
   const {
     control,
+    getValues,
     handleSubmit,
     setError,
     setValue,
@@ -56,12 +57,18 @@ export function AgentForm({
 
   const hasKeys = vaultKeys.length > 0;
 
+  // Pick a sensible default, but never clobber a selection the user still can use —
+  // the list re-renders whenever a credential is added mid-form.
   useEffect(() => {
+    const current = getValues("vault_key_id");
+    if (vaultKeys.some((k) => k.id === current && isSupportedLlmService(k.service))) {
+      return;
+    }
     const id = vaultKeys.find((k) => isSupportedLlmService(k.service))?.id ?? vaultKeys[0]?.id;
     if (id) {
       setValue("vault_key_id", id, { shouldValidate: true });
     }
-  }, [vaultKeys, setValue]);
+  }, [vaultKeys, getValues, setValue]);
 
   return (
     <form

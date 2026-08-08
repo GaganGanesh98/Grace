@@ -18,6 +18,8 @@ export const dashboardKeys = {
   receipt: (receiptId: string, projectId: string) =>
     ["axiom", "governance-receipt", projectId, receiptId] as const,
   vaultKeys: (projectId: string) => ["axiom", "vault-keys", projectId] as const,
+  /** User-scoped (not project-scoped) LLM credentials — shared by the agent form and quickstart. */
+  llmVaultKeys: ["axiom", "vault-keys", "llm"] as const,
   agentDefinitions: (projectId: string) => ["axiom", "agent-definitions", projectId] as const,
   /** Total non-archived rows; matches `meta.total` from GET /agent-definitions (paged). */
   agentDefinitionsNonArchivedCount: (projectId: string) =>

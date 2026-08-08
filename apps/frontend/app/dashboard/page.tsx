@@ -26,6 +26,8 @@ import { apiCreateProject } from "@/lib/api";
 import { fetchActiveGovernancePolicy, fetchPendingReceipts } from "@/lib/governance-api";
 import { fetchGovernanceLedgerBundle } from "@/lib/governance-ledger-bundle";
 import { ACTIVE_PROJECT_ID_LS_KEY, readGovernanceApiKey } from "@/lib/axiom-storage";
+import { supportedLlmKeys } from "@/lib/llm-providers";
+import { listVaultKeys } from "@/lib/vault-api";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -93,6 +95,11 @@ function CommandCenterInner(): ReactElement {
       : ["axiom", "cc-agent-defs", "none"],
     queryFn: () => fetchAllAgentDefinitions(activeProjectId!),
     enabled: Boolean(activeProjectId),
+  });
+
+  const llmVaultKeysQuery = useQuery({
+    queryKey: dashboardKeys.llmVaultKeys,
+    queryFn: () => listVaultKeys({ kind: "llm" }),
   });
 
   const pendingQuery = useQuery({
@@ -363,7 +370,14 @@ function CommandCenterInner(): ReactElement {
             Operational view of governance, receipts, and project posture for the active scope.
           </p>
         </header>
-        <EmptyStateCommandCenter />
+        <EmptyStateCommandCenter
+          state={{
+            hasProject: hasProjects,
+            hasCredential: supportedLlmKeys(llmVaultKeysQuery.data ?? []).length > 0,
+            hasAgent: (agentDefCountQuery.data ?? 0) > 0,
+            agentsHref: `/dashboard/projects/${activeProjectId}/agent-definitions`,
+          }}
+        />
         <ReceiptDrawer
           receiptId={activeReceiptId}
           projectId={activeProjectId}

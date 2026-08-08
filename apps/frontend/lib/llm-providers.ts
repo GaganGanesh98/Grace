@@ -17,6 +17,11 @@ export function isSupportedLlmService(service: string): boolean {
   return (SUPPORTED_LLM_SERVICES as readonly string[]).includes(service.trim().toLowerCase());
 }
 
+/** Subset of vault keys an agent definition can actually be created against. */
+export function supportedLlmKeys<T extends { service: string }>(keys: readonly T[]): T[] {
+  return keys.filter((k) => isSupportedLlmService(k.service));
+}
+
 /** Field error shown when the selected credential is not an LLM provider key we run agents on. */
 export function unsupportedServiceMessage(name: string, service: string): string {
   return `"${name}" is a ${service} credential. Agents need an LLM provider key — ${SUPPORTED_LLM_SERVICES_LABEL}.`;

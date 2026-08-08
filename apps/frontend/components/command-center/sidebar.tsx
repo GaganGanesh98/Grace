@@ -190,6 +190,12 @@ export function CommandCenterSidebar(): ReactElement {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const router = useRouter();
+  const { activeProjectId } = useProjectWorkspace();
+  // Agent creation lives inside a project; the standalone /dashboard/agents route
+  // is a placeholder, so sending people there was a dead end.
+  const newAgentHref = activeProjectId
+    ? `/dashboard/projects/${activeProjectId}/agent-definitions`
+    : "/dashboard/projects";
 
   const { data: me } = useQuery({
     queryKey: ["axiom", "me"],
@@ -287,7 +293,7 @@ export function CommandCenterSidebar(): ReactElement {
               className="w-full justify-center text-axiom-12"
               onClick={() => {
                 setOpen(false);
-                router.push("/dashboard/agents");
+                router.push(newAgentHref);
               }}
             >
               + NEW AGENT
