@@ -11,13 +11,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DEFAULT_AGENT_TOOLS_CONFIG } from "@/lib/default-agent-tools";
+import { isSupportedLlmService, unsupportedServiceMessage } from "@/lib/llm-providers";
 import type { VaultKey } from "@/lib/vault-api";
 
 const schema = z.object({
-  name: z.string().min(1),
-  model: z.string().min(1),
-  vault_key_id: z.string().uuid(),
-  system_prompt: z.string().min(1),
+  name: z.string().min(1, "Name is required"),
+  model: z.string().min(1, "Model is required"),
+  vault_key_id: z.string().uuid("Select an LLM credential."),
+  system_prompt: z.string().min(1, "System prompt is required"),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -29,6 +30,8 @@ type AgentFormProps = {
   submitError: string | null;
 };
 
+const EMPTY_VAULT_HINT_ID = "agent-form-empty-vault";
+
 export function AgentForm({
   vaultKeys,
   onSubmit,
@@ -38,6 +41,7 @@ export function AgentForm({
   const {
     control,
     handleSubmit,
+    setError,
     setValue,
     formState: { errors },
   } = useForm<FormValues>({
@@ -50,8 +54,10 @@ export function AgentForm({
     },
   });
 
+  const hasKeys = vaultKeys.length > 0;
+
   useEffect(() => {
-    const id = vaultKeys[0]?.id;
+    const id = vaultKeys.find((k) => isSupportedLlmService(k.service))?.id ?? vaultKeys[0]?.id;
     if (id) {
       setValue("vault_key_id", id, { shouldValidate: true });
     }
@@ -62,8 +68,18 @@ export function AgentForm({
       className="space-y-4 rounded-lg border border-[rgba(255,255,255,0.08)] bg-[#0b0c0e] p-6"
       onSubmit={handleSubmit(async (vals) => {
         const vk = vaultKeys.find((x) => x.id === vals.vault_key_id);
-        const unsupported = vk && !["openai", "anthropic", "google", "groq", "xai"].includes(vk.service);
-        if (unsupported) {
+        if (!vk) {
+          setError("vault_key_id", {
+            type: "manual",
+            message: "That credential is no longer in your vault. Pick another one.",
+          });
+          return;
+        }
+        if (!isSupportedLlmService(vk.service)) {
+          setError("vault_key_id", {
+            type: "manual",
+            message: unsupportedServiceMessage(vk.name, vk.service),
+          });
           return;
         }
         await onSubmit({
@@ -75,74 +91,94 @@ export function AgentForm({
         });
       })}
     >
-      {vaultKeys.length === 0 ? (
-        <p className="text-axiom-14 text-amber-400">
+      {hasKeys ? null : (
+        <p id={EMPTY_VAULT_HINT_ID} className="text-axiom-14 text-amber-400" role="status">
           No LLM credentials in vault.{" "}
           <Link href="/dashboard/vault" className="border-b border-border-strong text-text-secondary">
             Add one in Vault →
           </Link>
         </p>
-      ) : null}
+      )}
 
       <div>
-        <Label className="font-mono text-axiom-11 uppercase text-[#82878f]">Name</Label>
+        <Label htmlFor="agent-name" className="font-mono text-axiom-11 uppercase text-[#82878f]">
+          Name
+        </Label>
         <Controller
           name="name"
           control={control}
           render={({ field }) => (
-            <Input {...field} className="mt-1 border-[rgba(255,255,255,0.1)] bg-[#08090b]" />
+            <Input {...field} id="agent-name" className="mt-1 border-[rgba(255,255,255,0.1)] bg-[#08090b]" />
           )}
         />
         {errors.name ? <p className="mt-1 text-axiom-13 text-red-400">{errors.name.message}</p> : null}
       </div>
 
       <div>
-        <Label className="font-mono text-axiom-11 uppercase text-[#82878f]">Model</Label>
+        <Label htmlFor="agent-model" className="font-mono text-axiom-11 uppercase text-[#82878f]">
+          Model
+        </Label>
         <Controller
           name="model"
           control={control}
           render={({ field }) => (
-            <Input {...field} className="mt-1 border-[rgba(255,255,255,0.1)] bg-[#08090b]" />
+            <Input {...field} id="agent-model" className="mt-1 border-[rgba(255,255,255,0.1)] bg-[#08090b]" />
           )}
         />
+        {errors.model ? <p className="mt-1 text-axiom-13 text-red-400">{errors.model.message}</p> : null}
       </div>
 
       <div>
-        <Label className="font-mono text-axiom-11 uppercase text-[#82878f]">Vault key</Label>
+        <Label htmlFor="agent-vault-key" className="font-mono text-axiom-11 uppercase text-[#82878f]">
+          Vault key
+        </Label>
         <Controller
           name="vault_key_id"
           control={control}
           render={({ field }) => (
             <select
               {...field}
-              className="mt-1 w-full rounded-md border border-[rgba(255,255,255,0.1)] bg-[#08090b] px-3 py-2 font-mono text-axiom-14 text-[#ecedef]"
+              id="agent-vault-key"
+              disabled={!hasKeys}
+              aria-invalid={Boolean(errors.vault_key_id)}
+              className="mt-1 w-full rounded-md border border-[rgba(255,255,255,0.1)] bg-[#08090b] px-3 py-2 font-mono text-axiom-14 text-[#ecedef] disabled:opacity-60"
             >
+              {hasKeys ? null : <option value="">No LLM credentials in vault</option>}
               {vaultKeys.map((k) => (
                 <option key={k.id} value={k.id}>
-                  {k.name} ({k.service}) {k.key_prefix}…{k.key_suffix}
+                  {k.name} ({k.service}){isSupportedLlmService(k.service) ? "" : " — not supported"}{" "}
+                  {k.key_prefix}…{k.key_suffix}
                 </option>
               ))}
             </select>
           )}
         />
         {errors.vault_key_id ? (
-          <p className="mt-1 text-axiom-13 text-red-400">{errors.vault_key_id.message}</p>
+          <p className="mt-1 text-axiom-13 text-red-400" role="alert">
+            {errors.vault_key_id.message}
+          </p>
         ) : null}
       </div>
 
       <div>
-        <Label className="font-mono text-axiom-11 uppercase text-[#82878f]">System prompt</Label>
+        <Label htmlFor="agent-system-prompt" className="font-mono text-axiom-11 uppercase text-[#82878f]">
+          System prompt
+        </Label>
         <Controller
           name="system_prompt"
           control={control}
           render={({ field }) => (
             <textarea
               {...field}
+              id="agent-system-prompt"
               rows={4}
               className="mt-1 w-full rounded-md border border-[rgba(255,255,255,0.1)] bg-[#08090b] px-3 py-2 text-axiom-14 text-[#ecedef]"
             />
           )}
         />
+        {errors.system_prompt ? (
+          <p className="mt-1 text-axiom-13 text-red-400">{errors.system_prompt.message}</p>
+        ) : null}
       </div>
 
       <p className="font-mono text-axiom-11 uppercase text-[#82878f]">
@@ -154,7 +190,9 @@ export function AgentForm({
       <Button
         type="submit"
         className="bg-neutral-100 text-text-inverse hover:bg-white"
-        disabled={isSubmitting || vaultKeys.length === 0}
+        disabled={isSubmitting || !hasKeys}
+        title={hasKeys ? undefined : "Add an LLM provider credential to your vault first."}
+        aria-describedby={hasKeys ? undefined : EMPTY_VAULT_HINT_ID}
       >
         Create agent
       </Button>
