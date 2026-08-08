@@ -139,6 +139,8 @@ Commands:
   automint-worker-key  Ensure apps/backend/.env has AXIOM_WORKER_GATEWAY_API_KEY (same as dev hook)
   rotate-worker-key    Soft-revoke the current worker key, mint a new one, rewrite apps/backend/.env
   worker   Run the agent-run queue worker (Redis BRPOP + process_run; same as dev-spawned worker)
+  keys     Vault key inventory, backfill, rotation, verification (see docs/runbooks/key-rotation.md)
+           axiom keys status | migrate-vault --apply | rotate --new-kek-b64 <b64> --apply | verify
   stop     Stop app processes and docker compose stop (keeps volumes)
   fresh    Stop, docker compose down -v, then full dev stack from clean DB
   status   Show postgres/redis/backend/frontend/worker status (use --json for machine-readable)
@@ -152,6 +154,7 @@ Examples:
   ./axiom dev --no-start
   ./axiom automint-worker-key
   ./axiom rotate-worker-key
+  ./axiom keys status
   ./axiom worker
   ./axiom stop
 EOF
