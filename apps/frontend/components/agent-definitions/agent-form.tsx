@@ -3,15 +3,22 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import type { ReactElement } from "react";
-import { useEffect } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useEffect, useRef, useState } from "react";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DEFAULT_AGENT_TOOLS_CONFIG } from "@/lib/default-agent-tools";
-import { isSupportedLlmService, unsupportedServiceMessage } from "@/lib/llm-providers";
+import {
+  isSupportedLlmService,
+  modelProviderMismatchMessage,
+  modelProviderPrefix,
+  qualifyModel,
+  unsupportedServiceMessage,
+} from "@/lib/llm-providers";
+import type { LlmProvider } from "@/lib/providers-api";
 import type { VaultKey } from "@/lib/vault-api";
 
 const schema = z.object({
@@ -25,15 +32,19 @@ type FormValues = z.infer<typeof schema>;
 
 type AgentFormProps = {
   vaultKeys: VaultKey[];
+  /** Provider catalog from the backend registry; empty falls back to free-text model entry. */
+  providers?: LlmProvider[];
   onSubmit: (values: Record<string, unknown>) => Promise<void>;
   isSubmitting: boolean;
   submitError: string | null;
 };
 
 const EMPTY_VAULT_HINT_ID = "agent-form-empty-vault";
+const CUSTOM_MODEL = "__custom__";
 
 export function AgentForm({
   vaultKeys,
+  providers = [],
   onSubmit,
   isSubmitting,
   submitError,
@@ -49,12 +60,13 @@ export function AgentForm({
     resolver: zodResolver(schema),
     defaultValues: {
       name: "",
-      model: "groq/llama-3.3-70b-versatile",
+      model: "",
       vault_key_id: "",
       system_prompt: "You are a helpful assistant.",
     },
   });
 
+  const [customModel, setCustomModel] = useState(false);
   const hasKeys = vaultKeys.length > 0;
 
   // Pick a sensible default, but never clobber a selection the user still can use —
@@ -69,6 +81,31 @@ export function AgentForm({
       setValue("vault_key_id", id, { shouldValidate: true });
     }
   }, [vaultKeys, getValues, setValue]);
+
+  const selectedKeyId = useWatch({ control, name: "vault_key_id" });
+  const modelValue = useWatch({ control, name: "model" });
+  const selectedKey = vaultKeys.find((k) => k.id === selectedKeyId) ?? null;
+  const provider = selectedKey
+    ? (providers.find((p) => p.service === selectedKey.service) ?? null)
+    : null;
+  const modelOptions = provider ? provider.models.map((m) => qualifyModel(provider.service, m)) : [];
+
+  // Switching credentials must not leave a model string aimed at the old provider.
+  const appliedKeyRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!provider || !selectedKeyId || appliedKeyRef.current === selectedKeyId) {
+      return;
+    }
+    appliedKeyRef.current = selectedKeyId;
+    if (provider.default_model) {
+      setValue("model", qualifyModel(provider.service, provider.default_model));
+      setCustomModel(false);
+    }
+  }, [provider, selectedKeyId, setValue]);
+
+  const valueInCatalog = modelOptions.includes(modelValue ?? "");
+  const useCustomModel = modelOptions.length === 0 || customModel || !valueInCatalog;
+  const modelSelectValue = valueInCatalog && !customModel ? modelValue : CUSTOM_MODEL;
 
   return (
     <form
@@ -86,6 +123,14 @@ export function AgentForm({
           setError("vault_key_id", {
             type: "manual",
             message: unsupportedServiceMessage(vk.name, vk.service),
+          });
+          return;
+        }
+        const prefix = modelProviderPrefix(vals.model);
+        if (prefix && prefix !== vk.service.toLowerCase()) {
+          setError("model", {
+            type: "manual",
+            message: modelProviderMismatchMessage(vals.model, prefix, vk.service),
           });
           return;
         }
@@ -122,20 +167,6 @@ export function AgentForm({
       </div>
 
       <div>
-        <Label htmlFor="agent-model" className="font-mono text-axiom-11 uppercase text-[#82878f]">
-          Model
-        </Label>
-        <Controller
-          name="model"
-          control={control}
-          render={({ field }) => (
-            <Input {...field} id="agent-model" className="mt-1 border-[rgba(255,255,255,0.1)] bg-[#08090b]" />
-          )}
-        />
-        {errors.model ? <p className="mt-1 text-axiom-13 text-red-400">{errors.model.message}</p> : null}
-      </div>
-
-      <div>
         <Label htmlFor="agent-vault-key" className="font-mono text-axiom-11 uppercase text-[#82878f]">
           Vault key
         </Label>
@@ -163,6 +194,66 @@ export function AgentForm({
         {errors.vault_key_id ? (
           <p className="mt-1 text-axiom-13 text-red-400" role="alert">
             {errors.vault_key_id.message}
+          </p>
+        ) : null}
+      </div>
+
+      <div>
+        <Label htmlFor="agent-model" className="font-mono text-axiom-11 uppercase text-[#82878f]">
+          Model
+        </Label>
+        {modelOptions.length > 0 ? (
+          <select
+            id="agent-model"
+            value={modelSelectValue}
+            aria-invalid={Boolean(errors.model)}
+            className="mt-1 w-full rounded-md border border-[rgba(255,255,255,0.1)] bg-[#08090b] px-3 py-2 font-mono text-axiom-14 text-[#ecedef]"
+            onChange={(e) => {
+              if (e.target.value === CUSTOM_MODEL) {
+                setCustomModel(true);
+                return;
+              }
+              setCustomModel(false);
+              setValue("model", e.target.value, { shouldValidate: true });
+            }}
+          >
+            {modelOptions.map((m) => (
+              <option key={m} value={m}>
+                {m}
+              </option>
+            ))}
+            <option value={CUSTOM_MODEL}>Custom model…</option>
+          </select>
+        ) : null}
+        {useCustomModel ? (
+          <Controller
+            name="model"
+            control={control}
+            render={({ field }) => (
+              <>
+                {modelOptions.length > 0 ? (
+                  <Label htmlFor="agent-model-custom" className="sr-only">
+                    Custom model id
+                  </Label>
+                ) : null}
+                <Input
+                  {...field}
+                  id={modelOptions.length > 0 ? "agent-model-custom" : "agent-model"}
+                  placeholder={selectedKey ? `${selectedKey.service}/model-id` : "provider/model-id"}
+                  className="mt-1 border-[rgba(255,255,255,0.1)] bg-[#08090b]"
+                />
+              </>
+            )}
+          />
+        ) : null}
+        <p className="mt-1 text-axiom-11 text-[#82878f]">
+          {provider
+            ? `Models for ${provider.label}. The provider prefix is stripped before the call.`
+            : "Use provider/model-id — the provider prefix must match the selected credential."}
+        </p>
+        {errors.model ? (
+          <p className="mt-1 text-axiom-13 text-red-400" role="alert">
+            {errors.model.message}
           </p>
         ) : null}
       </div>

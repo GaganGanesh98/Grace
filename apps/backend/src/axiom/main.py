@@ -35,6 +35,7 @@ from axiom.routers import (
     policies,
     preflight,
     projects,
+    providers,
     users,
     vault,
     verify,
@@ -143,6 +144,7 @@ app.include_router(agents.router, prefix="/api/v1/projects", tags=["agents"])
 app.include_router(policies.router, prefix="/api/v1/projects", tags=["policies"])
 app.include_router(api_keys.router, prefix="/api/v1/projects", tags=["api_keys"])
 app.include_router(vault.router, prefix="/api/v1/vault", tags=["vault"])
+app.include_router(providers.router, prefix="/api/v1/providers", tags=["providers"])
 app.include_router(govern.router, prefix="/v1", tags=["govern"])
 app.include_router(approvals_router.router, prefix="/v1/governance", tags=["governance-approvals"])
 app.include_router(governance_engine.router, prefix="/v1/governance", tags=["governance-engine"])

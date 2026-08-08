@@ -7,10 +7,13 @@ import { AgentForm } from "@/components/agent-definitions/agent-form";
 import { Button } from "@/components/ui/button";
 import { AddCredentialModal } from "@/components/vault/add-credential-modal";
 import { SUPPORTED_LLM_SERVICES_LABEL, supportedLlmKeys } from "@/lib/llm-providers";
+import type { LlmProvider } from "@/lib/providers-api";
 import type { VaultKey } from "@/lib/vault-api";
 
 type AgentCreatePanelProps = {
   vaultKeys: VaultKey[];
+  /** Provider catalog from the backend registry; drives the model options. */
+  providers?: LlmProvider[];
   vaultLoading: boolean;
   vaultError: string | null;
   onSubmit: (values: Record<string, unknown>) => Promise<void>;
@@ -30,6 +33,7 @@ type AgentCreatePanelProps = {
  */
 export function AgentCreatePanel({
   vaultKeys,
+  providers,
   vaultLoading,
   vaultError,
   onSubmit,
@@ -117,6 +121,7 @@ export function AgentCreatePanel({
     <div className="space-y-3">
       <AgentForm
         vaultKeys={vaultKeys}
+        providers={providers}
         onSubmit={onSubmit}
         isSubmitting={isSubmitting}
         submitError={submitError}

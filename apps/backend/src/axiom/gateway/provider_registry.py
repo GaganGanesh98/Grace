@@ -41,6 +41,14 @@ class ProviderSpec:
     forward_headers: frozenset[str] = frozenset()
     chat_path: str = "/chat/completions"  # relative to base_url (informational)
     supports_streaming: bool = True
+    # Display name for UI dropdowns; falls back to ``name`` when empty.
+    label: str = ""
+    # Curated, non-exhaustive model ids as the provider names them upstream (no
+    # ``provider/`` prefix — the gateway strips that, see normalize_model_prefix).
+    # Served to the UI by GET /api/v1/providers so the frontend never keeps its
+    # own copy. An empty tuple means "we have no curated list; free text only".
+    models: tuple[str, ...] = ()
+    default_model: str = ""
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -54,6 +62,13 @@ PROVIDERS: dict[str, ProviderSpec] = {
         protocol=ProtocolShape.OPENAI_COMPATIBLE,
         base_url="https://api.groq.com/openai/v1",
         auth_method=AuthMethod.BEARER,
+        label="Groq",
+        models=(
+            "llama-3.3-70b-versatile",
+            "llama-3.1-8b-instant",
+            "gemma2-9b-it",
+        ),
+        default_model="llama-3.3-70b-versatile",
     ),
     "openai": ProviderSpec(
         name="openai",
@@ -62,6 +77,15 @@ PROVIDERS: dict[str, ProviderSpec] = {
         base_url="https://api.openai.com/v1",
         auth_method=AuthMethod.BEARER,
         forward_headers=frozenset({"openai-beta", "openai-organization"}),
+        label="OpenAI",
+        models=(
+            "gpt-4.1",
+            "gpt-4.1-mini",
+            "gpt-4o",
+            "gpt-4o-mini",
+            "o3-mini",
+        ),
+        default_model="gpt-4.1-mini",
     ),
     "anthropic": ProviderSpec(
         name="anthropic",
@@ -72,6 +96,14 @@ PROVIDERS: dict[str, ProviderSpec] = {
         default_headers={"anthropic-version": "2023-06-01"},
         forward_headers=frozenset({"anthropic-beta"}),
         chat_path="/messages",
+        label="Anthropic",
+        models=(
+            "claude-sonnet-5",
+            "claude-opus-5",
+            "claude-haiku-4-5",
+            "claude-sonnet-4-5",
+        ),
+        default_model="claude-sonnet-5",
     ),
     "xai": ProviderSpec(
         name="xai",
@@ -79,6 +111,9 @@ PROVIDERS: dict[str, ProviderSpec] = {
         protocol=ProtocolShape.OPENAI_COMPATIBLE,
         base_url="https://api.x.ai/v1",
         auth_method=AuthMethod.BEARER,
+        label="xAI",
+        models=("grok-4", "grok-3", "grok-3-mini"),
+        default_model="grok-4",
     ),
     "google": ProviderSpec(
         name="google",
@@ -87,9 +122,13 @@ PROVIDERS: dict[str, ProviderSpec] = {
         base_url="https://generativelanguage.googleapis.com/v1beta",
         auth_method=AuthMethod.QUERY_PARAM,
         chat_path="/models/{model}:generateContent",
+        label="Google",
+        models=("gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.0-flash"),
+        default_model="gemini-2.5-flash",
     ),
     "perplexity": ProviderSpec(
         name="perplexity",
+        label="Perplexity",
         key_prefixes=("pplx-",),
         protocol=ProtocolShape.OPENAI_COMPATIBLE,
         base_url="https://api.perplexity.ai",
@@ -97,6 +136,7 @@ PROVIDERS: dict[str, ProviderSpec] = {
     ),
     "openrouter": ProviderSpec(
         name="openrouter",
+        label="OpenRouter",
         key_prefixes=("sk-or-",),
         protocol=ProtocolShape.OPENAI_COMPATIBLE,
         base_url="https://openrouter.ai/api/v1",
@@ -104,6 +144,7 @@ PROVIDERS: dict[str, ProviderSpec] = {
     ),
     "together": ProviderSpec(
         name="together",
+        label="Together AI",
         key_prefixes=(),  # no known prefix — manual provider selection
         protocol=ProtocolShape.OPENAI_COMPATIBLE,
         base_url="https://api.together.xyz/v1",
@@ -111,6 +152,7 @@ PROVIDERS: dict[str, ProviderSpec] = {
     ),
     "fireworks": ProviderSpec(
         name="fireworks",
+        label="Fireworks AI",
         key_prefixes=("fp_",),
         protocol=ProtocolShape.OPENAI_COMPATIBLE,
         base_url="https://api.fireworks.ai/inference/v1",
@@ -118,6 +160,7 @@ PROVIDERS: dict[str, ProviderSpec] = {
     ),
     "deepseek": ProviderSpec(
         name="deepseek",
+        label="DeepSeek",
         key_prefixes=("sk-",),  # conflicts with openai — requires manual selection
         protocol=ProtocolShape.OPENAI_COMPATIBLE,
         base_url="https://api.deepseek.com/v1",
@@ -125,6 +168,7 @@ PROVIDERS: dict[str, ProviderSpec] = {
     ),
     "mistral": ProviderSpec(
         name="mistral",
+        label="Mistral",
         key_prefixes=(),  # no known unique prefix
         protocol=ProtocolShape.OPENAI_COMPATIBLE,
         base_url="https://api.mistral.ai/v1",
@@ -132,6 +176,7 @@ PROVIDERS: dict[str, ProviderSpec] = {
     ),
     "cerebras": ProviderSpec(
         name="cerebras",
+        label="Cerebras",
         key_prefixes=("csk-",),
         protocol=ProtocolShape.OPENAI_COMPATIBLE,
         base_url="https://api.cerebras.ai/v1",
@@ -139,6 +184,7 @@ PROVIDERS: dict[str, ProviderSpec] = {
     ),
     "replicate": ProviderSpec(
         name="replicate",
+        label="Replicate",
         key_prefixes=("r8_",),
         protocol=ProtocolShape.OPENAI_COMPATIBLE,
         base_url="https://api.replicate.com/v1",
@@ -200,6 +246,11 @@ def get_provider_spec(provider_name: str) -> ProviderSpec | None:
 def get_all_provider_names() -> list[str]:
     """Return all registered provider names. Used by: classifier, UI dropdowns."""
     return list(PROVIDERS.keys())
+
+
+def get_provider_label(spec: ProviderSpec) -> str:
+    """Display name for UI dropdowns, falling back to the registry key."""
+    return spec.label or spec.name
 
 
 def get_providers_by_protocol(protocol: ProtocolShape) -> list[ProviderSpec]:

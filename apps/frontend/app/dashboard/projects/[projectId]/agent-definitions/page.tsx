@@ -11,6 +11,7 @@ import { AgentList } from "@/components/agent-definitions/agent-list";
 import { useProjectWorkspace } from "@/components/project-workspace-provider";
 import { useAgentDefinitions, useArchiveAgentDefinition, useCreateAgentDefinition } from "@/hooks/use-agent-definitions";
 import { dashboardKeys } from "@/lib/dashboard-query-keys";
+import { fetchLlmProviders } from "@/lib/providers-api";
 import { listVaultKeys } from "@/lib/vault-api";
 
 export default function AgentDefinitionsPage(): ReactElement {
@@ -27,6 +28,11 @@ export default function AgentDefinitionsPage(): ReactElement {
   const vault = useQuery({
     queryKey: dashboardKeys.llmVaultKeys,
     queryFn: () => listVaultKeys({ kind: "llm" }),
+  });
+  const providers = useQuery({
+    queryKey: dashboardKeys.llmProviders,
+    queryFn: () => fetchLlmProviders(),
+    staleTime: 60 * 60 * 1000,
   });
   const createDef = useCreateAgentDefinition(projectId);
   const archive = useArchiveAgentDefinition(projectId);
@@ -52,6 +58,7 @@ export default function AgentDefinitionsPage(): ReactElement {
         <h2 className="font-mono text-axiom-12 uppercase tracking-[2px] text-[#6B7490]">Create agent</h2>
         <AgentCreatePanel
           vaultKeys={vault.data ?? []}
+          providers={providers.data ?? []}
           vaultLoading={vault.isPending}
           vaultError={vault.error ? vault.error.message : null}
           isSubmitting={createDef.isPending}

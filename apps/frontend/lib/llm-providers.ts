@@ -26,3 +26,25 @@ export function supportedLlmKeys<T extends { service: string }>(keys: readonly T
 export function unsupportedServiceMessage(name: string, service: string): string {
   return `"${name}" is a ${service} credential. Agents need an LLM provider key — ${SUPPORTED_LLM_SERVICES_LABEL}.`;
 }
+
+/**
+ * Agent definitions store models as `provider/model`; the gateway strips the
+ * prefix before calling upstream (`normalize_model_prefix`).
+ */
+export function qualifyModel(service: string, model: string): string {
+  return `${service}/${model}`;
+}
+
+/** Provider named by a `provider/model` string, or null when the id is bare. */
+export function modelProviderPrefix(model: string): string | null {
+  const i = model.indexOf("/");
+  if (i <= 0 || i === model.length - 1) {
+    return null;
+  }
+  return model.slice(0, i).trim().toLowerCase();
+}
+
+/** Field error for a model whose provider prefix contradicts the selected credential. */
+export function modelProviderMismatchMessage(model: string, prefix: string, service: string): string {
+  return `"${model}" is a ${prefix} model, but the selected credential is a ${service} key. This fails at run time, not here.`;
+}
