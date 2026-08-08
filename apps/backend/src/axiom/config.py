@@ -92,6 +92,26 @@ class Settings(BaseSettings):
     axiom_ml_dsa_public_b64: str | None = None
     axiom_evidence_key_b64: SecretStr | None = None
 
+    # --- Phase 8.2 vault key-encryption key (envelope encryption) ---
+    # GRACE_* only: these are new, they have no AXIOM_* legacy spelling, and
+    # must not acquire one. When the KEK is unset it is derived from the
+    # evidence key by HKDF (see services/crypto/kek_registry.py) so local dev
+    # needs no new configuration; production sets it explicitly for full
+    # separation. GRACE_VAULT_KEK_PREVIOUS_B64 is a comma-separated list of
+    # retired KEKs that must stay readable until their row count reaches zero.
+    grace_vault_kek_b64: SecretStr | None = Field(
+        default=None,
+        validation_alias=AliasChoices("GRACE_VAULT_KEK_B64"),
+    )
+    grace_vault_kek_id: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("GRACE_VAULT_KEK_ID"),
+    )
+    grace_vault_kek_previous_b64: str = Field(
+        default="",
+        validation_alias=AliasChoices("GRACE_VAULT_KEK_PREVIOUS_B64"),
+    )
+
     verify_base_url: str = Field(
         default="http://localhost:8000",
         validation_alias=AliasChoices("AXIOM_VERIFY_BASE_URL", "VERIFY_BASE_URL"),

@@ -25,7 +25,7 @@ import structlog
 from pydantic import SecretBytes, SecretStr
 
 from axiom.config import REPO_ROOT, get_settings
-from axiom.services.crypto import aes_gcm, ed25519, ml_dsa
+from axiom.services.crypto import aes_gcm, ed25519, kek_registry, ml_dsa
 
 logger = structlog.get_logger(__name__)
 
@@ -234,6 +234,12 @@ def reset_for_tests() -> None:
     global _cache
     with _lock:
         _cache = None
+
+
+# The KEK registry is a crypto leaf and cannot import this module (import-linter
+# contract 3), so the dependency is inverted: it asks us for the evidence key.
+# Registering the accessor rather than the value keeps dev auto-generation working.
+kek_registry.set_evidence_key_provider(lambda: get_signing_keys().evidence_key)
 
 
 def export_b64(keys: SigningKeys) -> dict[str, str]:
