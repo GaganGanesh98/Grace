@@ -1,4 +1,4 @@
-"""Auto-mint AXIOM project API key for the local agent worker (dev UX only)."""
+"""Auto-mint a Grace project API key for the local agent worker (dev UX only)."""
 
 from __future__ import annotations
 
@@ -31,8 +31,10 @@ DEV_PROJECT_SLUG = "axiom-dev"
 DEV_PROJECT_NAME = "Grace Dev"
 WORKER_KEY_NAME = "axiom-worker (auto-minted)"
 WORKER_SCOPES = ["govern:write"]
-ENV_KEY = "AXIOM_WORKER_GATEWAY_API_KEY"
-AUTOMINT_FLAG = "AXIOM_WORKER_AUTOMINT"
+ENV_KEY = "GRACE_WORKER_GATEWAY_API_KEY"
+LEGACY_ENV_KEY = "AXIOM_WORKER_GATEWAY_API_KEY"
+AUTOMINT_FLAG = "GRACE_WORKER_AUTOMINT"
+LEGACY_AUTOMINT_FLAG = "AXIOM_WORKER_AUTOMINT"
 
 
 def _is_ci() -> bool:
@@ -45,15 +47,27 @@ def _short_prefix(key_prefix: str) -> str:
     return key_prefix[-4:] if len(key_prefix) >= 4 else key_prefix
 
 
+def _read_worker_key(env_path: Path) -> str:
+    """Value under either spelling; GRACE_* wins, AXIOM_* is the compat window."""
+    for name in (ENV_KEY, LEGACY_ENV_KEY):
+        value = (read_env_value(env_path, name) or "").strip()
+        if value:
+            return value
+    return ""
+
+
 def _explicit_shell_key() -> bool:
-    return bool(os.environ.get(ENV_KEY, "").strip())
+    return bool(
+        os.environ.get(ENV_KEY, "").strip() or os.environ.get(LEGACY_ENV_KEY, "").strip()
+    )
 
 
 def _automint_disabled_in_file(env_path: Path) -> bool:
-    raw = read_env_value(env_path, AUTOMINT_FLAG)
-    if raw is None:
-        return False
-    return raw.strip() == "0"
+    for flag in (AUTOMINT_FLAG, LEGACY_AUTOMINT_FLAG):
+        raw = read_env_value(env_path, flag)
+        if raw is not None and raw.strip() == "0":
+            return True
+    return False
 
 
 async def _ensure_dev_user(session: AsyncSession) -> User:
@@ -106,11 +120,10 @@ async def ensure_worker_gateway_key(env_path: Path) -> str:
         logger.info("Auto-mint skipped (explicit key provided).")
         return "skipped_explicit"
     if _automint_disabled_in_file(env_path):
-        logger.info("Auto-mint skipped (AXIOM_WORKER_AUTOMINT=0).")
+        logger.info("Auto-mint skipped (GRACE_WORKER_AUTOMINT=0).")
         return "skipped_automint_off"
 
-    file_secret = read_env_value(env_path, ENV_KEY)
-    secret = (file_secret or "").strip()
+    secret = _read_worker_key(env_path)
 
     async with session_scope() as session:
         user = await _ensure_dev_user(session)
@@ -162,12 +175,16 @@ async def rotate_worker_gateway_key(env_path: Path) -> tuple[str, str]:
         logger.info("rotate-worker-key skipped (CI environment).")
         return ("", "")
 
-    file_secret = (read_env_value(env_path, ENV_KEY) or "").strip()
+    file_secret = _read_worker_key(env_path)
     if _explicit_shell_key() and not file_secret:
         logger.info("rotate-worker-key: explicit shell key in use; not managing .env.")
         return ("", "")
 
-    secret = file_secret or os.environ.get(ENV_KEY, "").strip()
+    secret = (
+        file_secret
+        or os.environ.get(ENV_KEY, "").strip()
+        or os.environ.get(LEGACY_ENV_KEY, "").strip()
+    )
 
     async with session_scope() as session:
         user = await _ensure_dev_user(session)

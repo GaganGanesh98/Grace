@@ -28,9 +28,9 @@ _status_redis() {
 
 _status_backend() {
   local code pid
-  code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 2 "http://127.0.0.1:${AXIOM_BACKEND_PORT}/healthz" 2>/dev/null || echo 000)"
+  code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 2 "http://127.0.0.1:${GRACE_BACKEND_PORT}/healthz" 2>/dev/null || echo 000)"
   if [[ "${code}" == 200 ]]; then
-    pid="$(_listeners_on_port "${AXIOM_BACKEND_PORT}" | head -1 || echo "")"
+    pid="$(_listeners_on_port "${GRACE_BACKEND_PORT}" | head -1 || echo "")"
     echo "ok|/healthz ${code}|${pid}"
   else
     echo "bad|/healthz ${code}|"
@@ -39,8 +39,8 @@ _status_backend() {
 
 _status_frontend() {
   local code pid
-  code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 2 "http://127.0.0.1:${AXIOM_FRONTEND_PORT}/" 2>/dev/null || echo 000)"
-  pid="$(_listeners_on_port "${AXIOM_FRONTEND_PORT}" | head -1 || echo "")"
+  code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 2 "http://127.0.0.1:${GRACE_FRONTEND_PORT}/" 2>/dev/null || echo 000)"
+  pid="$(_listeners_on_port "${GRACE_FRONTEND_PORT}" | head -1 || echo "")"
   if [[ "${code}" == 200 || "${code}" == 307 ]]; then
     echo "ok|HTTP ${code}|${pid}"
   else
@@ -49,12 +49,12 @@ _status_frontend() {
 }
 
 _status_worker() {
-  if [[ ! -f "${AXIOM_PID_WORKER}" ]]; then
+  if [[ ! -f "${GRACE_PID_WORKER}" ]]; then
     echo "bad|no pid file|"
     return
   fi
   local pid
-  pid="$(cat "${AXIOM_PID_WORKER}" 2>/dev/null || true)"
+  pid="$(cat "${GRACE_PID_WORKER}" 2>/dev/null || true)"
   [[ -z "${pid}" ]] && echo "bad|empty pid file|" && return
   if kill -0 "${pid}" 2>/dev/null; then
     echo "ok|process alive|${pid}"
@@ -82,10 +82,10 @@ _status_emit_json() {
   [[ "${f_ok}" == ok ]] && f_b="true"
   [[ "${w_ok}" == ok ]] && w_b="true"
   printf '{"postgres":{"ok":%s,"host_port":%s,"container_port":5432},"redis":{"ok":%s,"host_port":%s,"container_port":6379},"backend":{"ok":%s,"port":%s,"detail":"%s","pid":"%s"},"frontend":{"ok":%s,"port":%s,"detail":"%s","pid":"%s"},"worker":{"ok":%s,"detail":"%s","pid":"%s"}}\n' \
-    "${pg_b}" "${AXIOM_PG_HOST_PORT}" \
-    "${r_b}" "${AXIOM_REDIS_HOST_PORT}" \
-    "${b_b}" "${AXIOM_BACKEND_PORT}" "${b_msg}" "${b_pid}" \
-    "${f_b}" "${AXIOM_FRONTEND_PORT}" "${f_msg}" "${f_pid}" \
+    "${pg_b}" "${GRACE_PG_HOST_PORT}" \
+    "${r_b}" "${GRACE_REDIS_HOST_PORT}" \
+    "${b_b}" "${GRACE_BACKEND_PORT}" "${b_msg}" "${b_pid}" \
+    "${f_b}" "${GRACE_FRONTEND_PORT}" "${f_msg}" "${f_pid}" \
     "${w_b}" "${w_msg}" "${w_pid}"
 }
 
@@ -123,25 +123,25 @@ EOF
     echo "AXIOM status"
     IFS='|' read -r ok msg extra <<<"${pg}"
     if [[ "${ok}" == ok ]]; then
-      echo "  postgres: ✓ running on :${AXIOM_PG_HOST_PORT} → container :5432 (healthy, container=axiom-postgres)"
+      echo "  postgres: ✓ running on :${GRACE_PG_HOST_PORT} → container :5432 (healthy, container=axiom-postgres)"
     else
       echo "  postgres: ✗ not running (${msg})"
     fi
     IFS='|' read -r ok msg extra <<<"${redis}"
     if [[ "${ok}" == ok ]]; then
-      echo "  redis:    ✓ running on :${AXIOM_REDIS_HOST_PORT} (${extra}, container=axiom-redis)"
+      echo "  redis:    ✓ running on :${GRACE_REDIS_HOST_PORT} (${extra}, container=axiom-redis)"
     else
       echo "  redis:    ✗ not running (${msg})"
     fi
     IFS='|' read -r ok msg extra <<<"${be}"
     if [[ "${ok}" == ok ]]; then
-      echo "  backend:  ✓ running on :${AXIOM_BACKEND_PORT} (${msg}, pid=${extra:-?})"
+      echo "  backend:  ✓ running on :${GRACE_BACKEND_PORT} (${msg}, pid=${extra:-?})"
     else
       echo "  backend:  ✗ not running (${msg})"
     fi
     IFS='|' read -r ok msg extra <<<"${fe}"
     if [[ "${ok}" == ok ]]; then
-      echo "  frontend: ✓ running on :${AXIOM_FRONTEND_PORT} (${msg}, pid=${extra:-?})"
+      echo "  frontend: ✓ running on :${GRACE_FRONTEND_PORT} (${msg}, pid=${extra:-?})"
     else
       echo "  frontend: ✗ not running (${msg})"
     fi

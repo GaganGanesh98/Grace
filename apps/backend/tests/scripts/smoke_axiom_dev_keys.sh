@@ -23,7 +23,7 @@ cp "${DOTENV}" "${BACKUP}"
 echo "[smoke] backed up .env"
 
 # 2. Strip Phase-2 key lines
-sed -i '/^AXIOM_EVIDENCE_KEY_B64=/d;/^AXIOM_ED25519_/d;/^AXIOM_ML_DSA_/d' "${DOTENV}"
+sed -i '/^GRACE_EVIDENCE_KEY_B64=/d;/^GRACE_ED25519_/d;/^GRACE_ML_DSA_/d;/^AXIOM_EVIDENCE_KEY_B64=/d;/^AXIOM_ED25519_/d;/^AXIOM_ML_DSA_/d' "${DOTENV}"
 echo "[smoke] stripped Phase-2 key lines from .env"
 
 # 3. Start axiom dev in background, capture output

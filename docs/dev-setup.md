@@ -49,7 +49,7 @@ From the repository root:
 ./axiom dev
 ```
 
-On the first dev start, if `AXIOM_WORKER_GATEWAY_API_KEY` is missing from `apps/backend/.env`, the CLI mints a project API key for a dedicated local **dev** user/project and writes the `axm_live_…` secret into that file (nothing is printed to the terminal). Later runs verify the same key instead of minting again. Export `AXIOM_WORKER_GATEWAY_API_KEY` in your shell to use a specific key without touching `.env`, or set `AXIOM_WORKER_AUTOMINT=0` to disable automation. Rotate with `./axiom rotate-worker-key` (soft-revokes the old key in the database, writes a new secret, then restart `./axiom dev`).
+On the first dev start, if `GRACE_WORKER_GATEWAY_API_KEY` is missing from `apps/backend/.env`, the CLI mints a project API key for a dedicated local **dev** user/project and writes the `axm_live_…` secret into that file (nothing is printed to the terminal). Later runs verify the same key instead of minting again. Export `GRACE_WORKER_GATEWAY_API_KEY` in your shell to use a specific key without touching `.env`, or set `GRACE_WORKER_AUTOMINT=0` to disable automation. Rotate with `./axiom rotate-worker-key` (soft-revokes the old key in the database, writes a new secret, then restart `./axiom dev`).
 
 - Postgres is published on host **`:5433`** → container `:5432`.
 - Redis on host **`:6380`** → container `:6379`.
@@ -65,7 +65,7 @@ To run tests without `./axiom dev`, create the DB once:
 `docker compose exec -T postgres psql -U axiom -d postgres -c "CREATE DATABASE axiom_test OWNER axiom;"`  
 then `cd apps/backend && DATABASE_URL=postgresql+asyncpg://axiom:axiom_dev_only@127.0.0.1:5433/axiom_test uv run alembic upgrade head`.
 
-Only for debugging against the live dev DB: **`AXIOM_PYTEST_USE_DEV_DB=1`** (not recommended).
+Only for debugging against the live dev DB: **`GRACE_PYTEST_USE_DEV_DB=1`** (not recommended).
 
 Playwright **`npm run test:e2e`** drives the real UI against whatever **`./axiom dev`** is serving (typically the **`axiom`** database); it does not invoke `pytest`. Destructive **`TRUNCATE`** behavior comes from **backend tests**, not from the Playwright specs themselves.
 

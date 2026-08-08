@@ -16,7 +16,7 @@ axiom_ensure_test_database() {
 axiom_migrate_test_database() {
   (
     cd "${REPO_ROOT}/apps/backend" || exit 1
-    DATABASE_URL="${TEST_DATABASE_URL:-postgresql+asyncpg://axiom:axiom_dev_only@127.0.0.1:${AXIOM_PG_HOST_PORT}/axiom_test}" \
+    DATABASE_URL="${TEST_DATABASE_URL:-postgresql+asyncpg://axiom:axiom_dev_only@127.0.0.1:${GRACE_PG_HOST_PORT}/axiom_test}" \
       uv run alembic upgrade head
   ) || return 1
 }

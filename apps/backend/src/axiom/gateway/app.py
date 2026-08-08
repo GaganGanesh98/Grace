@@ -18,7 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from axiom.config import get_settings
+from axiom.config import deprecated_env_vars, get_settings
 from axiom.db import get_db, session_scope
 from axiom.gateway.classifier import (
     GatewayClassification,
@@ -343,6 +343,13 @@ async def lifespan(app: FastAPI):
     keys = get_signing_keys()
     # Same guard as the API: the gateway decrypts vault credentials too.
     kek_registry.assert_purpose_separation()
+    stale_env = deprecated_env_vars()
+    if stale_env:
+        logger.warning(
+            "grace.env.deprecated_axiom_vars",
+            count=len(stale_env),
+            variables=[f"{old} -> {new}" for old, new in stale_env],
+        )
     logger.info(
         "axiom.gateway.startup",
         evidence_key_id=keys.evidence_key_id[:16],

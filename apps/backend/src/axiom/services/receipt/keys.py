@@ -1,4 +1,4 @@
-"""Singleton loader for the Phase 2 AXIOM-wide signing + evidence keys.
+"""Singleton loader for the Phase 2 Grace-wide signing + evidence keys.
 
 Policy:
   * In ``environment`` in {"development", "test"}: if any of the five env vars
@@ -65,11 +65,11 @@ def _is_dev_or_test(environment: str) -> bool:
 def _missing_fields(settings: object) -> list[str]:
     missing: list[str] = []
     pairs: tuple[tuple[str, object], ...] = (
-        ("AXIOM_ED25519_PRIVATE_PEM", getattr(settings, "axiom_ed25519_private_pem", None)),
-        ("AXIOM_ED25519_PUBLIC_PEM", getattr(settings, "axiom_ed25519_public_pem", None)),
-        ("AXIOM_ML_DSA_PRIVATE_B64", getattr(settings, "axiom_ml_dsa_private_b64", None)),
-        ("AXIOM_ML_DSA_PUBLIC_B64", getattr(settings, "axiom_ml_dsa_public_b64", None)),
-        ("AXIOM_EVIDENCE_KEY_B64", getattr(settings, "axiom_evidence_key_b64", None)),
+        ("GRACE_ED25519_PRIVATE_PEM", getattr(settings, "axiom_ed25519_private_pem", None)),
+        ("GRACE_ED25519_PUBLIC_PEM", getattr(settings, "axiom_ed25519_public_pem", None)),
+        ("GRACE_ML_DSA_PRIVATE_B64", getattr(settings, "axiom_ml_dsa_private_b64", None)),
+        ("GRACE_ML_DSA_PUBLIC_B64", getattr(settings, "axiom_ml_dsa_public_b64", None)),
+        ("GRACE_EVIDENCE_KEY_B64", getattr(settings, "axiom_evidence_key_b64", None)),
     )
     for name, value in pairs:
         if value is None or value == "":
@@ -138,7 +138,7 @@ def _from_settings() -> SigningKeys:
     ml_pub_bytes = _b64decode(ml_pub_b64)
     ev = _b64decode(ev_b64.get_secret_value())
     if len(ev) != 32:
-        msg = "AXIOM_EVIDENCE_KEY_B64 must decode to 32 bytes (AES-256-GCM)"
+        msg = "GRACE_EVIDENCE_KEY_B64 must decode to 32 bytes (AES-256-GCM)"
         raise ValueError(msg)
 
     return SigningKeys(
@@ -246,9 +246,9 @@ def export_b64(keys: SigningKeys) -> dict[str, str]:
     """Helper for ops: dump the key material in base64 so they can pin it
     in env. Never call this from app code."""
     return {
-        "AXIOM_ED25519_PRIVATE_PEM": keys.ed25519_private.get_secret_value(),
-        "AXIOM_ED25519_PUBLIC_PEM": keys.ed25519_public,
-        "AXIOM_ML_DSA_PRIVATE_B64": _b64encode(keys.ml_dsa_private.get_secret_value()),
-        "AXIOM_ML_DSA_PUBLIC_B64": _b64encode(keys.ml_dsa_public),
-        "AXIOM_EVIDENCE_KEY_B64": _b64encode(keys.evidence_key),
+        "GRACE_ED25519_PRIVATE_PEM": keys.ed25519_private.get_secret_value(),
+        "GRACE_ED25519_PUBLIC_PEM": keys.ed25519_public,
+        "GRACE_ML_DSA_PRIVATE_B64": _b64encode(keys.ml_dsa_private.get_secret_value()),
+        "GRACE_ML_DSA_PUBLIC_B64": _b64encode(keys.ml_dsa_public),
+        "GRACE_EVIDENCE_KEY_B64": _b64encode(keys.evidence_key),
     }

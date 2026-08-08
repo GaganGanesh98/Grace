@@ -40,7 +40,7 @@ _listeners_on_port() {
 
 axiom_assert_infra_ports_or_abort() {
   local port cmdline pid
-  for port in "${AXIOM_PG_HOST_PORT}" "${AXIOM_REDIS_HOST_PORT}"; do
+  for port in "${GRACE_PG_HOST_PORT}" "${GRACE_REDIS_HOST_PORT}"; do
     for pid in $(_listeners_on_port "${port}"); do
       [[ -z "${pid}" ]] && continue
       cmdline="$(_cmdline_for_pid "${pid}")"

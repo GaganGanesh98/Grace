@@ -9,7 +9,11 @@ from uuid import UUID
 
 from axiom.workers.tools.base import BaseTool, ToolExecutionContext, check_governance
 
-DEFAULT_ARTIFACTS_ROOT = Path(os.environ.get("AXIOM_ARTIFACTS_ROOT", "/var/axiom/artifacts"))
+DEFAULT_ARTIFACTS_ROOT = Path(
+    os.environ.get("GRACE_ARTIFACTS_ROOT")
+    or os.environ.get("AXIOM_ARTIFACTS_ROOT")
+    or "/var/axiom/artifacts"
+)
 MAX_FILE_BYTES = 10 * 1024 * 1024
 
 

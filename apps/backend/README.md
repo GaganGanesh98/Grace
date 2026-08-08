@@ -109,9 +109,9 @@ this action is related to" even when no rule matched by exact fields.
 - Optional: OpenAI `text-embedding-3-small` via `httpx`, with `dimensions=384`
   so the column never changes. Enable with:
   ```bash
-  AXIOM_EMBEDDING_PROVIDER=openai
-  AXIOM_EMBEDDING_MODEL=text-embedding-3-small
-  AXIOM_EMBEDDING_OPENAI_API_KEY=sk-...
+  GRACE_EMBEDDING_PROVIDER=openai
+  GRACE_EMBEDDING_MODEL=text-embedding-3-small
+  GRACE_EMBEDDING_OPENAI_API_KEY=sk-...
   ```
 
 **Requirements:** Postgres with the `vector` extension. `docker-compose.yml`

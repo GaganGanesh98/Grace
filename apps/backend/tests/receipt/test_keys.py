@@ -49,7 +49,7 @@ def test_missing_fields_treats_empty_string_as_missing() -> None:
         axiom_evidence_key_b64 = None
 
     missing = _missing_fields(_Empty())
-    assert "AXIOM_ED25519_PUBLIC_PEM" in missing
+    assert "GRACE_ED25519_PUBLIC_PEM" in missing
 
 
 def test_get_signing_keys_autogen_cached() -> None:
@@ -64,12 +64,12 @@ def test_export_b64_roundtrip() -> None:
     reset_for_tests()
     k = get_signing_keys()
     exported = export_b64(k)
-    assert exported["AXIOM_ED25519_PRIVATE_PEM"].startswith("-----BEGIN PRIVATE KEY-----")
+    assert exported["GRACE_ED25519_PRIVATE_PEM"].startswith("-----BEGIN PRIVATE KEY-----")
     assert (
-        base64.b64decode(exported["AXIOM_ML_DSA_PRIVATE_B64"])
+        base64.b64decode(exported["GRACE_ML_DSA_PRIVATE_B64"])
         == k.ml_dsa_private.get_secret_value()
     )
-    assert base64.b64decode(exported["AXIOM_EVIDENCE_KEY_B64"]) == k.evidence_key
+    assert base64.b64decode(exported["GRACE_EVIDENCE_KEY_B64"]) == k.evidence_key
 
 
 def test_b64encode_helper() -> None:
@@ -84,14 +84,14 @@ def test_from_settings_loads_pinned_keys(monkeypatch: pytest.MonkeyPatch) -> Non
 
     s = get_settings()
     monkeypatch.setattr(
-        s, "axiom_ed25519_private_pem", SecretStr(exported["AXIOM_ED25519_PRIVATE_PEM"])
+        s, "axiom_ed25519_private_pem", SecretStr(exported["GRACE_ED25519_PRIVATE_PEM"])
     )
-    monkeypatch.setattr(s, "axiom_ed25519_public_pem", exported["AXIOM_ED25519_PUBLIC_PEM"])
+    monkeypatch.setattr(s, "axiom_ed25519_public_pem", exported["GRACE_ED25519_PUBLIC_PEM"])
     monkeypatch.setattr(
-        s, "axiom_ml_dsa_private_b64", SecretStr(exported["AXIOM_ML_DSA_PRIVATE_B64"])
+        s, "axiom_ml_dsa_private_b64", SecretStr(exported["GRACE_ML_DSA_PRIVATE_B64"])
     )
-    monkeypatch.setattr(s, "axiom_ml_dsa_public_b64", exported["AXIOM_ML_DSA_PUBLIC_B64"])
-    monkeypatch.setattr(s, "axiom_evidence_key_b64", SecretStr(exported["AXIOM_EVIDENCE_KEY_B64"]))
+    monkeypatch.setattr(s, "axiom_ml_dsa_public_b64", exported["GRACE_ML_DSA_PUBLIC_B64"])
+    monkeypatch.setattr(s, "axiom_evidence_key_b64", SecretStr(exported["GRACE_EVIDENCE_KEY_B64"]))
 
     loaded = _from_settings()
     assert loaded.evidence_key == pre.evidence_key

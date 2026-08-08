@@ -15,7 +15,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from starlette.responses import Response
 
-from axiom.config import get_settings
+from axiom.config import deprecated_env_vars, get_settings
 from axiom.core import errors as domain_errors
 from axiom.core.logging import configure_structlog
 from axiom.db import session_scope
@@ -86,6 +86,16 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     from axiom.services.receipt.keys import get_signing_keys
 
     keys = get_signing_keys()
+    # ADR-029 deferred the AXIOM_* -> GRACE_* rename; Phase 8.2 executes it behind
+    # aliases. Naming the stragglers here keeps the eventual removal a checklist.
+    stale_env = deprecated_env_vars()
+    if stale_env:
+        logger.warning(
+            "grace.env.deprecated_axiom_vars",
+            count=len(stale_env),
+            variables=[f"{old} -> {new}" for old, new in stale_env],
+            note="AXIOM_* still works; the GRACE_* spelling wins when both are set.",
+        )
     # A vault KEK equal to the evidence key silently undoes purpose separation,
     # so it is a startup failure rather than a warning nobody reads.
     kek_registry.assert_purpose_separation()
