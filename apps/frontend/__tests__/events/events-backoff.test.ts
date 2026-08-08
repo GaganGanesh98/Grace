@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { eventsBackoffMs } from "@/lib/events/use-axiom-events";
+import { eventsBackoffMs } from "@/lib/events/use-grace-events";
 
 describe("eventsBackoffMs", () => {
   it("returns 1s,2s,4s,8s,16s then 30s cap", () => {

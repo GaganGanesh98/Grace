@@ -9,7 +9,7 @@ type ArtifactsGridProps = {
 export function ArtifactsGrid({ paths }: ArtifactsGridProps): ReactElement {
   if (paths.length === 0) {
     return (
-      <p className="font-mono text-axiom-13 uppercase tracking-wide text-[#6B7490]">No artifact paths recorded.</p>
+      <p className="font-mono text-axiom-13 uppercase tracking-wide text-[#82878f]">No artifact paths recorded.</p>
     );
   }
 
@@ -18,7 +18,7 @@ export function ArtifactsGrid({ paths }: ArtifactsGridProps): ReactElement {
       {paths.map((p) => (
         <li
           key={p}
-          className="rounded-md border border-[rgba(255,255,255,0.08)] bg-[#080810] px-3 py-2 font-mono text-axiom-13 text-[#F0F2F8]"
+          className="rounded-md border border-[rgba(255,255,255,0.08)] bg-[#08090b] px-3 py-2 font-mono text-axiom-13 text-[#ecedef]"
         >
           {p}
         </li>

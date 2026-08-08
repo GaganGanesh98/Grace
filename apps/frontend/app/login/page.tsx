@@ -65,7 +65,7 @@ export default function LoginPage(): ReactElement {
       <div aria-hidden className={styles.ambientGrid} />
       <div aria-hidden className={styles.ambientGlow} />
 
-      <div className={styles.cornerMeta}>AXIOM :: VERIFICATION LAYER</div>
+      <div className={styles.cornerMeta}>GRACE :: VERIFICATION LAYER</div>
       <div className={styles.cornerMetaBr}>
         <div>ED25519 + ML-DSA-65</div>
         <div className={styles.cornerMetaBrDim}>NIST PQC LEVEL 3</div>
@@ -82,7 +82,7 @@ export default function LoginPage(): ReactElement {
                   <div className={styles.diamondInner} />
                 </div>
               </div>
-              <span className={styles.wordmarkTitle}>AXIOM</span>
+              <span className={styles.wordmarkTitle}>GRACE</span>
             </div>
             <span className={styles.wordmarkVer}>V0.2.4</span>
           </div>

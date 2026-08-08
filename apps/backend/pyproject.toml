@@ -32,7 +32,13 @@ dependencies = [
     "uuid6>=2024.7.24",
     "fastembed>=0.8.0",
     "pgvector>=0.5.0",
+    "mcp>=2.0.0",
 ]
+
+[project.scripts]
+# stdio transport for the MCP governance server (Phase 7.0).
+# Requires AXIOM_API_KEY with the 'mcp:read' / 'mcp:write' scopes.
+axiom-mcp = "axiom.mcp.transport:main"
 
 [dependency-groups]
 dev = [

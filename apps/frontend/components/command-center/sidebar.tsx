@@ -57,7 +57,7 @@ function Wordmark(): ReactElement {
         </div>
       </div>
       <span className="font-mono text-axiom-13 font-semibold uppercase tracking-[3px] text-text-primary">
-        AXIOM
+        Grace
       </span>
     </div>
   );

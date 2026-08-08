@@ -4,7 +4,7 @@ import { renderToString } from "react-dom/server";
 import type { ReactElement } from "react";
 import { describe, expect, it, vi } from "vitest";
 
-import { AxiomEventsProvider } from "@/lib/events/axiom-events-context";
+import { GraceEventsProvider } from "@/lib/events/grace-events-context";
 import {
   ProjectWorkspaceProvider,
   useProjectWorkspace,
@@ -43,9 +43,9 @@ function shell(): ReactElement {
   return (
     <QueryClientProvider client={qc}>
       <ProjectWorkspaceProvider>
-        <AxiomEventsProvider>
+        <GraceEventsProvider>
           <Sidebar />
-        </AxiomEventsProvider>
+        </GraceEventsProvider>
       </ProjectWorkspaceProvider>
     </QueryClientProvider>
   );

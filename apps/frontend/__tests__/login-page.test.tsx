@@ -26,7 +26,7 @@ describe("LoginPage", () => {
   it("renders V1b chrome, form fields, actions, and live indicator", () => {
     render(<LoginPage />);
 
-    expect(screen.getByText("AXIOM")).toBeTruthy();
+    expect(screen.getByText("GRACE")).toBeTruthy();
     expect(screen.getByText("V0.2.4")).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Resume session." })).toBeTruthy();
     expect(screen.getByText("VERIFICATION LAYER · AUTONOMOUS SYSTEMS")).toBeTruthy();

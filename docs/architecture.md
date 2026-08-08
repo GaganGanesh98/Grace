@@ -1,8 +1,8 @@
-# AXIOM V2 — Architecture (Phase 1)
+# Grace — Architecture (Phase 1)
 
 ## System overview
 
-AXIOM V2 Phase 1 is a monorepo SaaS foundation: a **FastAPI** backend with **PostgreSQL 18** and **Redis**, plus a **Next.js 14 (App Router)** frontend. The product goal is a cryptographic governance proof layer for AI agents; Phase 1 delivers authentication, tenancy (projects), agents, policies (empty shells), API keys, and audit events—without the govern pipeline or cryptography.
+Grace Phase 1 is a monorepo SaaS foundation: a **FastAPI** backend with **PostgreSQL 18** and **Redis**, plus a **Next.js 14 (App Router)** frontend. The product goal is a cryptographic governance proof layer for AI agents; Phase 1 delivers authentication, tenancy (projects), agents, policies (empty shells), API keys, and audit events—without the govern pipeline or cryptography.
 
 ## Stack (Phase 1)
 

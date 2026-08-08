@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { dashboardKeys } from "@/lib/dashboard-query-keys";
 
-import type { AxiomEvent, AxiomEventsStatus } from "./event-types";
+import type { GraceEvent, GraceEventsStatus } from "./event-types";
 
 const DEFAULT_WINDOWS = ["24h", "1h", "7d"] as const;
 
@@ -104,15 +104,15 @@ function uniqueKeys(keys: Qk[]): Qk[] {
   return o;
 }
 
-export type UseAxiomEventsOptions = {
+export type UseGraceEventsOptions = {
   projectId: string | null | undefined;
-  onEvent?: (event: AxiomEvent) => void;
+  onEvent?: (event: GraceEvent) => void;
   windows?: readonly string[];
 };
 
-export function useAxiomEvents(options: UseAxiomEventsOptions): {
-  status: AxiomEventsStatus;
-  lastEvent: AxiomEvent | null;
+export function useGraceEvents(options: UseGraceEventsOptions): {
+  status: GraceEventsStatus;
+  lastEvent: GraceEvent | null;
   connect: () => void;
   disconnect: () => void;
 } {
@@ -121,8 +121,8 @@ export function useAxiomEvents(options: UseAxiomEventsOptions): {
   const onEventRef = useRef(onEvent);
   onEventRef.current = onEvent;
 
-  const [lastEvent, setLastEvent] = useState<AxiomEvent | null>(null);
-  const [status, setStatus] = useState<AxiomEventsStatus>(
+  const [lastEvent, setLastEvent] = useState<GraceEvent | null>(null);
+  const [status, setStatus] = useState<GraceEventsStatus>(
     !projectId ? "disconnected" : "connecting",
   );
   const [userPaused, setUserPaused] = useState(false);
@@ -214,9 +214,9 @@ export function useAxiomEvents(options: UseAxiomEventsOptions): {
         if (name === "ping") {
           return;
         }
-        let parsed: AxiomEvent;
+        let parsed: GraceEvent;
         try {
-          parsed = JSON.parse(String(d)) as AxiomEvent;
+          parsed = JSON.parse(String(d)) as GraceEvent;
         } catch {
           return;
         }
@@ -228,7 +228,7 @@ export function useAxiomEvents(options: UseAxiomEventsOptions): {
         }
         if (inv.length === 0) {
           // eslint-disable-next-line no-console
-          console.warn("[useAxiomEvents] unmapped event type:", parsed.type);
+          console.warn("[useGraceEvents] unmapped event type:", parsed.type);
         }
       };
 

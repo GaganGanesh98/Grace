@@ -122,7 +122,23 @@ async def verify(
 
     canonical_bytes = canonicalize(signed_body)
 
-    payload_hash_matches = hashlib.sha256(canonical_bytes).digest() != b""  # always True
+    # Recompute the evidence envelope hash defined by Stage 5 (Evidence):
+    #   payload_hash = sha256(nonce || ciphertext || key_id.encode("utf-8"))
+    # This proves the stored evidence is byte-for-byte what was signed and
+    # Merkle-anchored, without decrypting it. Fails closed when any component
+    # is missing — an unverifiable receipt is not a verified one.
+    if (
+        receipt.evidence_nonce is None
+        or receipt.evidence_ciphertext is None
+        or not receipt.evidence_key_id
+    ):
+        payload_hash_matches = False
+    else:
+        _hasher = hashlib.sha256()
+        _hasher.update(receipt.evidence_nonce)
+        _hasher.update(receipt.evidence_ciphertext)
+        _hasher.update(receipt.evidence_key_id.encode("utf-8"))
+        payload_hash_matches = _hasher.digest() == receipt.payload_hash
 
     if receipt.ed25519_key_id != keys.ed25519_key_id:
         ed_valid = False
