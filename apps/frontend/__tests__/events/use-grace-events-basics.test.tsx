@@ -3,16 +3,16 @@ import { describe, expect, it } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { type ReactElement, type ReactNode } from "react";
 
-import { useAxiomEvents } from "@/lib/events/use-axiom-events";
+import { useGraceEvents } from "@/lib/events/use-grace-events";
 
 const qc = new QueryClient();
 function w({ children }: { children: ReactNode }): ReactElement {
   return <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
 }
 
-describe("useAxiomEvents basics", () => {
+describe("useGraceEvents basics", () => {
   it("keeps status disconnected for null projectId", () => {
-    const { result } = renderHook(() => useAxiomEvents({ projectId: null }), { wrapper: w });
+    const { result } = renderHook(() => useGraceEvents({ projectId: null }), { wrapper: w });
     expect(result.current.status).toBe("disconnected");
   });
 });

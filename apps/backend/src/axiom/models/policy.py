@@ -9,8 +9,8 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from axiom.core.embedding_dim import EMBEDDING_DIM
 from axiom.models.base import Base, SoftDeleteMixin, TimestampsMixin, UUIDv7Mixin
-from axiom.services.embeddings import EMBEDDING_DIM
 
 if TYPE_CHECKING:
     from axiom.models.project import Project

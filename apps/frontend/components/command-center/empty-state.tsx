@@ -14,7 +14,7 @@ const steps: Array<{ num: string; title: string; body: string }> = [
   {
     num: "02",
     title: "AGENT",
-    body: "Register an agent definition, then run it through AXIOM so every action is governed and signed.",
+    body: "Register an agent definition, then run it through Grace so every action is governed and signed.",
   },
   {
     num: "03",
@@ -39,7 +39,7 @@ export function EmptyStateCommandCenter({ className }: { className?: string }): 
           Nothing here yet — let&apos;s change that.
         </h2>
         <p className="text-axiom-15 leading-relaxed text-[var(--axiom-text-muted)]">
-          AXIOM signs and governs every action your AI agents take. To start, create a project, add an agent, and
+          Grace signs and governs every action your AI agents take. To start, create a project, add an agent, and
           submit your first run. Every action will produce a cryptographically signed receipt.
         </p>
       </div>

@@ -1,4 +1,4 @@
-# Authentication setup (AXIOM V2)
+# Authentication setup (Grace)
 
 Email/password and Google OAuth for local development and production.
 

@@ -1,7 +1,7 @@
 import asyncio
 import logging as pylogging
 from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
+from contextlib import AsyncExitStack, asynccontextmanager
 from uuid import UUID
 
 import structlog
@@ -92,13 +92,23 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     async with session_scope() as db:
         await load_governance_merkle_from_db(db)
     _app.state.approval_expiry_task = asyncio.create_task(_approval_expiry_background_loop())
-    yield
+
+    # FastAPI does not run the lifespan of mounted sub-applications, so the
+    # MCP session manager has to be started here or the /mcp endpoint 500s on
+    # every request. See axiom.mcp.transport.build_http_app.
+    async with AsyncExitStack() as stack:
+        if getattr(_app.state, "mcp_mounted", False):
+            from axiom.mcp.transport import session_manager_lifespan
+
+            await stack.enter_async_context(session_manager_lifespan())
+        yield
+
     await close_redis()
     logger.info("axiom.shutdown")
 
 
 app = FastAPI(
-    title="AXIOM API",
+    title="Grace API",
     version="0.1.0",
     description="Cryptographic governance proof layer for AI agents.",
     docs_url="/docs" if settings.environment != "production" else None,
@@ -145,6 +155,21 @@ app.include_router(agent_runs_router.router, prefix="/v1", tags=["agent-runs"])
 app.include_router(command_center_router.router, prefix="/v1", tags=["command-center"])
 app.include_router(v1_events.router, prefix="/v1", tags=["events"])
 app.include_router(webhooks.router, prefix="/webhooks", tags=["webhooks"])
+
+# MCP governance server (Phase 7.0). Mounted rather than included: it is an
+# ASGI sub-application with its own auth middleware, not a FastAPI router.
+# Imported lazily so that a missing optional `mcp` dependency degrades to a
+# disabled endpoint instead of breaking the whole API.
+app.state.mcp_mounted = False
+if settings.mcp_enabled:
+    try:
+        from axiom.mcp.transport import build_http_app
+
+        app.mount("/mcp", build_http_app())
+        app.state.mcp_mounted = True
+        logger.info("axiom.mcp.mounted", path="/mcp")
+    except ImportError as exc:  # pragma: no cover - depends on install extras
+        logger.warning("axiom.mcp.unavailable", error=str(exc))
 
 
 @app.websocket("/ws/agent-runs/{run_id}")
