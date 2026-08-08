@@ -25,7 +25,10 @@ RAW_KEY = "sk-proj-cccccccccccccccccccccccccccccccc"
 @pytest.fixture(autouse=True)
 async def _isolate_vault_table() -> AsyncIterator[None]:
     async with session_scope() as session:
-        await session.execute(text("TRUNCATE vault_keys CASCADE"))
+        # DELETE, not TRUNCATE: TRUNCATE takes ACCESS EXCLUSIVE and deadlocks
+        # against any other pytest run sharing this database.
+        await session.execute(text("DELETE FROM agent_definitions"))
+        await session.execute(text("DELETE FROM vault_keys"))
     yield
 
 

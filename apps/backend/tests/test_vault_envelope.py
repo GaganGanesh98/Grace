@@ -34,7 +34,10 @@ async def _isolate_vault_table() -> AsyncIterator[None]:
     agent_definitions, which is the only table referencing vault_keys.
     """
     async with session_scope() as session:
-        await session.execute(text("TRUNCATE vault_keys CASCADE"))
+        # DELETE, not TRUNCATE: TRUNCATE takes ACCESS EXCLUSIVE and deadlocks
+        # against any other pytest run sharing this database.
+        await session.execute(text("DELETE FROM agent_definitions"))
+        await session.execute(text("DELETE FROM vault_keys"))
     yield
 
 
