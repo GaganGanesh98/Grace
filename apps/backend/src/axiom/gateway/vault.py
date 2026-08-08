@@ -15,8 +15,6 @@ from axiom.models.vault import VaultKey
 from axiom.gateway.protocol_handlers import merge_forward_headers, prepare_upstream_request
 from axiom.gateway.provider_registry import get_provider_spec
 from axiom.services import vault as vault_service
-from axiom.services.crypto import vault as aes_vault
-from axiom.services.receipt.keys import get_signing_keys
 
 logger = structlog.get_logger(__name__)
 
@@ -26,10 +24,6 @@ def _scrub_key_var(key: str) -> None:
     for i in range(len(buf)):
         buf[i] = 0
     del buf
-
-
-def _kek() -> bytes:
-    return get_signing_keys().evidence_key
 
 
 async def inject_credentials(
@@ -92,7 +86,7 @@ async def inject_credentials(
                 and vk.kind == "llm"
                 and vk.service.lower() == prov
             ):
-                raw = aes_vault.decrypt(vk.encrypted_key, _kek()).decode("utf-8")
+                raw = vault_service.decrypt_row(vk)
                 resolved = (raw, vk.id)
                 logger.info(
                     "gateway.inject.used_agent_definition_vault_key",

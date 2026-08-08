@@ -15,8 +15,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from axiom.core import errors
 from axiom.models.agent_definition import AgentDefinition
 from axiom.models.vault import VaultKey
+from axiom.services.crypto import envelope, kek_registry
+from axiom.services.crypto import exceptions as crypto_exceptions
 from axiom.services.crypto import vault as aes_vault
-from axiom.services.receipt.keys import get_signing_keys
+from axiom.utils.ids import new_uuidv7
 
 logger = structlog.get_logger(__name__)
 
@@ -69,8 +71,65 @@ def _display_suffix(raw: str) -> str:
     return "..." + raw[-4:]
 
 
-def _encryption_key() -> bytes:
-    return get_signing_keys().evidence_key
+def _legacy_read_key() -> bytes:
+    """Evidence key, for reading pre-Phase-8.2 rows only.
+
+    Nothing *writes* a credential under this key any more. It stays reachable
+    until ``axiom keys migrate-vault`` reports zero legacy rows, at which point
+    this function has no callers left.
+    """
+    return kek_registry.active_kek(kek_registry.Purpose.EVIDENCE)[0]
+
+
+def seal_credential(
+    raw_key: str, *, vault_key_id: UUID, user_id: UUID
+) -> envelope.WrappedSecret:
+    """Seal a credential under a fresh DEK wrapped by the active vault KEK."""
+    kek, kek_id = kek_registry.active_kek(kek_registry.Purpose.VAULT)
+    return envelope.seal(
+        raw_key.encode("utf-8"),
+        kek,
+        kek_id=kek_id,
+        aad=envelope.vault_aad(vault_key_id, user_id),
+    )
+
+
+def decrypt_row(row: VaultKey) -> str:
+    """Decrypt a vault row, dispatching on its recorded scheme.
+
+    There is deliberately no fallback between schemes. A ``grace/vault/v2`` row
+    without a wrapped DEK is corrupt, and quietly retrying it as legacy is how a
+    migration appears to succeed while never finishing.
+
+    Every failure mode surfaces as ``core.errors.DecryptionError`` so callers
+    have one exception to catch, whatever layer detected the problem.
+    """
+    try:
+        return _decrypt_row(row)
+    except crypto_exceptions.CryptoError as exc:
+        raise errors.DecryptionError(f"Vault key {row.id} could not be decrypted.") from exc
+
+
+def _decrypt_row(row: VaultKey) -> str:
+    if row.scheme == envelope.SCHEME_V2:
+        if not row.wrapped_dek or not row.kek_id:
+            raise errors.DecryptionError(
+                f"Vault key {row.id} claims scheme {envelope.SCHEME_V2} but has no wrapped DEK.",
+            )
+        kek = kek_registry.kek_by_id(kek_registry.Purpose.VAULT, row.kek_id)
+        secret = envelope.WrappedSecret(
+            kek_id=row.kek_id,
+            scheme=row.scheme,
+            wrapped_dek=row.wrapped_dek,
+            ciphertext=row.encrypted_key,
+        )
+        aad = envelope.vault_aad(row.id, row.user_id)
+        return envelope.unseal(secret, kek, aad=aad).decode("utf-8")
+
+    if row.scheme == envelope.SCHEME_LEGACY:
+        return aes_vault.decrypt(row.encrypted_key, _legacy_read_key()).decode("utf-8")
+
+    raise errors.DecryptionError(f"Vault key {row.id} has unknown scheme {row.scheme!r}.")
 
 
 @dataclass(frozen=True)
@@ -140,14 +199,22 @@ async def create_vault_key(
     if res_kind not in _KIND_SET:
         raise errors.ValidationError("kind must be one of: llm, tool, custom")
 
-    enc = aes_vault.encrypt(raw_key.encode("utf-8"), _encryption_key())
+    # The AAD binds the ciphertext to this row and user, so the id has to exist
+    # before the seal — hence generating it here rather than letting Postgres
+    # supply it on insert.
+    row_id = new_uuidv7()
+    sealed = seal_credential(raw_key, vault_key_id=row_id, user_id=user_id)
 
     row = VaultKey(
+        id=row_id,
         user_id=user_id,
         service=res_service,
         name=name.strip()[:100],
         kind=res_kind,
-        encrypted_key=enc,
+        encrypted_key=sealed.ciphertext,
+        scheme=sealed.scheme,
+        kek_id=sealed.kek_id,
+        wrapped_dek=sealed.wrapped_dek,
         key_prefix=_display_prefix(raw_key),
         key_suffix=_display_suffix(raw_key),
         is_active=True,
@@ -190,7 +257,7 @@ async def get_key_for_provider(db: AsyncSession, user_id: UUID, service: str) ->
     row = await _active_llm_key_row(db, user_id, service)
     if row is None:
         return None
-    return aes_vault.decrypt(row.encrypted_key, _encryption_key()).decode("utf-8")
+    return decrypt_row(row)
 
 
 async def get_key_and_id_for_provider(
@@ -200,8 +267,7 @@ async def get_key_and_id_for_provider(
     row = await _active_llm_key_row(db, user_id, service)
     if row is None:
         return None
-    raw = aes_vault.decrypt(row.encrypted_key, _encryption_key()).decode("utf-8")
-    return raw, row.id
+    return decrypt_row(row), row.id
 
 
 async def get_key_and_id_by_name(
@@ -231,8 +297,7 @@ async def get_key_and_id_by_name(
     )
     if row is None:
         return None
-    raw = aes_vault.decrypt(row.encrypted_key, _encryption_key()).decode("utf-8")
-    return raw, row.id
+    return decrypt_row(row), row.id
 
 
 async def get_vault_key(db: AsyncSession, user_id: UUID, key_id: UUID) -> VaultKeyDisplay:
