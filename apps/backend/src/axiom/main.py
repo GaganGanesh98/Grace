@@ -49,6 +49,7 @@ from axiom.routers.v1 import command_center as command_center_router
 from axiom.routers.v1 import events as v1_events
 from axiom.routers.v1 import governance as governance_engine
 from axiom.schemas.common import ErrorBody, ErrorEnvelope
+from axiom.services.crypto import kek_registry
 from axiom.services.events import schedule_approval_resolved, schedule_receipt_sealed
 from axiom.services.governance.approval_expire import expire_due_hold_receipts
 from axiom.services.governance.receipt import load_governance_merkle_from_db
@@ -85,10 +86,15 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     from axiom.services.receipt.keys import get_signing_keys
 
     keys = get_signing_keys()
+    # A vault KEK equal to the evidence key silently undoes purpose separation,
+    # so it is a startup failure rather than a warning nobody reads.
+    kek_registry.assert_purpose_separation()
+    vault_kek_id = kek_registry.active_kek(kek_registry.Purpose.VAULT)[1]
     logger.info(
         "axiom.startup",
         environment=settings.environment,
         evidence_key_id=keys.evidence_key_id[:16],
+        vault_kek_id=vault_kek_id[:16],
     )
     async with session_scope() as db:
         await load_governance_merkle_from_db(db)

@@ -48,6 +48,7 @@ from axiom.gateway.vault import inject_credentials
 from axiom.middleware.body_size import BodySizeLimitMiddleware
 from axiom.services import vault as vault_service
 from axiom.services.api_key import APIKeyContext
+from axiom.services.crypto import kek_registry
 from axiom.services.governance.receipt import load_governance_merkle_from_db
 from axiom.services.redis_client import close_redis
 
@@ -340,7 +341,13 @@ async def lifespan(app: FastAPI):
     from axiom.services.receipt.keys import get_signing_keys
 
     keys = get_signing_keys()
-    logger.info("axiom.gateway.startup", evidence_key_id=keys.evidence_key_id[:16])
+    # Same guard as the API: the gateway decrypts vault credentials too.
+    kek_registry.assert_purpose_separation()
+    logger.info(
+        "axiom.gateway.startup",
+        evidence_key_id=keys.evidence_key_id[:16],
+        vault_kek_id=kek_registry.active_kek(kek_registry.Purpose.VAULT)[1][:16],
+    )
     async with httpx.AsyncClient() as client:
         app.state.http_client = client
         async with session_scope() as db:
