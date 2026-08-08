@@ -88,7 +88,7 @@ async def events_stream(
             except Exception:  # noqa: BLE001
                 pass
             try:
-                await pubsub.close()
+                await pubsub.aclose()
             except Exception:  # noqa: BLE001
                 pass
 
