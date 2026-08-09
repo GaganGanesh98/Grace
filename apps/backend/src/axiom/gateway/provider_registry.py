@@ -63,10 +63,19 @@ PROVIDERS: dict[str, ProviderSpec] = {
         base_url="https://api.groq.com/openai/v1",
         auth_method=AuthMethod.BEARER,
         label="Groq",
+        # Chat-capable production models only — Groq also serves whisper-*
+        # (speech-to-text), orpheus-* (TTS) and llama-prompt-guard-* (classifier),
+        # none of which belong in an agent's model picker. Note that several ids
+        # legitimately contain a slash; the gateway strips only the first
+        # `<provider>/` segment, so `groq/openai/gpt-oss-120b` arrives upstream
+        # as `openai/gpt-oss-120b`.
         models=(
             "llama-3.3-70b-versatile",
             "llama-3.1-8b-instant",
-            "gemma2-9b-it",
+            "openai/gpt-oss-120b",
+            "openai/gpt-oss-20b",
+            "groq/compound",
+            "groq/compound-mini",
         ),
         default_model="llama-3.3-70b-versatile",
     ),
@@ -78,14 +87,17 @@ PROVIDERS: dict[str, ProviderSpec] = {
         auth_method=AuthMethod.BEARER,
         forward_headers=frozenset({"openai-beta", "openai-organization"}),
         label="OpenAI",
+        # The current frontier family. Older ids (gpt-4o, gpt-4.1, o3-mini) are
+        # not listed here because they are no longer in the published model
+        # list; anyone still on one reaches it through the UI's custom-model
+        # field rather than us asserting availability we cannot verify.
         models=(
-            "gpt-4.1",
-            "gpt-4.1-mini",
-            "gpt-4o",
-            "gpt-4o-mini",
-            "o3-mini",
+            "gpt-5.6",
+            "gpt-5.6-sol",
+            "gpt-5.6-terra",
+            "gpt-5.6-luna",
         ),
-        default_model="gpt-4.1-mini",
+        default_model="gpt-5.6",
     ),
     "anthropic": ProviderSpec(
         name="anthropic",
@@ -97,10 +109,15 @@ PROVIDERS: dict[str, ProviderSpec] = {
         forward_headers=frozenset({"anthropic-beta"}),
         chat_path="/messages",
         label="Anthropic",
+        # claude-mythos-5 is deliberately absent: it is invitation-only, so
+        # offering it would produce a 404 for almost every operator.
         models=(
             "claude-sonnet-5",
             "claude-opus-5",
+            "claude-fable-5",
             "claude-haiku-4-5",
+            "claude-opus-4-8",
+            "claude-sonnet-4-6",
             "claude-sonnet-4-5",
         ),
         default_model="claude-sonnet-5",
@@ -123,8 +140,18 @@ PROVIDERS: dict[str, ProviderSpec] = {
         auth_method=AuthMethod.QUERY_PARAM,
         chat_path="/models/{model}:generateContent",
         label="Google",
-        models=("gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.0-flash"),
-        default_model="gemini-2.5-flash",
+        # gemini-2.0-flash dropped — no longer in the published generateContent
+        # model list.
+        models=(
+            "gemini-3.6-flash",
+            "gemini-3.5-flash",
+            "gemini-3.5-flash-lite",
+            "gemini-3.1-pro-preview",
+            "gemini-2.5-pro",
+            "gemini-2.5-flash",
+            "gemini-2.5-flash-lite",
+        ),
+        default_model="gemini-3.5-flash",
     ),
     "perplexity": ProviderSpec(
         name="perplexity",

@@ -37,6 +37,12 @@ type AgentFormProps = {
   onSubmit: (values: Record<string, unknown>) => Promise<void>;
   isSubmitting: boolean;
   submitError: string | null;
+  /**
+   * Render the "Hard enforcement" toggle, which the project-workspace dialog
+   * offers. It rides along in `tools_config` — see the submit handler for what
+   * that is and is not worth today.
+   */
+  showHardEnforcement?: boolean;
 };
 
 const EMPTY_VAULT_HINT_ID = "agent-form-empty-vault";
@@ -48,6 +54,7 @@ export function AgentForm({
   onSubmit,
   isSubmitting,
   submitError,
+  showHardEnforcement = false,
 }: AgentFormProps): ReactElement {
   const {
     control,
@@ -67,6 +74,7 @@ export function AgentForm({
   });
 
   const [customModel, setCustomModel] = useState(false);
+  const [hardEnforcement, setHardEnforcement] = useState(true);
   const hasKeys = vaultKeys.length > 0;
 
   // Pick a sensible default, but never clobber a selection the user still can use —
@@ -134,12 +142,18 @@ export function AgentForm({
           });
           return;
         }
+        // `hard_enforcement` is merged into the tools config rather than
+        // replacing it — the project-workspace dialog used to send
+        // `{hard_enforcement}` alone, which left those agents with no tool
+        // definitions recorded at all.
         await onSubmit({
           name: vals.name,
           model: vals.model,
           vault_key_id: vals.vault_key_id,
           system_prompt: vals.system_prompt,
-          tools_config: DEFAULT_AGENT_TOOLS_CONFIG,
+          tools_config: showHardEnforcement
+            ? { ...DEFAULT_AGENT_TOOLS_CONFIG, hard_enforcement: hardEnforcement }
+            : DEFAULT_AGENT_TOOLS_CONFIG,
         });
       })}
     >
@@ -282,6 +296,20 @@ export function AgentForm({
       <p className="font-mono text-axiom-11 uppercase text-[#82878f]">
         Tools bundled: http_fetch, web_search, file_write (Phase 6.5 default)
       </p>
+
+      {showHardEnforcement ? (
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={hardEnforcement}
+            className="h-4 w-4 rounded-sm border border-text-primary accent-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-neutral-100 focus-visible:outline-offset-2"
+            onChange={(e) => {
+              setHardEnforcement(e.target.checked);
+            }}
+          />
+          <span className="text-axiom-12 text-[#ecedef]">Hard enforcement</span>
+        </label>
+      ) : null}
 
       {submitError ? <p className="text-axiom-14 text-red-400">{submitError}</p> : null}
 

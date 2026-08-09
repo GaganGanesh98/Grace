@@ -11,6 +11,7 @@ import { fetchAllAgentDefinitions } from "@/lib/agent-runner-api";
 import { dashboardKeys } from "@/lib/dashboard-query-keys";
 import { useProjectIdFromLayout } from "@/lib/projects/project-id-context";
 import { API_MAX_PER_PAGE, fetchAgentRunsForProject } from "@/lib/projects/project-workspace-api";
+import { NOT_TRACKED, RunFailureReason, runDetailHref } from "@/lib/projects/run-display";
 import type { AgentRunOut } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useCreateAgentRun } from "@/hooks/use-agent-runs";
@@ -215,6 +216,7 @@ export function OverviewTabPanel(): ReactElement {
           </Link>
         </div>
         <RecentRunsTable
+          projectId={projectId}
           runs={recentQ.data ?? []}
           agentName={(id) => nameByDef.get(id) ?? "—"}
         />
@@ -231,7 +233,12 @@ export function OverviewTabPanel(): ReactElement {
             sub={metrics.pct}
             subTone="ok"
           />
-          <MetricCard title="Cost (MTD)" value={metrics.cost} sub="your LLM provider bills" subTone="muted" />
+          <MetricCard
+            title="Cost (MTD)"
+            value={metrics.cost}
+            sub="not computed here — your LLM provider bills"
+            subTone="muted"
+          />
           <MetricCard
             title="Governance blocks"
             value={metrics.gov}
@@ -257,11 +264,11 @@ function useProjectMetrics30d(
   return useMemo(() => {
     if (!runs || runs.length === 0) {
       return {
-        totalStr: "—",
-        pct: "—",
-        cost: "—",
-        gov: "—",
-        govSub: "no data for governance this period",
+        totalStr: "0",
+        pct: "no runs in this period",
+        cost: NOT_TRACKED,
+        gov: NOT_TRACKED,
+        govSub: "no per-run governance attribution in the API yet",
         govTone: "muted" as const,
       };
     }
@@ -274,8 +281,10 @@ function useProjectMetrics30d(
     return {
       totalStr: String(tot),
       pct,
-      cost: "—",
-      gov: "—",
+      // Deliberately not "—": these are unimplemented, not zero, and an
+      // em-dash reads as a broken metric. See lib/projects/run-display.ts.
+      cost: NOT_TRACKED,
+      gov: NOT_TRACKED,
       govSub: "governance denials are not yet attributed per run in the API",
       govTone: "muted" as const,
     };
@@ -327,7 +336,17 @@ function statusChip(s: string): { cls: string; label: string } {
   return { cls: "bg-[var(--axiom-warn)]/20 text-[var(--axiom-warn)]", label: s.toUpperCase() };
 }
 
-function RecentRunsTable({ runs, agentName }: { runs: AgentRunOut[]; agentName: (id: string) => string }): ReactElement {
+/** One row per run, each a link to the run detail view. Failed runs carry their reason. */
+function RecentRunsTable({
+  projectId,
+  runs,
+  agentName,
+}: {
+  projectId: string;
+  runs: AgentRunOut[];
+  agentName: (id: string) => string;
+}): ReactElement {
+  const router = useRouter();
   if (runs.length === 0) {
     return <p className="p-4 font-mono text-axiom-13 text-[var(--axiom-text-dim)]">No runs yet.</p>;
   }
@@ -348,29 +367,41 @@ function RecentRunsTable({ runs, agentName }: { runs: AgentRunOut[]; agentName: 
           {runs.map((r) => {
             const g = (r.input_payload?.goal as string | undefined) ?? "—";
             const ch = statusChip(r.status);
+            const href = runDetailHref(projectId, r.id);
             return (
               <tr
                 key={r.id}
                 className="group cursor-pointer border-b border-[var(--axiom-border)]/50 transition hover:border-l-2 hover:border-l-[var(--axiom-electric)] hover:bg-[var(--axiom-electric)]/5"
                 onClick={() => {
-                  window.location.assign(`/dashboard/ledger/${r.id}`);
+                  router.push(href);
                 }}
               >
                 <td className="py-2 pr-2 align-top text-[var(--axiom-text)]">
                   {agentName(r.agent_definition_id)}
                 </td>
-                <td className="max-w-[1px] truncate py-2 pr-2 text-[var(--axiom-text-muted)]">{g}</td>
-                <td className="whitespace-nowrap py-2 pr-2 text-[var(--axiom-text-dim)]">
+                <td className="max-w-[1px] py-2 pr-2 align-top text-[var(--axiom-text-muted)]">
+                  <span className="block truncate">{g}</span>
+                  <RunFailureReason run={r} />
+                </td>
+                <td className="whitespace-nowrap py-2 pr-2 align-top text-[var(--axiom-text-dim)]">
                   {r.started_at
                     ? new Date(r.started_at).toLocaleTimeString()
                     : new Date(r.created_at).toLocaleTimeString()}
                 </td>
-                <td className="py-2 pr-2">
+                <td className="py-2 pr-2 align-top">
                   <span className={cn("rounded px-1.5 py-0.5 text-axiom-10", ch.cls)}>{ch.label}</span>
                 </td>
-                <td className="py-2 pr-2">—</td>
-                <td className="py-2 text-right text-[var(--axiom-text-dim)] opacity-0 group-hover:opacity-100">
-                  Replay
+                <td className="py-2 pr-2 align-top">{NOT_TRACKED}</td>
+                <td className="py-2 text-right align-top">
+                  <Link
+                    href={href}
+                    className="text-[var(--axiom-electric)] opacity-0 transition group-hover:opacity-100 focus:opacity-100"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                  >
+                    Open →
+                  </Link>
                 </td>
               </tr>
             );

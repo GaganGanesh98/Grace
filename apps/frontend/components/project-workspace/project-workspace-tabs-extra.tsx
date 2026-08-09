@@ -6,10 +6,13 @@ import { useEffect, useMemo, useState, type ReactElement } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
+import { AgentForm } from "@/components/agent-definitions/agent-form";
 import { createAgentDefinition, fetchAllAgentDefinitions } from "@/lib/agent-runner-api";
 import { useProjectWorkspace } from "@/components/project-workspace-provider";
 import { dashboardKeys } from "@/lib/dashboard-query-keys";
 import { useProjectIdFromLayout } from "@/lib/projects/project-id-context";
+import { NOT_TRACKED, RunFailureReason, runDetailHref } from "@/lib/projects/run-display";
+import { fetchLlmProviders } from "@/lib/providers-api";
 import { listVaultKeys } from "@/lib/vault-api";
 import {
   API_MAX_PER_PAGE,
@@ -26,15 +29,6 @@ import {
   updateProject,
 } from "@/lib/projects/project-workspace-api";
 import { cn } from "@/lib/utils";
-
-const MODELS = [
-  "gpt-4o",
-  "gpt-4o-mini",
-  "claude-3-5-sonnet-20241022",
-  "claude-3-5-haiku-20241022",
-  "gemini-2.0-flash",
-  "llama-3.3-70b-versatile",
-] as const;
 
 function nextMemberRole(r: string): "ADMIN" | "MEMBER" {
   if (r === "ADMIN") {
@@ -101,7 +95,7 @@ export function AgentsTabPanel(): ReactElement {
                   {a.description || "—"}
                 </p>
                 <p className="mt-2 font-mono text-axiom-11 text-[var(--axiom-text-dim)]">
-                  (stats require backend aggregates)
+                  Per-agent stats: {NOT_TRACKED.toLowerCase()}
                 </p>
               </button>
               <div className="mt-3 flex justify-end gap-2">
@@ -145,39 +139,30 @@ export function AgentsTabPanel(): ReactElement {
   );
 }
 
+/**
+ * Thin dialog around the shared `AgentForm`.
+ *
+ * This used to be a second agent-creation form with its own hardcoded model
+ * list, which meant the project workspace offered models the selected
+ * credential could not serve. There is one form and one model source now: the
+ * provider registry, over GET /api/v1/providers.
+ */
 function NewAgentModal({ projectId, onClose }: { projectId: string; onClose: () => void }): ReactElement {
   const qc = useQueryClient();
-  const vq = useQuery({
-    queryKey: ["axiom", "vault-keys", "llm"],
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const vaultQ = useQuery({
+    queryKey: dashboardKeys.llmVaultKeys,
     queryFn: () => listVaultKeys({ kind: "llm" }),
   });
-  const [name, setName] = useState("");
-  const [sys, setSys] = useState("");
-  const [model, setModel] = useState<string>(MODELS[0]);
-  const [vk, setVk] = useState("");
-  const [hard, setHard] = useState(true);
-  const [err, setErr] = useState<Record<string, string>>({});
-  const m = useMutation({
-    mutationFn: async () => {
-      if (hard) {
-        /* */ void 0;
-      } else {
-        // eslint-disable-next-line no-console
-        console.warn("hard_enforcement off: advanced");
-      }
-      if (!name.trim() || !sys.trim() || !vk) {
-        throw new Error("validation");
-      }
-      return createAgentDefinition(projectId, {
-        name: name.trim(),
-        system_prompt: sys.trim(),
-        model,
-        vault_key_id: vk,
-        max_iterations: 10,
-        max_tokens_per_run: 100_000,
-        tools_config: hard ? { hard_enforcement: true } : { hard_enforcement: false },
-      });
-    },
+  const providersQ = useQuery({
+    queryKey: dashboardKeys.llmProviders,
+    queryFn: () => fetchLlmProviders(),
+    staleTime: 60 * 60 * 1000,
+  });
+
+  const create = useMutation({
+    mutationFn: (body: Record<string, unknown>) => createAgentDefinition(projectId, body),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: dashboardKeys.agentDefinitions(projectId) });
       await qc.invalidateQueries({ queryKey: dashboardKeys.commandCenterAgentDefinitionsAll(projectId) });
@@ -185,13 +170,8 @@ function NewAgentModal({ projectId, onClose }: { projectId: string; onClose: () 
       toast.success("Agent created");
       onClose();
     },
-    onError: (e) => {
-      if (e instanceof Error && e.message === "validation") {
-        return;
-      }
-      toast.error(e instanceof Error ? e.message : "Failed");
-    },
   });
+
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/60 p-4"
@@ -201,110 +181,46 @@ function NewAgentModal({ projectId, onClose }: { projectId: string; onClose: () 
         }
       }}
     >
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded border border-[var(--axiom-border-strong)] bg-[var(--axiom-bg-card)] p-6">
-        <h2 className="font-mono text-axiom-12 uppercase text-[var(--axiom-text)]">New agent</h2>
-        <div className="mt-4 space-y-3">
-          <div>
-            <span className="text-axiom-10 font-mono uppercase">Name *</span>
-            <input
-              className="mt-1 w-full rounded border border-[var(--axiom-border)] bg-[var(--axiom-bg)] p-2 font-mono text-axiom-13"
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-              }}
-            />
-            {err.name ? <p className="text-red-400">{err.name}</p> : null}
-          </div>
-          <div>
-            <span className="text-axiom-10 font-mono uppercase">System prompt *</span>
-            <textarea
-              className="mt-1 min-h-[100px] w-full rounded border border-[var(--axiom-border)] bg-[var(--axiom-bg)] p-2"
-              placeholder="You are an agent that..."
-              value={sys}
-              onChange={(e) => {
-                setSys(e.target.value);
-              }}
-            />
-            {err.sys ? <p className="text-red-400">{err.sys}</p> : null}
-          </div>
-          <div>
-            <span className="text-axiom-10 font-mono uppercase">Model</span>
-            <select
-              className="mt-1 w-full rounded border p-2"
-              value={model}
-              onChange={(e) => {
-                setModel(e.target.value);
-              }}
-            >
-              {MODELS.map((m0) => (
-                <option key={m0} value={m0}>
-                  {m0}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <span className="text-axiom-10 font-mono uppercase">Vault key *</span>
-            <select
-              className="mt-1 w-full rounded border p-2"
-              value={vk}
-              onChange={(e) => {
-                setVk(e.target.value);
-              }}
-            >
-              <option value="">Select…</option>
-              {(vq.data ?? []).map((k) => (
-                <option key={k.id} value={k.id}>
-                  {k.name} ({k.service}) {k.key_prefix}…{k.key_suffix}
-                </option>
-              ))}
-            </select>
-            {!vq.isPending && (vq.data ?? []).length === 0 ? (
-              <p className="mt-2 text-axiom-12 text-[var(--axiom-text-muted)]">
-                No LLM credentials in vault.{" "}
-                <Link href="/dashboard/vault" className="border-b border-border-strong text-text-secondary">
-                  Add one in Vault →
-                </Link>
-              </p>
-            ) : null}
-          </div>
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={hard}
-              className="h-4 w-4 rounded-sm border border-text-primary accent-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-neutral-100 focus-visible:outline-offset-2"
-              onChange={(e) => setHard(e.target.checked)}
-            />
-            <span className="text-axiom-12">Hard enforcement</span>
-          </label>
-        </div>
-        <div className="mt-6 flex justify-end gap-2">
-          <button type="button" onClick={onClose}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="new-agent-title"
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded border border-[var(--axiom-border-strong)] bg-[var(--axiom-bg-card)] p-6"
+      >
+        <div className="flex items-center justify-between gap-4">
+          <h2 id="new-agent-title" className="font-mono text-axiom-12 uppercase text-[var(--axiom-text)]">
+            New agent
+          </h2>
+          <button type="button" onClick={onClose} className="text-[var(--axiom-text-muted)]">
             Cancel
           </button>
-          <button
-            type="button"
-            onClick={() => {
-              const e2: Record<string, string> = {};
-              if (!name.trim()) {
-                e2.name = "Name required";
-              }
-              if (!sys.trim()) {
-                e2.sys = "System prompt required";
-              }
-              if (!vk) {
-                e2.vk = "Vault key required";
-              }
-              if (Object.keys(e2).length) {
-                setErr(e2);
-                return;
-              }
-              m.mutate();
-            }}
-            className="bg-[var(--axiom-electric)] px-3 py-1.5 text-black"
-          >
-            Create agent
-          </button>
+        </div>
+        <div className="mt-4">
+          {vaultQ.isPending ? (
+            <div
+              className="h-56 animate-pulse rounded border border-[var(--axiom-border)]"
+              role="status"
+              aria-label="Loading vault credentials"
+            />
+          ) : (
+            <AgentForm
+              vaultKeys={vaultQ.data ?? []}
+              providers={providersQ.data ?? []}
+              isSubmitting={create.isPending}
+              submitError={submitError}
+              showHardEnforcement
+              onSubmit={async (body) => {
+                setSubmitError(null);
+                try {
+                  await create.mutateAsync(body);
+                } catch (e) {
+                  const msg = e instanceof Error ? e.message : "Failed to create agent";
+                  setSubmitError(msg);
+                  toast.error(msg);
+                }
+              }}
+            />
+          )}
         </div>
       </div>
     </div>
@@ -323,6 +239,7 @@ const RUN_FILTER_KEYS = [
 
 export function RunsTabPanel(): ReactElement {
   const projectId = useProjectIdFromLayout();
+  const router = useRouter();
   const [qstr, setQstr] = useState("");
   const [chip, setChip] = useState<(typeof RUN_FILTER_KEYS)[number]>(RUN_FILTER_KEYS[0]);
   const fkey = `${chip.id}:${qstr}`;
@@ -403,25 +320,39 @@ export function RunsTabPanel(): ReactElement {
             <tbody>
               {runs.map((r) => {
                 const g = (r.input_payload?.goal as string | undefined) ?? "—";
+                const href = runDetailHref(projectId, r.id);
                 return (
                   <tr
                     key={r.id}
-                    className="cursor-pointer border-b hover:bg-[var(--axiom-electric)]/5"
+                    className="group cursor-pointer border-b hover:bg-[var(--axiom-electric)]/5"
                     onClick={() => {
-                      window.location.assign(`/dashboard/ledger/${r.id}`);
+                      router.push(href);
                     }}
                   >
-                    <td className="py-1 text-[var(--axiom-text-dim)]">
+                    <td className="py-1 align-top text-[var(--axiom-text-dim)]">
                       {new Date(r.created_at).toLocaleString()}
                     </td>
-                    <td className="truncate text-[var(--axiom-electric)]">
+                    <td className="truncate align-top text-[var(--axiom-electric)]">
                       {nameByDef.get(r.agent_definition_id) ?? "—"}
                     </td>
-                    <td className="max-w-xs truncate">{g}</td>
-                    <td>—</td>
-                    <td>{r.status}</td>
-                    <td>—</td>
-                    <td className="text-right">Replay</td>
+                    <td className="max-w-xs align-top">
+                      <span className="block truncate">{g}</span>
+                      <RunFailureReason run={r} />
+                    </td>
+                    <td className="align-top">{NOT_TRACKED}</td>
+                    <td className="align-top">{r.status}</td>
+                    <td className="align-top">{NOT_TRACKED}</td>
+                    <td className="text-right align-top">
+                      <Link
+                        href={href}
+                        className="text-[var(--axiom-electric)]"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                      >
+                        Open →
+                      </Link>
+                    </td>
                   </tr>
                 );
               })}

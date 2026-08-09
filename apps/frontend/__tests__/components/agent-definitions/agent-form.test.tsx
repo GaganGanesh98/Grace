@@ -20,6 +20,13 @@ const PROVIDERS: LlmProvider[] = [
     models: ["claude-sonnet-5", "claude-haiku-4-5"],
     default_model: "claude-sonnet-5",
   },
+  {
+    service: "openai",
+    label: "OpenAI",
+    protocol: "openai_compatible",
+    models: ["gpt-4o", "gpt-4o-mini"],
+    default_model: "gpt-4o-mini",
+  },
 ];
 
 const key = (over: Partial<VaultKey> = {}): VaultKey => ({
@@ -143,6 +150,73 @@ describe("AgentForm", () => {
 
     fireEvent.change(select, { target: { value: "__custom__" } });
     expect(await screen.findByLabelText(/custom model id/i)).toBeTruthy();
+  });
+
+  it("shows only the selected credential's provider models, never another provider's", async () => {
+    render(
+      <AgentForm
+        vaultKeys={[key({ service: "groq", name: "groq-only", key_prefix: "gsk_" })]}
+        providers={PROVIDERS}
+        onSubmit={vi.fn()}
+        isSubmitting={false}
+        submitError={null}
+      />,
+    );
+
+    const select = (await screen.findByLabelText(/^model$/i)) as HTMLSelectElement;
+    const values = Array.from(select.options).map((o) => o.value);
+
+    expect(values).toContain("groq/llama-3.3-70b-versatile");
+    expect(values).toContain("groq/llama-3.1-8b-instant");
+    expect(values).toContain("__custom__");
+    // The regression this guards: the project workspace used to render a flat
+    // hardcoded list containing every provider's ids regardless of credential.
+    expect(values.some((v) => v.includes("gpt-4o"))).toBe(false);
+    expect(values.some((v) => v.startsWith("openai/"))).toBe(false);
+    expect(values.some((v) => v.startsWith("anthropic/"))).toBe(false);
+    expect(values.some((v) => v.startsWith("google/"))).toBe(false);
+  });
+
+  it("renders the hard-enforcement toggle only when asked, and merges it into tools_config", async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    render(
+      <AgentForm
+        vaultKeys={[key()]}
+        providers={PROVIDERS}
+        onSubmit={onSubmit}
+        isSubmitting={false}
+        submitError={null}
+        showHardEnforcement
+      />,
+    );
+
+    const toggle = screen.getByLabelText(/hard enforcement/i) as HTMLInputElement;
+    expect(toggle.checked).toBe(true);
+
+    fillRequiredFields();
+    fireEvent.click(screen.getByRole("button", { name: /create agent/i }));
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledTimes(1);
+    });
+
+    const body = onSubmit.mock.calls[0][0] as { tools_config: Record<string, unknown> };
+    expect(body.tools_config.hard_enforcement).toBe(true);
+    // Merged, not replaced — the old modal sent {hard_enforcement} alone, which
+    // left those agents with no tool definitions recorded.
+    expect(Array.isArray(body.tools_config.tools)).toBe(true);
+  });
+
+  it("omits the hard-enforcement toggle by default", () => {
+    render(
+      <AgentForm
+        vaultKeys={[key()]}
+        providers={PROVIDERS}
+        onSubmit={vi.fn()}
+        isSubmitting={false}
+        submitError={null}
+      />,
+    );
+    expect(screen.queryByLabelText(/hard enforcement/i)).toBeNull();
   });
 
   it("resets the model to the new provider's default when the credential changes", async () => {

@@ -1,8 +1,11 @@
 """GET /api/v1/providers — LLM provider catalog served from the provider registry."""
 
+import json
+
 import pytest
 from httpx import AsyncClient
 
+from axiom.gateway.protocol_handlers import normalize_model_prefix
 from axiom.gateway.provider_registry import PROVIDERS
 from tests.conftest import auth_headers, signup_user, unique_email
 
@@ -30,16 +33,39 @@ async def test_providers_mirror_the_registry(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_curated_models_are_bare_ids_and_include_their_default(client: AsyncClient) -> None:
-    """The gateway strips a ``provider/`` prefix, so the registry stores bare ids."""
+async def test_curated_models_survive_the_qualify_then_strip_round_trip(
+    client: AsyncClient,
+) -> None:
+    """The UI sends ``<service>/<model>``; the gateway must hand upstream the model back.
+
+    Model ids are *not* required to be slash-free — Groq genuinely serves
+    ``openai/gpt-oss-120b`` and ``groq/compound``. What has to hold is that
+    prefixing with the service and then stripping one segment is the identity,
+    because that is the path every model in this list actually takes.
+    """
     tokens = await signup_user(client, unique_email(), "password1a")
     response = await client.get("/api/v1/providers", headers=auth_headers(tokens["access_token"]))
     assert response.status_code == 200
 
     for item in response.json():
         for model in item["models"]:
-            assert "/" not in model, f"{item['service']} model {model} must not carry a prefix"
+            qualified = f"{item['service']}/{model}"
+            body = json.dumps({"model": qualified}).encode()
+            normalized = json.loads(normalize_model_prefix(body, item["service"]))
+            assert normalized["model"] == model, (
+                f"{item['service']}: {qualified} normalised to {normalized['model']!r}"
+            )
         if item["models"]:
             assert item["default_model"] in item["models"]
         else:
             assert item["default_model"] == ""
+
+
+@pytest.mark.asyncio
+async def test_curated_models_are_unique_per_provider(client: AsyncClient) -> None:
+    tokens = await signup_user(client, unique_email(), "password1a")
+    response = await client.get("/api/v1/providers", headers=auth_headers(tokens["access_token"]))
+    assert response.status_code == 200
+
+    for item in response.json():
+        assert len(item["models"]) == len(set(item["models"])), item["service"]
