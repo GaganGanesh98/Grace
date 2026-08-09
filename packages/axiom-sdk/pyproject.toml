@@ -5,12 +5,15 @@ build-backend = "hatchling.build"
 [project]
 name = "grace-sdk"
 version = "0.1.0"
-description = "Python SDK for AXIOM — real-time hard governance and execution engine for AI agents"
+description = "Python SDK for Grace — cryptographic governance receipts for AI agent actions"
 readme = "README.md"
+# MIT, deliberately, while the platform is AGPL-3.0: an AGPL client SDK would
+# place copyleft obligations on every application that imports it. See
+# docs/legal-posture.md §5.
 license = "MIT"
 requires-python = ">=3.10"
 authors = [
-    { name = "AXIOM Control Systems Inc." },
+    { name = "Gagan Ganesh" },
 ]
 keywords = ["ai", "governance", "agents", "compliance", "post-quantum", "cryptography"]
 classifiers = [

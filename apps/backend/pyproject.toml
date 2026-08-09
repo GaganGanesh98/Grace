@@ -3,6 +3,10 @@ name = "grace-backend"
 version = "0.1.0"
 description = "Cryptographic governance proof layer for AI agents"
 readme = "README.md"
+license = "AGPL-3.0-only"
+authors = [
+    { name = "Gagan Ganesh" },
+]
 requires-python = ">=3.13,<3.14"
 dependencies = [
     "cryptography>=43.0.0",

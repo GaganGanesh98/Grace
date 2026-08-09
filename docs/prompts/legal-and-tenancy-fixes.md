@@ -73,9 +73,22 @@ line with the current product name and the claims register in
 
 `packages/axiom-sdk` stays MIT while the rest of the repo is AGPL-3.0. This is
 intentional — an AGPL client SDK would impose copyleft on every application
-that imports it. Add a short `packages/axiom-sdk/LICENSE` (MIT text, fetched
-not transcribed) and a paragraph at the top of the SDK's README explaining the
-split and pointing at `docs/legal-posture.md` §5.
+that imports it.
+
+**`packages/axiom-sdk/LICENSE` already exists — do not create it.** Its MIT body
+is fine; line 3 is not:
+
+```
+Copyright (c) 2026 AXIOM Control Systems Inc.
+```
+
+Correct that line to `Copyright (c) 2026 Gagan Ganesh` and leave the rest of the
+MIT text untouched. This is the same misattribution as task 2, in a second
+place; a file that already exists is easy to miss when the instruction says
+"add".
+
+Then add a paragraph at the top of the SDK's README explaining the split and
+pointing at `docs/legal-posture.md` §5.
 
 **Do not** add SPDX headers to every source file. The licence is established by
 `LICENSE` plus package metadata; per-file headers are churn with no legal
@@ -89,9 +102,23 @@ external patch — retroactive relicensing needs every contributor's consent).
 
 ### Done when
 
-`LICENSE` exists and verifies; no file in the repo attributes authorship to
-"AXIOM Control Systems Inc."; `grep -rn "AXIOM Control Systems" .` returns
-nothing outside `.git`; the ADR is written.
+`LICENSE` exists and verifies; the README's `[LICENSE](LICENSE)` link resolves;
+no file in the repo *attributes authorship or copyright* to "AXIOM Control
+Systems Inc."; the ADR is written.
+
+The acceptance check must exclude the documents that legitimately quote the
+string — this prompt and `docs/legal-posture.md` both name it in order to
+describe the correction, so a bare `grep -rn "AXIOM Control Systems" .` can
+never come back clean:
+
+```
+grep -rn "AXIOM Control Systems" . \
+  --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=.venv \
+  --exclude-dir=prompts --exclude=legal-posture.md
+```
+
+That must return nothing. Expected hits *before* the fix:
+`packages/axiom-sdk/pyproject.toml:13` and `packages/axiom-sdk/LICENSE:3`.
 
 ---
 
