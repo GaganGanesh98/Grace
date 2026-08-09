@@ -4,14 +4,23 @@
 # published DB/Redis host ports are expected Docker internals, not rogues.
 : "${REPO_ROOT:?}"
 
-readonly DOCKER_PROXY_PATTERNS=('docker-proxy' 'rootlesskit')
+readonly DOCKER_PROXY_PATTERNS=(
+  'docker-proxy'       # Linux, rootful daemon
+  'rootlesskit'        # Linux, rootless daemon
+  'com.docker.backend' # Docker Desktop (macOS) — publishes ports itself
+  'vpnkit'             # Docker Desktop (macOS), older networking stack
+)
 
+# Full command line for a pid. Linux exposes it via procfs; macOS has no /proc,
+# so fall back to ps — without this, every lookup returned "" on macOS, no
+# pattern matched, and Docker's own port publisher was reported as a rogue
+# process holding 5433/6380.
 _cmdline_for_pid() {
   local pid=$1
   if [[ -r "/proc/${pid}/cmdline" ]]; then
     tr '\0' ' ' <"/proc/${pid}/cmdline"
   else
-    echo ""
+    ps -o command= -p "${pid}" 2>/dev/null || echo ""
   fi
 }
 
