@@ -89,19 +89,19 @@ Hypothesis settings match the spec (`max_examples` 200–500 per test). Full-rep
 
 ## Edge cases and decisions
 
-1. **RFC 8032 TEST 1 (empty message)**  
+1. **RFC 8032 TEST 1 (empty message)**
    The API requires a non-empty message for `sign`. KAT documents rejection via `CryptoInputError` rather than matching the empty-message signature.
 
-2. **`ed25519.verify` and exceptions**  
+2. **`ed25519.verify` and exceptions**
    Malformed types or incorrect byte lengths now raise `CryptoInputError`. HTTP or pipeline callers that assumed “always bool” may need `except CryptoInputError` and to treat it as an invalid signature. This is noted for `routers/verify.py` and similar—**not changed** in this sprint per scope rules.
 
-3. **Merkle empty leaves**  
+3. **Merkle empty leaves**
    Append-tree leaves and `build_tree` leaves must be non-empty; empty `b""` is rejected.
 
-4. **Hypothesis + `build_tree`**  
+4. **Hypothesis + `build_tree`**
    Existing property tests were updated to avoid generating empty leaf bytes.
 
-5. **`==` remaining in crypto**  
+5. **`==` remaining in crypto**
    Intentional uses remain for integer logic, empty-tree checks, and string backend names (`"pqcrypto"`). Secret-dependent byte comparisons use `constant_time_compare` or `hmac.compare_digest`.
 
 ## Ruff
