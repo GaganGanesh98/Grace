@@ -112,6 +112,11 @@ ignore = [
 # Spawns real interpreters to prove the key loader is multiprocess-safe. Fixed
 # argv, no shell, no external input -- S603's threat model does not apply.
 "tests/receipt/test_keys_multiprocess.py" = ["S603"]
+# Preflight degrades gracefully: a Redis or policy-lookup failure must never
+# break the request path, so these catch broadly and log with exc_info=True.
+"src/axiom/routers/preflight.py" = ["BLE001"]
+"src/axiom/services/preflight/cache.py" = ["BLE001"]
+"src/axiom/services/preflight/service.py" = ["BLE001"]
 # runner.py catches Exception and logs with exc_info=True; ruff's BLE001
 # heuristic doesn't fire, but our `test_no_silent_errors` security gate
 # still demands a visible noqa marker. Silence RUF100 only for that file.
