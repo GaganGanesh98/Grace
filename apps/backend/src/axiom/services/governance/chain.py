@@ -1,10 +1,10 @@
 """Governance workflow chains — grouping receipts with chain-level seals."""
 
 from __future__ import annotations
-from typing import Any
 
 import hashlib
 from datetime import UTC, datetime, timedelta
+from typing import Any
 from uuid import UUID
 
 import structlog

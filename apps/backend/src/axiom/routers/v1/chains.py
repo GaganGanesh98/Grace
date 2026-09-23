@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Annotated
+from typing import Annotated, Any
 from uuid import UUID
 
 import structlog
@@ -28,7 +28,9 @@ router = APIRouter()
 logger = structlog.get_logger(__name__)
 
 
-async def _to_chain_summary(db_chain: GovernanceChain, records: list[dict[str, Any]]) -> ChainSummary:
+async def _to_chain_summary(
+    db_chain: GovernanceChain, records: list[dict[str, Any]]
+) -> ChainSummary:
     sig = None
     if db_chain.status in ("sealed", "auto_closed") and db_chain.chain_hash is not None:
         sig = verify_chain_signatures(db_chain)
