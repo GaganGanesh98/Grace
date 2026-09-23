@@ -67,6 +67,18 @@ jobs:
         working-directory: apps/backend
         run: uv run lint-imports --config ../../.importlinter
 
+      # The suite expects a migrated database. Locally that comes from
+      # scripts/lib/axiom-ensure-test-db.sh; CI never ran it, so every
+      # DB-backed test failed with 'relation "agents" does not exist'.
+      - name: Apply migrations
+        working-directory: apps/backend
+        env:
+          DATABASE_URL: postgresql+asyncpg://axiom:ci_only@localhost:5432/axiom_test
+          SECRET_KEY: ci-secret-key-not-for-production-use-only-xxxxxxxxxxxxxxxx
+          JWT_SECRET: ci-jwt-secret-not-for-production-use-only
+          ENCRYPTION_KEY: ci-encryption-key-not-for-production
+        run: uv run alembic upgrade head
+
       - name: Pytest with coverage
         working-directory: apps/backend
         env:
