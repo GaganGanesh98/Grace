@@ -76,6 +76,7 @@ def _run_preflight_subprocess(
     return subprocess.run(
         [PYTHON, "-c", script],
         capture_output=True,
+        check=False,
         text=True,
         env=env,
         timeout=30,
@@ -94,6 +95,7 @@ def _read_evidence_key_id_subprocess(tmp_path: Path, env: dict[str, str]) -> str
     result = subprocess.run(
         [PYTHON, "-c", script],
         capture_output=True,
+        check=False,
         text=True,
         env=env,
         timeout=30,
@@ -191,6 +193,7 @@ def test_preflight_fails_fast_on_readonly_env(tmp_path: Path) -> None:
     result = subprocess.run(
         [PYTHON, "-c", script],
         capture_output=True,
+        check=False,
         text=True,
         env=env,
         timeout=30,

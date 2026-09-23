@@ -57,7 +57,7 @@ async def _ensure_project_policy(project_id: UUID, profile: str) -> None:
         project.settings = settings
 
 
-async def main() -> int:  # noqa: PLR0915
+async def main() -> int:
     base = os.environ.get("AXIOM_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
     email = f"gov-e2e-{uuid.uuid4().hex[:12]}@example.com"
     password = os.environ.get("AXIOM_E2E_PASSWORD", "password1a")

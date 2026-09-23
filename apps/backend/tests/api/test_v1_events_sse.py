@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import os
 import uuid
 
@@ -86,10 +87,8 @@ async def test_sse_stream_headers_and_initial_connected() -> None:
         assert d.get("stream_id")
         assert d.get("server_time")
     finally:
-        try:
+        with contextlib.suppress(Exception):
             await r.aclose()
-        except Exception:  # noqa: BLE001
-            pass
         await ac.aclose()
 
 
@@ -114,10 +113,8 @@ async def test_heartbeat_multiple_pings() -> None:
         assert buf.count(b"event: ping") >= 3
     finally:
         if r:
-            try:
+            with contextlib.suppress(Exception):
                 await r.aclose()
-            except Exception:  # noqa: BLE001
-                pass
         await ac.aclose()
 
 
@@ -161,10 +158,8 @@ async def test_subscriber_receives_same_project_event() -> None:
         assert rid.encode() in more
     finally:
         if r:
-            try:
+            with contextlib.suppress(Exception):
                 await r.aclose()
-            except Exception:  # noqa: BLE001
-                pass
         await ac.aclose()
 
 
@@ -197,10 +192,8 @@ async def test_does_not_receive_different_project_channel() -> None:
             assert b'"n":1' not in chunk
     finally:
         if r:
-            try:
+            with contextlib.suppress(Exception):
                 await r.aclose()
-            except Exception:  # noqa: BLE001
-                pass
         await ac1.aclose()
 
 

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 import httpx
 import pytest
 
@@ -19,7 +21,7 @@ class TestContentEncodingStripped:
 
 
 class TestHopByHopStrippedFromResponse:
-    HOP_BY_HOP = [
+    HOP_BY_HOP: ClassVar[list[str]] = [
         "connection",
         "keep-alive",
         "proxy-authenticate",

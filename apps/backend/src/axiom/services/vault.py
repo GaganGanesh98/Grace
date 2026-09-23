@@ -106,10 +106,7 @@ def _resolve_kind_service(
 ) -> tuple[str, str]:
     d_kind, d_service = detect_credential_kind_and_service(raw_key.strip())
     kind_s = (kind_override or "").strip().lower()
-    if kind_s in _KIND_SET:
-        res_kind = kind_s
-    else:
-        res_kind = d_kind
+    res_kind = kind_s if kind_s in _KIND_SET else d_kind
     svc_s = (service_override or "").strip()
     if svc_s:
         res_service = svc_s[:50]
@@ -327,7 +324,7 @@ async def store_key(
     raw_key: str,
 ) -> tuple[VaultKey, str]:
     """Legacy: encrypt and store; returns (row, detected_service label)."""
-    row, d_kind, d_service = await create_vault_key(
+    row, _d_kind, d_service = await create_vault_key(
         db,
         user_id,
         name,

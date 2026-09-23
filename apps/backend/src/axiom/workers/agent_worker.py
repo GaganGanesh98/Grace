@@ -80,7 +80,7 @@ async def _resolve_project_gateway_key(
     return plaintext
 
 
-async def process_run(run_id: str) -> None:  # noqa: PLR0915
+async def process_run(run_id: str) -> None:
     """Execute a single agent run: optional queue item is resolved by ``run_id`` string."""
 
     rid = UUID(run_id)

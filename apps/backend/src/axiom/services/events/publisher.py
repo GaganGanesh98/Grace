@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
@@ -77,10 +78,10 @@ def schedule_axiom_event(event_type: str, project_id: UUID, payload: dict[str, A
     t = loop.create_task(publish_axiom_event(event_type, project_id, payload))
 
     def _done(task: asyncio.Task[None]) -> None:
-        try:
+        # Retrieve the result so asyncio does not warn about an unretrieved
+        # exception. Failures are already logged inside publish_axiom_event.
+        with contextlib.suppress(Exception):
             task.result()
-        except Exception:  # noqa: BLE001
-            pass  # already logged in publish
 
     t.add_done_callback(_done)
 

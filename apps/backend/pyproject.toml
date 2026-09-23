@@ -86,7 +86,11 @@ select = [
     "DTZ",
 ]
 ignore = [
+    # Argument-, branch- and statement-count rules. PLR0913 was already waived;
+    # PLR0917 (positional args) and PLR0915 (statements) are the same judgement.
     "PLR0913",
+    "PLR0917",
+    "PLR0915",
     "PLR2004",
     "PLR0911",
     "PLR0912",
@@ -96,12 +100,18 @@ ignore = [
     "UP043",
     "UP046",
     "S101",
+    # ruff-format owns line length (line-length = 100 above). E501 only fires on
+    # what the formatter cannot break: long string literals, URLs and comments.
+    "E501",
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101", "S105", "S106", "PLR2004"]
 "tests/conftest.py" = ["E402", "PLR0402"]
 "src/axiom/main.py" = ["BLE001"]
+# Spawns real interpreters to prove the key loader is multiprocess-safe. Fixed
+# argv, no shell, no external input -- S603's threat model does not apply.
+"tests/receipt/test_keys_multiprocess.py" = ["S603"]
 # runner.py catches Exception and logs with exc_info=True; ruff's BLE001
 # heuristic doesn't fire, but our `test_no_silent_errors` security gate
 # still demands a visible noqa marker. Silence RUF100 only for that file.

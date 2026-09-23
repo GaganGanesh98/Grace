@@ -76,7 +76,7 @@ async def test_seal_after_hold_approval_flips_verdict_to_allow_and_verifies(
         verdict.verdict = "allow"
         receipt.approval_status = "approved"
         receipt.approved_at = datetime.now(UTC)
-        vres = verify_execution(intent, {})
+        verify_execution(intent, {})
         sealed = await seal_pending_after_hold_decision(
             session,
             receipt=receipt,
@@ -131,7 +131,7 @@ async def test_seal_after_hold_rejection_flips_verdict_to_deny_and_verifies(
         verdict.verdict = "deny"
         verdict.reason = "rejected"
         receipt.approval_status = "rejected"
-        vres = verify_execution(intent, {})
+        verify_execution(intent, {})
         sealed = await seal_pending_after_hold_decision(
             session,
             receipt=receipt,

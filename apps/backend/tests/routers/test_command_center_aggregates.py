@@ -360,7 +360,7 @@ async def test_next_rotation_days_84(client: AsyncClient, monkeypatch: pytest.Mo
 
     class _DT:
         @staticmethod
-        def now(tz=None):
+        def now(_tz=None):
             return real_dt(2026, 4, 22, 0, 0, 0, tzinfo=UTC)
 
     get_settings.cache_clear()

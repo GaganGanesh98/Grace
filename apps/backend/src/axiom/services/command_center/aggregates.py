@@ -36,10 +36,7 @@ def parse_window_to_start(window: str) -> datetime:
         msg = f"invalid window: {window!r}"
         raise ValueError(msg)
     n, unit = int(m.group(1)), m.group(2).lower()
-    if unit == "d":
-        delta = timedelta(days=n)
-    else:
-        delta = timedelta(hours=n)
+    delta = timedelta(days=n) if unit == "d" else timedelta(hours=n)
     return datetime.now(UTC) - delta
 
 

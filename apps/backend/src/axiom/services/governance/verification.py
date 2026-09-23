@@ -55,7 +55,7 @@ def verify_execution(
     )
 
 
-def verify_receipt_independent(body: VerifyReceiptRequest) -> GovernanceEngineVerifyResponse:  # noqa: PLR0915
+def verify_receipt_independent(body: VerifyReceiptRequest) -> GovernanceEngineVerifyResponse:
     """Ed25519, ML-DSA-65, and Merkle checks (no database)."""
     errors: list[str] = []
     checks: dict[str, bool] = {"ed25519": False, "ml_dsa_65": False, "merkle": False}

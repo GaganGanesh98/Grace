@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import time
 from collections.abc import AsyncIterator
 from datetime import UTC, datetime
@@ -85,14 +86,10 @@ async def events_stream(
             )
             raise
         finally:
-            try:
+            with contextlib.suppress(Exception):
                 await pubsub.unsubscribe(f"{AXIOM_EVENTS_PREFIX}{project_id}")
-            except Exception:  # noqa: BLE001
-                pass
-            try:
+            with contextlib.suppress(Exception):
                 await pubsub.close()
-            except Exception:  # noqa: BLE001
-                pass
 
     return StreamingResponse(
         body(),
