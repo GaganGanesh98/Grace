@@ -45,6 +45,7 @@ dev = [
     "pytest>=8.3.0",
     "pytest-asyncio>=0.24.0",
     "pytest-cov>=6.0.0",
+    "pytest-timeout>=2.3.0",
     "ruff>=0.11.0",
     "mypy>=1.13.0",
     "types-passlib",
@@ -165,6 +166,10 @@ asyncio_default_test_loop_scope = "session"
 testpaths = ["tests"]
 python_files = "test_*.py"
 addopts = "-ra -q --strict-markers --cov=axiom --cov-branch --cov-report=term-missing --cov-fail-under=80"
+# Without this a hung test blocks until the 6-hour job limit with no clue which
+# one it was; 60s turns that into a normal failure naming the test.
+timeout = 60
+timeout_method = "thread"
 markers = [
     "security: security-focused tests",
     "slow: tests that take > 1s",
