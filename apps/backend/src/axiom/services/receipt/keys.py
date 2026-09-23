@@ -97,7 +97,9 @@ def _persist_to_dotenv(env_vars: dict[str, str]) -> None:
             separator = "\n" if existing and not existing.endswith("\n") else ""
             with open(dotenv_path, "a") as f:
                 f.write(separator + "\n".join(lines_to_add) + "\n")
-            logger.info("axiom.keys.persisted_to_dotenv", path=str(dotenv_path), keys=list(env_vars.keys()))
+            logger.info(
+                "axiom.keys.persisted_to_dotenv", path=str(dotenv_path), keys=list(env_vars.keys())
+            )
     except OSError:
         logger.warning("axiom.keys.persist_failed", path=str(dotenv_path), exc_info=True)
 

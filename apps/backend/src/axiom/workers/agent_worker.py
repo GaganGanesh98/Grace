@@ -118,9 +118,7 @@ async def process_run(run_id: str) -> None:  # noqa: PLR0915
         correlation_id = run.correlation_id
 
     project_id = run.project_id
-    schedule_run_started(
-        project_id, run_id=rid, agent_id=run.agent_definition_id
-    )
+    schedule_run_started(project_id, run_id=rid, agent_id=run.agent_definition_id)
 
     publisher = EventPublisher()
     await publisher.publish(
@@ -197,7 +195,7 @@ async def process_run(run_id: str) -> None:  # noqa: PLR0915
                 "ok": ok,
             },
         )
-    except Exception as exc:  # noqa: BLE001 — terminal failure; log + persist run state
+    except Exception as exc:
         logger.exception("agent_worker.run_failed", run_id=run_id)
         ex_pid: UUID | None = None
         ex_row_id: UUID | None = None

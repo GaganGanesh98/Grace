@@ -695,5 +695,3 @@ async def gateway_llm_proxy(
         path_for_classify=path,
         body=body,
     )
-
-

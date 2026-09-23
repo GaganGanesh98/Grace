@@ -83,7 +83,7 @@ def _merkle_status(
     return "healthy"
 
 
-def _verdict_approved(v) -> "case":  # type: ignore[valid-type]
+def _verdict_approved(v) -> case:  # type: ignore[valid-type]
     return case(
         (
             func.lower(v).in_(("approve", "modify", "allow")),
@@ -93,7 +93,7 @@ def _verdict_approved(v) -> "case":  # type: ignore[valid-type]
     )
 
 
-def _verdict_escalated(v) -> "case":
+def _verdict_escalated(v) -> case:
     return case(
         (
             func.lower(v).in_(("escalate", "hold")),
@@ -103,7 +103,7 @@ def _verdict_escalated(v) -> "case":
     )
 
 
-def _verdict_denied(v) -> "case":
+def _verdict_denied(v) -> case:
     return case(
         (
             func.lower(v) == "deny",
@@ -125,9 +125,7 @@ def _receipt_has_tsa() -> and_:
     )
 
 
-async def project_has_active_db_policy(
-    session: AsyncSession, project_id: UUID
-) -> bool:
+async def project_has_active_db_policy(session: AsyncSession, project_id: UUID) -> bool:
     n = await session.scalar(
         select(func.count())
         .select_from(Policy)
@@ -156,47 +154,56 @@ class AggregatesService:
             start = parse_window_to_start(window)
         except ValueError:
             start = parse_window_to_start("24h")
-        calls = await self._db.scalar(
-            select(func.count())
-            .select_from(GovernanceReceipt)
-            .where(
-                and_(
-                    GovernanceReceipt.project_id == project_id,
-                    GovernanceReceipt.created_at >= start,
+        calls = (
+            await self._db.scalar(
+                select(func.count())
+                .select_from(GovernanceReceipt)
+                .where(
+                    and_(
+                        GovernanceReceipt.project_id == project_id,
+                        GovernanceReceipt.created_at >= start,
+                    )
                 )
             )
-        ) or 0
-        completed = await self._db.scalar(
-            select(func.count())
-            .select_from(AgentRun)
-            .where(
-                and_(
-                    AgentRun.project_id == project_id,
-                    AgentRun.status == AgentRunStatus.SUCCEEDED.value,
-                    or_(
-                        and_(
-                            AgentRun.completed_at.is_not(None),
-                            AgentRun.completed_at >= start,
+            or 0
+        )
+        completed = (
+            await self._db.scalar(
+                select(func.count())
+                .select_from(AgentRun)
+                .where(
+                    and_(
+                        AgentRun.project_id == project_id,
+                        AgentRun.status == AgentRunStatus.SUCCEEDED.value,
+                        or_(
+                            and_(
+                                AgentRun.completed_at.is_not(None),
+                                AgentRun.completed_at >= start,
+                            ),
+                            and_(
+                                AgentRun.completed_at.is_(None),
+                                AgentRun.created_at >= start,
+                            ),
                         ),
-                        and_(
-                            AgentRun.completed_at.is_(None),
-                            AgentRun.created_at >= start,
-                        ),
-                    ),
+                    )
                 )
             )
-        ) or 0
-        violations = await self._db.scalar(
-            select(func.coalesce(func.sum(_verdict_denied(GovernanceVerdict.verdict)), 0))
-            .select_from(GovernanceReceipt)
-            .join(GovernanceVerdict, GovernanceVerdict.id == GovernanceReceipt.verdict_id)
-            .where(
-                and_(
-                    GovernanceReceipt.project_id == project_id,
-                    GovernanceReceipt.created_at >= start,
+            or 0
+        )
+        violations = (
+            await self._db.scalar(
+                select(func.coalesce(func.sum(_verdict_denied(GovernanceVerdict.verdict)), 0))
+                .select_from(GovernanceReceipt)
+                .join(GovernanceVerdict, GovernanceVerdict.id == GovernanceReceipt.verdict_id)
+                .where(
+                    and_(
+                        GovernanceReceipt.project_id == project_id,
+                        GovernanceReceipt.created_at >= start,
+                    )
                 )
             )
-        ) or 0
+            or 0
+        )
         return PostureOut(
             calls_governed=int(calls),
             runs_completed=int(completed),
@@ -324,9 +331,7 @@ class AggregatesService:
         )
         n_app = int(
             await self._db.scalar(
-                select(
-                    func.coalesce(func.sum(_verdict_approved(v.verdict)), 0)
-                )
+                select(func.coalesce(func.sum(_verdict_approved(v.verdict)), 0))
                 .select_from(GovernanceReceipt)
                 .join(v, v.id == GovernanceReceipt.verdict_id)
                 .where(wh)
@@ -335,9 +340,7 @@ class AggregatesService:
         )
         n_esc = int(
             await self._db.scalar(
-                select(
-                    func.coalesce(func.sum(_verdict_escalated(v.verdict)), 0)
-                )
+                select(func.coalesce(func.sum(_verdict_escalated(v.verdict)), 0))
                 .select_from(GovernanceReceipt)
                 .join(v, v.id == GovernanceReceipt.verdict_id)
                 .where(wh)
@@ -346,9 +349,7 @@ class AggregatesService:
         )
         n_deny = int(
             await self._db.scalar(
-                select(
-                    func.coalesce(func.sum(_verdict_denied(v.verdict)), 0)
-                )
+                select(func.coalesce(func.sum(_verdict_denied(v.verdict)), 0))
                 .select_from(GovernanceReceipt)
                 .join(v, v.id == GovernanceReceipt.verdict_id)
                 .where(wh)
@@ -368,9 +369,7 @@ class AggregatesService:
         project_id: UUID,
     ) -> TsaStatusOut:
         tsa_f = and_(GovernanceReceipt.project_id == project_id, _receipt_has_tsa())
-        max_at = await self._db.scalar(
-            select(func.max(GovernanceReceipt.created_at)).where(tsa_f)
-        )
+        max_at = await self._db.scalar(select(func.max(GovernanceReceipt.created_at)).where(tsa_f))
         age: int | None
         if max_at is None:
             age = None

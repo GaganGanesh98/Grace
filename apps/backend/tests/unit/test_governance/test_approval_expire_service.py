@@ -16,7 +16,10 @@ from axiom.services.governance.approval_expire import expire_due_hold_receipts
 from axiom.services.governance.context import enrich_context
 from axiom.services.governance.intent import declare_intent
 from axiom.services.governance.policy import clear_policy_cache_for_tests, evaluate_policy
-from axiom.services.governance.receipt import create_pending_receipt, reset_governance_merkle_for_tests
+from axiom.services.governance.receipt import (
+    create_pending_receipt,
+    reset_governance_merkle_for_tests,
+)
 from axiom.services.governance.verdict import render_verdict
 from axiom.services.governance.verification import verify_sealed_governance_receipt_from_db
 from tests.fixtures.governance import bootstrap_project_with_api_key
@@ -32,7 +35,9 @@ def _reset_merkle_and_policy() -> None:
 
 
 @pytest.mark.asyncio
-async def test_expire_due_hold_receipts_denies_and_seals_expired_pending(client: AsyncClient) -> None:
+async def test_expire_due_hold_receipts_denies_and_seals_expired_pending(
+    client: AsyncClient,
+) -> None:
     fx = await bootstrap_project_with_api_key(client, policy_rules=[])
     async with session_scope() as session:
         project = await session.get(Project, UUID(fx["project_id"]))
@@ -146,7 +151,9 @@ async def test_expire_handles_empty_pending_set(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_expired_receipt_seals_with_expired_approval_and_verifies(client: AsyncClient) -> None:
+async def test_expired_receipt_seals_with_expired_approval_and_verifies(
+    client: AsyncClient,
+) -> None:
     fx = await bootstrap_project_with_api_key(client, policy_rules=[])
     pid = UUID(fx["project_id"])
     async with session_scope() as session:

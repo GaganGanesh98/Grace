@@ -169,9 +169,7 @@ async def create_vault_key(
     return row, d_kind, d_service
 
 
-async def _active_llm_key_row(
-    db: AsyncSession, user_id: UUID, service: str
-) -> VaultKey | None:
+async def _active_llm_key_row(db: AsyncSession, user_id: UUID, service: str) -> VaultKey | None:
     return await db.scalar(
         select(VaultKey)
         .where(

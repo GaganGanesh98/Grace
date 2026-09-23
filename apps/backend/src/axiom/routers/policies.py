@@ -80,9 +80,7 @@ async def search_policies(
     """Semantically match active policies against a free-text query via pgvector
     cosine similarity. Declared before ``/{policy_id}`` so "search" is not parsed
     as a policy UUID."""
-    matches = await policies_service.search_policies(
-        db, project_id=project_id, query_text=q, k=k
-    )
+    matches = await policies_service.search_policies(db, project_id=project_id, query_text=q, k=k)
     return DataEnvelope(
         data=[
             PolicySearchResult(policy=PolicyOut.model_validate(policy), similarity=score)

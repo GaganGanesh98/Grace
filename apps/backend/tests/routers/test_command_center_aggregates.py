@@ -16,13 +16,13 @@ from axiom.models.governance import (
     GovernanceReceipt,
     GovernanceVerdict,
 )
-from axiom.schemas.common import DataEnvelope
 from axiom.schemas.command_center import (
     CryptoHealthOut,
     PolicyBreakdownOut,
     PostureOut,
     TsaStatusOut,
 )
+from axiom.schemas.common import DataEnvelope
 from tests.api.test_receipts_artifacts_endpoints import _headers_and_project
 from tests.fixtures.governance import bootstrap_project_with_api_key
 
@@ -128,7 +128,9 @@ async def test_posture_happy_includes_governed_receipts_and_runs(
     )
     assert g.status_code == 200, g.text
     body = g.json()
-    assert isinstance(DataEnvelope[PostureOut](data=PostureOut.model_validate(body["data"])).data, PostureOut)
+    assert isinstance(
+        DataEnvelope[PostureOut](data=PostureOut.model_validate(body["data"])).data, PostureOut
+    )
     assert body["data"]["calls_governed"] == 2
     assert body["data"]["runs_completed"] == 1
     assert body["data"]["violations"] == 1
@@ -155,12 +157,8 @@ async def test_crypto_health_happy_partial_signing(client: AsyncClient) -> None:
     h, pid = await _headers_and_project(client)
     pid_u = UUID(pid)
     ed = b"sig"
-    i, v, r1 = _governance_stub(
-        pid_u, ed_b=ed, execution_data={}
-    )
-    i2, v2, r2 = _governance_stub(
-        pid_u, ed_b=None, execution_data={}
-    )  # second with no signatures
+    i, v, r1 = _governance_stub(pid_u, ed_b=ed, execution_data={})
+    i2, v2, r2 = _governance_stub(pid_u, ed_b=None, execution_data={})  # second with no signatures
     r2.ed25519_sig = None
     r2.ml_dsa_sig = None
     r2.merkle_root = None
@@ -259,18 +257,10 @@ async def test_policy_breakdown_happy_with_active_policy(
 ) -> None:
     fx = await bootstrap_project_with_api_key(client)
     pid = UUID(fx["project_id"])
-    i, v, r = _governance_stub(
-        pid, verdict="deny", ed_b=None
-    )  # deny + allow via second stub
-    i2, v2, r2 = _governance_stub(
-        pid, verdict="escalate", ed_b=None
-    )
-    i3, v3, r3 = _governance_stub(
-        pid, verdict="hold", ed_b=None
-    )
-    i4, v4, r4 = _governance_stub(
-        pid, verdict="allow", ed_b=None
-    )
+    i, v, r = _governance_stub(pid, verdict="deny", ed_b=None)  # deny + allow via second stub
+    i2, v2, r2 = _governance_stub(pid, verdict="escalate", ed_b=None)
+    i3, v3, r3 = _governance_stub(pid, verdict="hold", ed_b=None)
+    i4, v4, r4 = _governance_stub(pid, verdict="allow", ed_b=None)
     async with session_scope() as s:
         for a, b, c in ((i, v, r), (i2, v2, r2), (i3, v3, r3), (i4, v4, r4)):
             s.add(a)
@@ -362,9 +352,7 @@ async def test_tsa_status_no_anchor_returns_null_age(client: AsyncClient) -> Non
 
 
 @pytest.mark.asyncio
-async def test_next_rotation_days_84(
-    client: AsyncClient, monkeypatch: pytest.MonkeyPatch
-) -> None:
+async def test_next_rotation_days_84(client: AsyncClient, monkeypatch: pytest.MonkeyPatch) -> None:
     h, pid = await _headers_and_project(client)
     from datetime import datetime as real_dt
 

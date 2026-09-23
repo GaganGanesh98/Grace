@@ -177,7 +177,8 @@ class TestProviderForwardHeaders:
             "Content-Type": "application/json",
         }
         out = merge_forward_headers(
-            inbound, provider_forward_headers=frozenset({"openai-beta"}),
+            inbound,
+            provider_forward_headers=frozenset({"openai-beta"}),
         )
         assert out["openai-beta"] == "assistants=v2"
 

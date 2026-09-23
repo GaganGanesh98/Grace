@@ -128,9 +128,7 @@ async def approve_governance_receipt(
             final_verdict="allow",
         )
         await db.commit()
-        schedule_approval_resolved(
-            receipt.project_id, receipt_id=receipt.id, resolution="approved"
-        )
+        schedule_approval_resolved(receipt.project_id, receipt_id=receipt.id, resolution="approved")
         schedule_receipt_sealed(
             receipt.project_id,
             receipt_id=receipt.id,
@@ -238,9 +236,7 @@ async def reject_governance_receipt(
             final_verdict="deny",
         )
         await db.commit()
-        schedule_approval_resolved(
-            receipt.project_id, receipt_id=receipt.id, resolution="rejected"
-        )
+        schedule_approval_resolved(receipt.project_id, receipt_id=receipt.id, resolution="rejected")
         schedule_receipt_sealed(
             receipt.project_id,
             receipt_id=receipt.id,

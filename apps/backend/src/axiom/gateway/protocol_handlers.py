@@ -63,46 +63,54 @@ def build_upstream_url(spec: ProviderSpec, path_suffix: str) -> str:
     return f"{base}/{sub}" if sub else base
 
 
-_HOP_BY_HOP = frozenset({
-    "connection",
-    "keep-alive",
-    "proxy-authenticate",
-    "proxy-authorization",
-    "te",
-    "trailer",
-    "transfer-encoding",
-    "upgrade",
-})
+_HOP_BY_HOP = frozenset(
+    {
+        "connection",
+        "keep-alive",
+        "proxy-authenticate",
+        "proxy-authorization",
+        "te",
+        "trailer",
+        "transfer-encoding",
+        "upgrade",
+    }
+)
 
-_NEVER_FORWARD = frozenset({
-    "host",
-    "content-length",
-    "accept-encoding",
-    "authorization",
-    "x-api-key",
-    "x-correlation-id",
-    "user-agent",
-})
+_NEVER_FORWARD = frozenset(
+    {
+        "host",
+        "content-length",
+        "accept-encoding",
+        "authorization",
+        "x-api-key",
+        "x-correlation-id",
+        "user-agent",
+    }
+)
 
-_SAFE_END_TO_END = frozenset({
-    "content-type",
-    "accept",
-})
+_SAFE_END_TO_END = frozenset(
+    {
+        "content-type",
+        "accept",
+    }
+)
 
 GATEWAY_USER_AGENT = "axiom-gateway/1.0"
 
-_RESPONSE_NEVER_FORWARD = frozenset({
-    "content-encoding",
-    "content-length",
-    "connection",
-    "keep-alive",
-    "proxy-authenticate",
-    "proxy-authorization",
-    "te",
-    "trailer",
-    "transfer-encoding",
-    "upgrade",
-})
+_RESPONSE_NEVER_FORWARD = frozenset(
+    {
+        "content-encoding",
+        "content-length",
+        "connection",
+        "keep-alive",
+        "proxy-authenticate",
+        "proxy-authorization",
+        "te",
+        "trailer",
+        "transfer-encoding",
+        "upgrade",
+    }
+)
 
 
 def sanitize_upstream_response_headers(
@@ -221,7 +229,8 @@ async def proxy_openai_compatible(
         raise ValueError(msg)
     url = build_upstream_url(spec, path_suffix)
     merged = merge_forward_headers(
-        forward_headers or {}, provider_forward_headers=spec.forward_headers,
+        forward_headers or {},
+        provider_forward_headers=spec.forward_headers,
     )
     out_headers, out_url = prepare_upstream_request(spec, decrypted_key, url, merged)
     return await http_client.post(out_url, content=body, headers=out_headers, timeout=120.0)
@@ -242,7 +251,8 @@ async def proxy_anthropic_messages(
         raise ValueError(msg)
     url = build_upstream_url(spec, path_suffix)
     merged = merge_forward_headers(
-        forward_headers or {}, provider_forward_headers=spec.forward_headers,
+        forward_headers or {},
+        provider_forward_headers=spec.forward_headers,
     )
     out_headers, out_url = prepare_upstream_request(spec, decrypted_key, url, merged)
     return await http_client.post(out_url, content=body, headers=out_headers, timeout=120.0)
@@ -263,7 +273,8 @@ async def proxy_google_gemini(
         raise ValueError(msg)
     url = build_upstream_url(spec, path_suffix)
     merged = merge_forward_headers(
-        forward_headers or {}, provider_forward_headers=spec.forward_headers,
+        forward_headers or {},
+        provider_forward_headers=spec.forward_headers,
     )
     out_headers, out_url = prepare_upstream_request(spec, decrypted_key, url, merged)
     return await http_client.post(out_url, content=body, headers=out_headers, timeout=120.0)

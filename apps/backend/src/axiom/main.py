@@ -264,8 +264,7 @@ async def domain_error_handler(_request: Request, exc: domain_errors.DomainError
                     "message": str(exc),
                     "details": {
                         "referencing_agents": [
-                            {"id": str(aid), "name": name}
-                            for aid, name in exc.referencing_agents
+                            {"id": str(aid), "name": name} for aid, name in exc.referencing_agents
                         ],
                     },
                 },

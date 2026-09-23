@@ -41,7 +41,9 @@ def _reset_merkle_and_policy() -> None:
 
 
 @pytest.mark.asyncio
-async def test_unsigned_receipt_payload_canonical_json_is_deterministic(client: AsyncClient) -> None:
+async def test_unsigned_receipt_payload_canonical_json_is_deterministic(
+    client: AsyncClient,
+) -> None:
     fx = await bootstrap_project_with_api_key(client, policy_rules=[])
     pid = UUID(fx["project_id"])
     async with session_scope() as session:

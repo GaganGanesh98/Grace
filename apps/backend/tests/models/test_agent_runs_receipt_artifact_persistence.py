@@ -197,7 +197,7 @@ async def test_transaction_rolls_back_if_persistence_fails(client: AsyncClient) 
     orig = AsyncSession.commit
     calls = {"n": 0}
 
-    async def flaky_commit(self) -> None:  # noqa: ANN001
+    async def flaky_commit(self) -> None:
         calls["n"] += 1
         if calls["n"] == 3:
             raise RuntimeError("commit denied")

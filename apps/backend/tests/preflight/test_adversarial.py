@@ -214,7 +214,9 @@ def test_adv_no_phase_2_modifications() -> None:
     )
     assert proc.returncode == 0, proc.stderr
     out = (proc.stdout or "").strip()
-    assert out == "", f"Phase 2 paths (excluding crypto) must be unchanged vs v0.2.0-engine, got:\n{out}"
+    assert out == "", (
+        f"Phase 2 paths (excluding crypto) must be unchanged vs v0.2.0-engine, got:\n{out}"
+    )
 
 
 def test_adv_no_biological_metaphors() -> None:

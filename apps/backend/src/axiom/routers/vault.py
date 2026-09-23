@@ -29,9 +29,7 @@ router = APIRouter()
 async def list_vault_keys(
     db: Annotated[AsyncSession, Depends(get_db)],
     user: Annotated[User, Depends(get_current_user)],
-    kind: str | None = Query(
-        default=None, description="Filter: llm, tool, or custom"
-    ),
+    kind: str | None = Query(default=None, description="Filter: llm, tool, or custom"),
 ) -> list[VaultKeyListItem]:
     rows = await vault_service.list_keys(db, user.id, kind=kind)
     return [

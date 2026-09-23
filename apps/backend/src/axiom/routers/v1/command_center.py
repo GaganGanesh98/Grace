@@ -161,7 +161,7 @@ async def download_agent_run_artifact(
     ct = "application/octet-stream"
     safe = quote(filename)
     headers = {
-        "Content-Disposition": f'attachment; filename="{safe}"; filename*=UTF-8\'\'{safe}',
+        "Content-Disposition": f"attachment; filename=\"{safe}\"; filename*=UTF-8''{safe}",
         "Content-Type": ct,
         "Content-Length": str(len(body)),
     }

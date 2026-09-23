@@ -9,16 +9,15 @@ from uuid import UUID
 
 import structlog
 from jose import jwt
-from sqlalchemy import and_, cast, func, or_, select
-from sqlalchemy import String
+from sqlalchemy import String, and_, cast, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from axiom.config import get_settings
 from axiom.core import errors
 from axiom.models.agent_definition import AgentDefinition
 from axiom.models.agent_run import AgentRun, AgentRunStatus
-from axiom.services.redis_client import get_redis
 from axiom.services.events import schedule_run_completed
+from axiom.services.redis_client import get_redis
 from axiom.utils.ids import new_uuidv7_str
 
 logger = structlog.get_logger(__name__)

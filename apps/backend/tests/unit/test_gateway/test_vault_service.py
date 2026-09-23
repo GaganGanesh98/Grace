@@ -20,7 +20,9 @@ from axiom.services import vault as vault_service
 async def test_store_key_encrypts() -> None:
     email = f"vault-{uuid4().hex}@example.com"
     async with session_scope() as session:
-        user, _, _ = await auth_service.signup(session, email=email, password="password1a", full_name="T")
+        user, _, _ = await auth_service.signup(
+            session, email=email, password="password1a", full_name="T"
+        )
         project = await session.scalar(select(Project).where(Project.owner_user_id == user.id))
         if project is None:
             slug = f"v-{uuid4().hex}"
@@ -78,7 +80,9 @@ def test_detect_unknown_returns_custom_custom() -> None:
 async def test_create_llm_key_for_user() -> None:
     email = f"vault-{uuid4().hex}@example.com"
     async with session_scope() as session:
-        user, _, _ = await auth_service.signup(session, email=email, password="password1a", full_name="T")
+        user, _, _ = await auth_service.signup(
+            session, email=email, password="password1a", full_name="T"
+        )
         project = await session.scalar(select(Project).where(Project.owner_user_id == user.id))
         if project is None:
             slug = f"v-{uuid4().hex}"
@@ -109,7 +113,9 @@ async def test_create_llm_key_for_user() -> None:
 async def test_list_vault_keys_filters_by_kind() -> None:
     email = f"vault-{uuid4().hex}@example.com"
     async with session_scope() as session:
-        user, _, _ = await auth_service.signup(session, email=email, password="password1a", full_name="T")
+        user, _, _ = await auth_service.signup(
+            session, email=email, password="password1a", full_name="T"
+        )
         project = await session.scalar(select(Project).where(Project.owner_user_id == user.id))
         if project is None:
             slug = f"v-{uuid4().hex}"
@@ -153,7 +159,9 @@ async def test_delete_vault_key_in_use_returns_error() -> None:
 
     email = f"vault-{uuid4().hex}@example.com"
     async with session_scope() as session:
-        user, _, _ = await auth_service.signup(session, email=email, password="password1a", full_name="T")
+        user, _, _ = await auth_service.signup(
+            session, email=email, password="password1a", full_name="T"
+        )
         project = await session.scalar(select(Project).where(Project.owner_user_id == user.id))
         if project is None:
             slug = f"v-{uuid4().hex}"
@@ -212,7 +220,9 @@ async def test_deactivate_vault_key_succeeds_even_in_use() -> None:
 
     email = f"vault-{uuid4().hex}@example.com"
     async with session_scope() as session:
-        user, _, _ = await auth_service.signup(session, email=email, password="password1a", full_name="T")
+        user, _, _ = await auth_service.signup(
+            session, email=email, password="password1a", full_name="T"
+        )
         project = await session.scalar(select(Project).where(Project.owner_user_id == user.id))
         if project is None:
             slug = f"v-{uuid4().hex}"
@@ -274,7 +284,9 @@ async def test_store_key_auto_detects_provider() -> None:
 async def test_get_key_decrypts_correctly() -> None:
     email = f"vault-{uuid4().hex}@example.com"
     async with session_scope() as session:
-        user, _, _ = await auth_service.signup(session, email=email, password="password1a", full_name="T")
+        user, _, _ = await auth_service.signup(
+            session, email=email, password="password1a", full_name="T"
+        )
         project = await session.scalar(select(Project).where(Project.owner_user_id == user.id))
         if project is None:
             slug = f"v-{uuid4().hex}"
@@ -304,7 +316,9 @@ async def test_get_key_decrypts_correctly() -> None:
 async def test_list_keys_never_returns_raw_key() -> None:
     email = f"vault-{uuid4().hex}@example.com"
     async with session_scope() as session:
-        user, _, _ = await auth_service.signup(session, email=email, password="password1a", full_name="T")
+        user, _, _ = await auth_service.signup(
+            session, email=email, password="password1a", full_name="T"
+        )
         project = await session.scalar(select(Project).where(Project.owner_user_id == user.id))
         if project is None:
             slug = f"v-{uuid4().hex}"
@@ -335,7 +349,9 @@ async def test_list_keys_never_returns_raw_key() -> None:
 async def test_delete_key_removes_from_db() -> None:
     email = f"vault-{uuid4().hex}@example.com"
     async with session_scope() as session:
-        user, _, _ = await auth_service.signup(session, email=email, password="password1a", full_name="T")
+        user, _, _ = await auth_service.signup(
+            session, email=email, password="password1a", full_name="T"
+        )
         project = await session.scalar(select(Project).where(Project.owner_user_id == user.id))
         if project is None:
             slug = f"v-{uuid4().hex}"
@@ -367,7 +383,9 @@ async def test_delete_key_removes_from_db() -> None:
 async def test_get_nonexistent_provider_returns_none() -> None:
     email = f"vault-{uuid4().hex}@example.com"
     async with session_scope() as session:
-        user, _, _ = await auth_service.signup(session, email=email, password="password1a", full_name="T")
+        user, _, _ = await auth_service.signup(
+            session, email=email, password="password1a", full_name="T"
+        )
         project = await session.scalar(select(Project).where(Project.owner_user_id == user.id))
         if project is None:
             slug = f"v-{uuid4().hex}"
@@ -400,7 +418,9 @@ def test_key_prefix_suffix_extracted_correctly() -> None:
 async def test_duplicate_provider_name_rejected() -> None:
     email = f"vault-{uuid4().hex}@example.com"
     async with session_scope() as session:
-        user, _, _ = await auth_service.signup(session, email=email, password="password1a", full_name="T")
+        user, _, _ = await auth_service.signup(
+            session, email=email, password="password1a", full_name="T"
+        )
         project = await session.scalar(select(Project).where(Project.owner_user_id == user.id))
         if project is None:
             slug = f"v-{uuid4().hex}"
@@ -416,10 +436,14 @@ async def test_duplicate_provider_name_rejected() -> None:
                 )
             )
             await session.flush()
-        await vault_service.store_key(session, user.id, "openai", "Dup", "sk-proj-aaaaaaaaaaaaaaaaaaaa")
+        await vault_service.store_key(
+            session, user.id, "openai", "Dup", "sk-proj-aaaaaaaaaaaaaaaaaaaa"
+        )
         uid = user.id
         await session.commit()
 
     async with session_scope() as session:
         with pytest.raises(errors.ConflictError):
-            await vault_service.store_key(session, uid, "openai", "Dup", "sk-proj-bbbbbbbbbbbbbbbbbbbb")
+            await vault_service.store_key(
+                session, uid, "openai", "Dup", "sk-proj-bbbbbbbbbbbbbbbbbbbb"
+            )

@@ -228,7 +228,9 @@ async def seal_after_transport_failure(
         "risk": intent.risk_declared,
         "error": error_message,
     }
-    vres = VerificationResult(passed=False, mismatches=[{"field": "gateway", "detail": error_message}], status="fail")
+    vres = VerificationResult(
+        passed=False, mismatches=[{"field": "gateway", "detail": error_message}], status="fail"
+    )
     await seal_receipt(
         db,
         receipt=receipt,

@@ -13,7 +13,6 @@ from axiom.gateway.upstream_audit import sha256_hex
 
 
 class TestNormalizeModelPrefix:
-
     def test_strips_matching_provider_prefix(self) -> None:
         body = json.dumps({"model": "groq/llama-3.3-70b-versatile", "messages": []}).encode()
         result = normalize_model_prefix(body, "groq")
@@ -21,7 +20,9 @@ class TestNormalizeModelPrefix:
         assert parsed["model"] == "llama-3.3-70b-versatile"
         assert parsed["messages"] == []
 
-    def test_strips_mismatched_provider_prefix_with_warning(self, caplog: pytest.LogCaptureFixture) -> None:
+    def test_strips_mismatched_provider_prefix_with_warning(
+        self, caplog: pytest.LogCaptureFixture
+    ) -> None:
         body = json.dumps({"model": "openai/gpt-4", "messages": []}).encode()
         with caplog.at_level(logging.WARNING):
             result = normalize_model_prefix(body, "groq")

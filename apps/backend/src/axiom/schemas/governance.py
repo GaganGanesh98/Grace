@@ -158,7 +158,9 @@ class ReportRequest(BaseModel):
 class VerifyGovernanceByReceiptIdRequest(BaseModel):
     """Server-side verify: load a sealed governance receipt from the database."""
 
-    receipt_id: str = Field(..., min_length=1, description="Governance receipt UUID from govern/report")
+    receipt_id: str = Field(
+        ..., min_length=1, description="Governance receipt UUID from govern/report"
+    )
 
     model_config = ConfigDict(extra="forbid")
 

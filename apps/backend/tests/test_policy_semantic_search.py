@@ -95,14 +95,22 @@ async def _create_policy(
 async def test_search_ranks_by_semantic_meaning(client: AsyncClient) -> None:
     pid, headers = await _new_project(client)
     await _create_policy(
-        client, pid, headers,
-        slug=unique_slug("del"), name="Deletion guardrail",
-        description="deny delete of production data", rules=[],
+        client,
+        pid,
+        headers,
+        slug=unique_slug("del"),
+        name="Deletion guardrail",
+        description="deny delete of production data",
+        rules=[],
     )
     await _create_policy(
-        client, pid, headers,
-        slug=unique_slug("read"), name="Log reader",
-        description="allow read of application logs", rules=[],
+        client,
+        pid,
+        headers,
+        slug=unique_slug("read"),
+        name="Log reader",
+        description="allow read of application logs",
+        rules=[],
     )
 
     resp = await client.get(
@@ -123,9 +131,13 @@ async def test_search_ranks_by_semantic_meaning(client: AsyncClient) -> None:
 async def test_search_scopes_to_project(client: AsyncClient) -> None:
     pid_a, headers_a = await _new_project(client)
     await _create_policy(
-        client, pid_a, headers_a,
-        slug=unique_slug("del"), name="Deletion guardrail",
-        description="deny delete of production data", rules=[],
+        client,
+        pid_a,
+        headers_a,
+        slug=unique_slug("del"),
+        name="Deletion guardrail",
+        description="deny delete of production data",
+        rules=[],
     )
     pid_b, headers_b = await _new_project(client)
     resp = await client.get(

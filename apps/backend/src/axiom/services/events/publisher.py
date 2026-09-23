@@ -59,7 +59,12 @@ async def publish_axiom_event(
     try:
         await _publish(get_redis(), project_id, envelope)
     except Exception as exc:  # noqa: BLE001
-        logger.warning("axiom_event.publish_failed", type=event_type, project_id=str(project_id), error=str(exc))
+        logger.warning(
+            "axiom_event.publish_failed",
+            type=event_type,
+            project_id=str(project_id),
+            error=str(exc),
+        )
 
 
 def schedule_axiom_event(event_type: str, project_id: UUID, payload: dict[str, Any]) -> None:
@@ -105,9 +110,7 @@ def schedule_approval_created(project_id: UUID, *, receipt_id: UUID, expires_at:
     )
 
 
-def schedule_approval_resolved(
-    project_id: UUID, *, receipt_id: UUID, resolution: str
-) -> None:
+def schedule_approval_resolved(project_id: UUID, *, receipt_id: UUID, resolution: str) -> None:
     """resolution: approved | rejected | expired"""
     schedule_axiom_event(
         "approval.resolved",

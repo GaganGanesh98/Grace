@@ -59,7 +59,9 @@ async def test_create_definition_creates_matching_legacy_agent() -> None:
         )
         n_agents_before = int(
             await session.scalar(
-                select(func.count()).select_from(Agent).where(
+                select(func.count())
+                .select_from(Agent)
+                .where(
                     Agent.project_id == project_id,
                     Agent.deleted_at.is_(None),
                 )
@@ -95,7 +97,9 @@ async def test_create_definition_creates_matching_legacy_agent() -> None:
 
         n_agents_after = int(
             await session.scalar(
-                select(func.count()).select_from(Agent).where(
+                select(func.count())
+                .select_from(Agent)
+                .where(
                     Agent.project_id == project_id,
                     Agent.deleted_at.is_(None),
                 )
@@ -130,7 +134,9 @@ async def test_create_definition_reuses_existing_legacy_agent() -> None:
         await session.flush()
         count_before = int(
             await session.scalar(
-                select(func.count()).select_from(Agent).where(
+                select(func.count())
+                .select_from(Agent)
+                .where(
                     Agent.project_id == project_id,
                     Agent.deleted_at.is_(None),
                 )
@@ -151,7 +157,9 @@ async def test_create_definition_reuses_existing_legacy_agent() -> None:
 
         count_after = int(
             await session.scalar(
-                select(func.count()).select_from(Agent).where(
+                select(func.count())
+                .select_from(Agent)
+                .where(
                     Agent.project_id == project_id,
                     Agent.deleted_at.is_(None),
                 )

@@ -12,8 +12,6 @@ import sys
 import textwrap
 from pathlib import Path
 
-import pytest
-
 PYTHON = sys.executable
 
 _KEY_ENV_PREFIXES = (
@@ -64,12 +62,17 @@ def _make_subprocess_script(tmp_path: Path, body: str) -> str:
     """) + textwrap.dedent(body)
 
 
-def _run_preflight_subprocess(tmp_path: Path, env: dict[str, str]) -> subprocess.CompletedProcess[str]:
+def _run_preflight_subprocess(
+    tmp_path: Path, env: dict[str, str]
+) -> subprocess.CompletedProcess[str]:
     """Run preflight in a fresh subprocess, returning CompletedProcess."""
-    script = _make_subprocess_script(tmp_path, """\
+    script = _make_subprocess_script(
+        tmp_path,
+        """\
         ids = keys_mod.preflight_ensure_keys()
         print(ids["evidence_key_id"])
-    """)
+    """,
+    )
     return subprocess.run(
         [PYTHON, "-c", script],
         capture_output=True,
@@ -81,10 +84,13 @@ def _run_preflight_subprocess(tmp_path: Path, env: dict[str, str]) -> subprocess
 
 def _read_evidence_key_id_subprocess(tmp_path: Path, env: dict[str, str]) -> str:
     """Spawn a fresh subprocess that loads keys from .env and prints evidence_key_id."""
-    script = _make_subprocess_script(tmp_path, """\
+    script = _make_subprocess_script(
+        tmp_path,
+        """\
         k = keys_mod.get_signing_keys()
         print(k.evidence_key_id)
-    """)
+    """,
+    )
     result = subprocess.run(
         [PYTHON, "-c", script],
         capture_output=True,
@@ -139,7 +145,9 @@ def test_preflight_is_idempotent(tmp_path: Path) -> None:
     assert r2.returncode == 0, f"second preflight failed: {r2.stderr}"
     dotenv_after_second = (tmp_path / "apps" / "backend" / ".env").read_text()
 
-    assert dotenv_after_first == dotenv_after_second, "idempotency violated: .env changed on second preflight"
+    assert dotenv_after_first == dotenv_after_second, (
+        "idempotency violated: .env changed on second preflight"
+    )
     id1 = r1.stdout.strip().splitlines()[-1]
     id2 = r2.stdout.strip().splitlines()[-1]
     assert id1 == id2, "key IDs differ between preflight runs"
@@ -166,7 +174,9 @@ def test_preflight_fails_fast_on_readonly_env(tmp_path: Path) -> None:
 
     env = _subprocess_env(tmp_path)
 
-    script = _make_subprocess_script(tmp_path, """\
+    script = _make_subprocess_script(
+        tmp_path,
+        """\
         try:
             keys_mod.preflight_ensure_keys()
             sys.exit(0)
@@ -176,7 +186,8 @@ def test_preflight_fails_fast_on_readonly_env(tmp_path: Path) -> None:
         except Exception as e:
             print(f"Unexpected: {type(e).__name__}: {e}", file=sys.stderr)
             sys.exit(2)
-    """)
+    """,
+    )
     result = subprocess.run(
         [PYTHON, "-c", script],
         capture_output=True,
