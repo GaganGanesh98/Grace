@@ -197,8 +197,11 @@ jobs:
         uses: trufflesecurity/trufflehog@v3.84.2
         with:
           path: ./
-          base: ${{ github.event.repository.default_branch }}
-          head: HEAD
+          # On pull_request, diff-scan base..head. On push, base and head would
+          # both be the default branch, which the action rejects — leave base
+          # empty there so it scans the full history instead.
+          base: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || '' }}
+          head: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || 'HEAD' }}
           extra_args: --only-verified
 
   trivy:
@@ -206,7 +209,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Trivy filesystem scan
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scan-ref: .
