@@ -165,10 +165,7 @@ def _resolve_kind_service(
 ) -> tuple[str, str]:
     d_kind, d_service = detect_credential_kind_and_service(raw_key.strip())
     kind_s = (kind_override or "").strip().lower()
-    if kind_s in _KIND_SET:
-        res_kind = kind_s
-    else:
-        res_kind = d_kind
+    res_kind = kind_s if kind_s in _KIND_SET else d_kind
     svc_s = (service_override or "").strip()
     if svc_s:
         res_service = svc_s[:50]
@@ -236,10 +233,8 @@ async def create_vault_key(
     return row, d_kind, d_service
 
 
-async def _active_llm_key_row(
-    db: AsyncSession, user_id: UUID, service: str
-) -> VaultKey | None:
-    return await db.scalar(
+async def _active_llm_key_row(db: AsyncSession, user_id: UUID, service: str) -> VaultKey | None:
+    row = await db.scalar(
         select(VaultKey)
         .where(
             VaultKey.user_id == user_id,
@@ -250,6 +245,7 @@ async def _active_llm_key_row(
         .order_by(VaultKey.created_at.desc())
         .limit(1)
     )
+    return row
 
 
 async def get_key_for_provider(db: AsyncSession, user_id: UUID, service: str) -> str | None:
@@ -298,6 +294,37 @@ async def get_key_and_id_by_name(
     if row is None:
         return None
     return decrypt_row(row), row.id
+
+
+async def get_key_and_id_by_name(
+    db: AsyncSession, user_id: UUID, name: str
+) -> tuple[str, UUID] | None:
+    """Return (decrypted_key, vault_key_id) for an active key named ``name``, or None.
+
+    Used by the generic proxy, where the caller names the credential explicitly
+    rather than having it inferred from a provider. Unlike the provider lookup
+    this does not filter on ``kind``: an arbitrary HTTP target may legitimately
+    need a 'tool' or 'custom' credential, and the caller has already stated
+    which key it wants by name.
+
+    Scoping to ``user_id`` is the tenancy boundary — a name belonging to another
+    user resolves to None, which callers surface as not-found rather than
+    forbidden so the vault cannot be enumerated.
+    """
+    row = await db.scalar(
+        select(VaultKey)
+        .where(
+            VaultKey.user_id == user_id,
+            VaultKey.name == name,
+            VaultKey.is_active.is_(True),
+        )
+        .order_by(VaultKey.created_at.desc())
+        .limit(1)
+    )
+    if row is None:
+        return None
+    raw = aes_vault.decrypt(row.encrypted_key, _encryption_key()).decode("utf-8")
+    return raw, row.id
 
 
 async def get_vault_key(db: AsyncSession, user_id: UUID, key_id: UUID) -> VaultKeyDisplay:
@@ -394,7 +421,7 @@ async def store_key(
     raw_key: str,
 ) -> tuple[VaultKey, str]:
     """Legacy: encrypt and store; returns (row, detected_service label)."""
-    row, d_kind, d_service = await create_vault_key(
+    row, _d_kind, d_service = await create_vault_key(
         db,
         user_id,
         name,

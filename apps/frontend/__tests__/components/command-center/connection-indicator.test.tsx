@@ -2,11 +2,12 @@ import { render, screen } from "@testing-library/react";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
 import { ConnectionIndicator } from "@/components/command-center/connection-indicator";
+import type { GraceEventsStatus } from "@/lib/events/event-types";
 
 // Mirror context without importing the provider's internal hook (mock module)
 const mockCtx = vi.hoisted(() => ({
   value: {
-    status: "connected" as const,
+    status: "connected" as GraceEventsStatus,
     showIndicator: true,
     lastEvent: null,
     connect: () => {},

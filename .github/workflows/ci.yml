@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:18-alpine
+        image: pgvector/pgvector:pg18
         env:
           POSTGRES_USER: axiom
           POSTGRES_PASSWORD: ci_only
@@ -66,6 +66,23 @@ jobs:
       - name: Import-linter architecture
         working-directory: apps/backend
         run: uv run lint-imports --config ../../.importlinter
+
+      # The suite expects a migrated database. Locally that comes from
+      # scripts/lib/axiom-ensure-test-db.sh; CI never ran it, so every
+      # DB-backed test failed with 'relation "agents" does not exist'.
+      - name: Apply migrations
+        working-directory: apps/backend
+        env:
+          TEST_DATABASE_URL: postgresql+asyncpg://axiom:ci_only@localhost:5432/axiom_test
+          TEST_REDIS_URL: redis://localhost:6379/0
+          DATABASE_URL: postgresql+asyncpg://axiom:ci_only@localhost:5432/axiom_test
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: ci-secret-key-not-for-production-use-only-xxxxxxxxxxxxxxxx
+          JWT_SECRET: ci-jwt-secret-not-for-production-use-only
+          ENCRYPTION_KEY: ci-encryption-key-not-for-production
+          GOOGLE_CLIENT_ID: test-google-client
+          GOOGLE_CLIENT_SECRET: test-google-secret
+        run: uv run alembic upgrade head
 
       - name: Pytest with coverage
         working-directory: apps/backend
@@ -197,8 +214,11 @@ jobs:
         uses: trufflesecurity/trufflehog@v3.84.2
         with:
           path: ./
-          base: ${{ github.event.repository.default_branch }}
-          head: HEAD
+          # On pull_request, diff-scan base..head. On push, base and head would
+          # both be the default branch, which the action rejects — leave base
+          # empty there so it scans the full history instead.
+          base: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || '' }}
+          head: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || 'HEAD' }}
           extra_args: --only-verified
 
   trivy:
@@ -206,7 +226,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Trivy filesystem scan
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scan-ref: .
@@ -221,6 +241,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+      # the mypy hook runs `uv run mypy src`, so the backend environment has to
+      # exist in this job too
+      - name: Sync backend deps
+        working-directory: apps/backend
+        run: uv sync --all-groups
       - name: Install pre-commit
         run: pip install pre-commit
       - name: Run all hooks

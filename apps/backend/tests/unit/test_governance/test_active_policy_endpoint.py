@@ -38,7 +38,9 @@ async def test_active_policy_reflects_project_settings(client: AsyncClient) -> N
     pid = UUID(fx["project_id"])
     async with session_scope() as session:
         await session.execute(
-            update(Project).where(Project.id == pid).values(settings={"governance_policy": "approval-first"})
+            update(Project)
+            .where(Project.id == pid)
+            .values(settings={"governance_policy": "approval-first"})
         )
         await session.commit()
 

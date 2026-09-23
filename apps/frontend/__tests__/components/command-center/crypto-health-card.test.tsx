@@ -35,7 +35,7 @@ describe("CryptoHealthCard", () => {
       isError: true,
       error: new Error("nope"),
       refetch,
-    } as ReturnType<typeof useCryptoHealthQuery>);
+    } as unknown as ReturnType<typeof useCryptoHealthQuery>);
     render(<CryptoHealthCard projectId="p1" />);
     expect(screen.getByText(/Couldn/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "RETRY" }));

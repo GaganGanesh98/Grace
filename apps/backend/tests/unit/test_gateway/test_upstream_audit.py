@@ -274,5 +274,5 @@ def test_parse_token_usage_unparseable() -> None:
 
 def test_parse_model_from_request() -> None:
     assert parse_model_from_request(b'{"model": "gpt-4"}') == "gpt-4"
-    assert parse_model_from_request(b'{}') is None
+    assert parse_model_from_request(b"{}") is None
     assert parse_model_from_request(b"garbage") is None

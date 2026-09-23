@@ -7,7 +7,7 @@ import json
 import logging
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from . import ed25519, ml_dsa_65
 from .exceptions import KeyError_
@@ -73,7 +73,7 @@ class StaticKeyProvider(KeyProvider):
         if not p.is_file():
             msg = f"missing metadata for key_id={key_id}"
             raise KeyError_(msg)
-        return json.loads(p.read_text(encoding="utf-8"))
+        return cast("dict[str, Any]", json.loads(p.read_text(encoding="utf-8")))
 
     def _save_meta(self, meta: KeyMetadata) -> None:
         data = {

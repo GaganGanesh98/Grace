@@ -99,7 +99,11 @@ async def test_verify_sealed_receipt_all_checks_green(client: AsyncClient) -> No
         pr = evaluate_policy(intent, ctx)
         verdict = await render_verdict(session, intent, pr, ctx)
         receipt = await create_pending_receipt(session, intent=intent, verdict=verdict)
-        out = {"target": intent.target, "action_type": intent.action_type, "risk": intent.risk_declared}
+        out = {
+            "target": intent.target,
+            "action_type": intent.action_type,
+            "risk": intent.risk_declared,
+        }
         vres = verify_execution(intent, out)
         sealed = await seal_receipt(
             session,
@@ -138,7 +142,11 @@ async def test_verify_independent_tampered_body_fails_ed25519(client: AsyncClien
         pr = evaluate_policy(intent, ctx)
         verdict = await render_verdict(session, intent, pr, ctx)
         receipt = await create_pending_receipt(session, intent=intent, verdict=verdict)
-        out = {"target": intent.target, "action_type": intent.action_type, "risk": intent.risk_declared}
+        out = {
+            "target": intent.target,
+            "action_type": intent.action_type,
+            "risk": intent.risk_declared,
+        }
         vres = verify_execution(intent, out)
         sealed = await seal_receipt(
             session,
@@ -199,7 +207,11 @@ async def test_verify_independent_bad_signature_bytes_fail(client: AsyncClient) 
         pr = evaluate_policy(intent, ctx)
         verdict = await render_verdict(session, intent, pr, ctx)
         receipt = await create_pending_receipt(session, intent=intent, verdict=verdict)
-        out = {"target": intent.target, "action_type": intent.action_type, "risk": intent.risk_declared}
+        out = {
+            "target": intent.target,
+            "action_type": intent.action_type,
+            "risk": intent.risk_declared,
+        }
         vres = verify_execution(intent, out)
         sealed = await seal_receipt(
             session,
@@ -275,7 +287,11 @@ async def test_verify_independent_includes_per_check_breakdown(client: AsyncClie
         pr = evaluate_policy(intent, ctx)
         verdict = await render_verdict(session, intent, pr, ctx)
         receipt = await create_pending_receipt(session, intent=intent, verdict=verdict)
-        out = {"target": intent.target, "action_type": intent.action_type, "risk": intent.risk_declared}
+        out = {
+            "target": intent.target,
+            "action_type": intent.action_type,
+            "risk": intent.risk_declared,
+        }
         vres = verify_execution(intent, out)
         sealed = await seal_receipt(
             session,

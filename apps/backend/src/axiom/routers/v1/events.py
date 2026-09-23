@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import time
 from collections.abc import AsyncIterator
 from datetime import UTC, datetime
@@ -29,7 +30,7 @@ def _iso_z_now() -> str:
 
 
 def _fmt_sse(event: str, data: str) -> bytes:
-    return f"event: {event}\ndata: {data}\n\n".encode("utf-8")
+    return f"event: {event}\ndata: {data}\n\n".encode()
 
 
 @router.get("/events/stream")
@@ -79,18 +80,18 @@ async def events_stream(
                     yield _fmt_sse(ev, text)
         except asyncio.CancelledError:
             raise
-        except Exception as exc:  # noqa: BLE001
-            logger.warning("axiom_event.sse_stream_error", project_id=str(project_id), error=str(exc))
+        except Exception as exc:
+            logger.warning(
+                "axiom_event.sse_stream_error", project_id=str(project_id), error=str(exc)
+            )
             raise
         finally:
-            try:
+            with contextlib.suppress(Exception):
                 await pubsub.unsubscribe(f"{AXIOM_EVENTS_PREFIX}{project_id}")
-            except Exception:  # noqa: BLE001
-                pass
-            try:
+            with contextlib.suppress(Exception):
+                # aclose(), not the deprecated close(): redis-py renamed it, and
+                # the sync alias is scheduled for removal.
                 await pubsub.aclose()
-            except Exception:  # noqa: BLE001
-                pass
 
     return StreamingResponse(
         body(),

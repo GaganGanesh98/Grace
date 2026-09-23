@@ -47,7 +47,7 @@ def _load_policy_yaml(stem: str) -> dict[str, Any]:
     return data
 
 
-def _eval_condition(condition: str, intent: GovernanceIntent, _context: dict) -> bool:
+def _eval_condition(condition: str, intent: GovernanceIntent, _context: dict[str, Any]) -> bool:
     c = condition.strip()
     if c == "true":
         return True
@@ -113,7 +113,7 @@ def describe_active_governance_policy(project_settings: dict[str, Any] | None) -
     }
 
 
-def evaluate_policy(intent: GovernanceIntent, context: dict) -> PolicyResult:
+def evaluate_policy(intent: GovernanceIntent, context: dict[str, Any]) -> PolicyResult:
     settings = context.get("project_settings") or {}
     requested = str(settings.get("governance_policy") or "starter-safe")
     stem = _resolve_policy_stem(requested)

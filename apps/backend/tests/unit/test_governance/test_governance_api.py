@@ -13,7 +13,10 @@ from axiom.db import session_scope
 from axiom.models.governance import GovernanceIntent, GovernanceReceipt, GovernanceVerdict
 from axiom.models.project import Project
 from axiom.services.crypto.canonical_json import canonicalize
-from axiom.services.governance.receipt import approval_dict_from_receipt, unsigned_receipt_for_sealing
+from axiom.services.governance.receipt import (
+    approval_dict_from_receipt,
+    unsigned_receipt_for_sealing,
+)
 from axiom.services.receipt.keys import get_signing_keys
 from tests.fixtures.governance import bootstrap_project_with_api_key
 

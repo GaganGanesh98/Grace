@@ -52,7 +52,7 @@ CLI: `./axiom crypto check` runs `python -m axiom.services.crypto.compliance` fr
 
 ## Test results
 
-- **`tests/unit/test_crypto`**: **157 tests collected**; latest run **153 passed**, **4 skipped** (ML-DSA stub / optional cases). Command:  
+- **`tests/unit/test_crypto`**: **157 tests collected**; latest run **153 passed**, **4 skipped** (ML-DSA stub / optional cases). Command:
   `cd apps/backend && uv run pytest tests/unit/test_crypto -q --no-cov --override-ini addopts=-q`
 - **Full `pytest`**: The repository’s root `tests/conftest.py` autouse Redis fixture requires a reachable Redis at `REDIS_URL` (and related stack for DB-backed tests). Without Docker services, many integration tests **error** on `redis.exceptions.ConnectionError`. This is an environment constraint, not a regression in the crypto package.
 

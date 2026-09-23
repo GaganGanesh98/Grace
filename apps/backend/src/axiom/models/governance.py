@@ -190,7 +190,9 @@ class GovernanceReceipt(Base):
     ml_dsa_sig: Mapped[bytes | None] = mapped_column(nullable=True)
     merkle_leaf: Mapped[bytes | None] = mapped_column(nullable=True)
     merkle_root: Mapped[bytes | None] = mapped_column(nullable=True)
-    merkle_proof: Mapped[list[Any] | None] = mapped_column(JSONB, nullable=True)
+    # Stored shape is {"leaf_index": int, "tree_size": int, "path": [hex, ...]}
+    # -- a dict, not a list. Every reader calls .get() on it.
+    merkle_proof: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
     key_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     status: Mapped[str] = mapped_column(String(50), nullable=False, server_default="pending")
     sealed_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)

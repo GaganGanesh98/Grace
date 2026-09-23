@@ -9,17 +9,32 @@ import pytest
 from httpx import AsyncClient
 
 from axiom.db import session_scope
-from axiom.models.governance import GovernanceChain, GovernanceIntent, GovernanceReceipt, GovernanceVerdict
+from axiom.models.governance import (
+    GovernanceChain,
+    GovernanceIntent,
+    GovernanceReceipt,
+    GovernanceVerdict,
+)
 from axiom.models.project import Project
 from axiom.schemas.governance import GovernRequest
-from axiom.services.governance.chain import adjust_chain_after_hold_resolution, create_chain, update_chain_stats
+from axiom.services.governance.chain import (
+    adjust_chain_after_hold_resolution,
+    create_chain,
+    update_chain_stats,
+)
 from axiom.services.governance.context import enrich_context
 from axiom.services.governance.hold_resolution import seal_pending_after_hold_decision
 from axiom.services.governance.intent import declare_intent
 from axiom.services.governance.policy import clear_policy_cache_for_tests, evaluate_policy
-from axiom.services.governance.receipt import create_pending_receipt, reset_governance_merkle_for_tests
+from axiom.services.governance.receipt import (
+    create_pending_receipt,
+    reset_governance_merkle_for_tests,
+)
 from axiom.services.governance.verdict import render_verdict
-from axiom.services.governance.verification import verify_execution, verify_sealed_governance_receipt_from_db
+from axiom.services.governance.verification import (
+    verify_execution,
+    verify_sealed_governance_receipt_from_db,
+)
 from tests.fixtures.governance import bootstrap_project_with_api_key
 
 
@@ -33,7 +48,9 @@ def _reset_merkle_and_policy() -> None:
 
 
 @pytest.mark.asyncio
-async def test_seal_after_hold_approval_flips_verdict_to_allow_and_verifies(client: AsyncClient) -> None:
+async def test_seal_after_hold_approval_flips_verdict_to_allow_and_verifies(
+    client: AsyncClient,
+) -> None:
     fx = await bootstrap_project_with_api_key(client, policy_rules=[])
     pid = UUID(fx["project_id"])
     async with session_scope() as session:
@@ -59,7 +76,7 @@ async def test_seal_after_hold_approval_flips_verdict_to_allow_and_verifies(clie
         verdict.verdict = "allow"
         receipt.approval_status = "approved"
         receipt.approved_at = datetime.now(UTC)
-        vres = verify_execution(intent, {})
+        verify_execution(intent, {})
         sealed = await seal_pending_after_hold_decision(
             session,
             receipt=receipt,
@@ -86,7 +103,9 @@ async def test_seal_after_hold_approval_flips_verdict_to_allow_and_verifies(clie
 
 
 @pytest.mark.asyncio
-async def test_seal_after_hold_rejection_flips_verdict_to_deny_and_verifies(client: AsyncClient) -> None:
+async def test_seal_after_hold_rejection_flips_verdict_to_deny_and_verifies(
+    client: AsyncClient,
+) -> None:
     fx = await bootstrap_project_with_api_key(client, policy_rules=[])
     pid = UUID(fx["project_id"])
     async with session_scope() as session:
@@ -112,7 +131,7 @@ async def test_seal_after_hold_rejection_flips_verdict_to_deny_and_verifies(clie
         verdict.verdict = "deny"
         verdict.reason = "rejected"
         receipt.approval_status = "rejected"
-        vres = verify_execution(intent, {})
+        verify_execution(intent, {})
         sealed = await seal_pending_after_hold_decision(
             session,
             receipt=receipt,

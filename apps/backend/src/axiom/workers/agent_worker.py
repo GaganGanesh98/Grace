@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import asyncio
 import json
+from collections.abc import Awaitable
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, cast
 from uuid import UUID
 
 import httpx
@@ -80,7 +81,7 @@ async def _resolve_project_gateway_key(
     return plaintext
 
 
-async def process_run(run_id: str) -> None:  # noqa: PLR0915
+async def process_run(run_id: str) -> None:
     """Execute a single agent run: optional queue item is resolved by ``run_id`` string."""
 
     rid = UUID(run_id)
@@ -118,9 +119,7 @@ async def process_run(run_id: str) -> None:  # noqa: PLR0915
         correlation_id = run.correlation_id
 
     project_id = run.project_id
-    schedule_run_started(
-        project_id, run_id=rid, agent_id=run.agent_definition_id
-    )
+    schedule_run_started(project_id, run_id=rid, agent_id=run.agent_definition_id)
 
     publisher = EventPublisher()
     await publisher.publish(
@@ -197,7 +196,7 @@ async def process_run(run_id: str) -> None:  # noqa: PLR0915
                 "ok": ok,
             },
         )
-    except Exception as exc:  # noqa: BLE001 — terminal failure; log + persist run state
+    except Exception as exc:
         logger.exception("agent_worker.run_failed", run_id=run_id)
         ex_pid: UUID | None = None
         ex_row_id: UUID | None = None
@@ -223,7 +222,7 @@ async def drain_one_from_queue(timeout_seconds: float = 5.0) -> str | None:
     """Blocking pop of the next pending run id (JSON payload with ``run_id``)."""
 
     redis = get_redis()
-    item = await redis.brpop(QUEUE_PENDING, timeout=timeout_seconds)
+    item = await cast("Awaitable[list[Any]]", redis.brpop(QUEUE_PENDING, timeout=timeout_seconds))
     if item is None:
         return None
     _key, raw = item

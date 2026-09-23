@@ -55,7 +55,7 @@ def verify_execution(
     )
 
 
-def verify_receipt_independent(body: VerifyReceiptRequest) -> GovernanceEngineVerifyResponse:  # noqa: PLR0915
+def verify_receipt_independent(body: VerifyReceiptRequest) -> GovernanceEngineVerifyResponse:
     """Ed25519, ML-DSA-65, and Merkle checks (no database)."""
     errors: list[str] = []
     checks: dict[str, bool] = {"ed25519": False, "ml_dsa_65": False, "merkle": False}
@@ -180,9 +180,9 @@ def verify_sealed_governance_receipt_from_db(
     receipt_json = canonicalize(payload_obj).decode("utf-8")
     ed_b64 = base64.b64encode(receipt.ed25519_sig).decode("ascii") if receipt.ed25519_sig else ""
     ml_b64 = base64.b64encode(receipt.ml_dsa_sig).decode("ascii") if receipt.ml_dsa_sig else ""
-    mp = receipt.merkle_proof if isinstance(receipt.merkle_proof, dict) else {}
-    raw_path = mp.get("path") if isinstance(mp.get("path"), list) else []
-    path = [str(x) for x in raw_path]
+    mp: dict[str, Any] = receipt.merkle_proof if isinstance(receipt.merkle_proof, dict) else {}
+    raw_path = mp.get("path")
+    path = [str(x) for x in (raw_path if isinstance(raw_path, list) else [])]
     merkle_root_hex = receipt.merkle_root.hex() if receipt.merkle_root else ""
     keys = get_signing_keys()
     leaf_index = mp.get("leaf_index")

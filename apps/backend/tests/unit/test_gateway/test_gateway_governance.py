@@ -234,6 +234,7 @@ async def test_governance_chain_created_per_workflow(
             "name": "R",
         },
     )
+
     async def fake_proxy(*_a, **_k):
         return httpx.Response(200, json={"ok": True})
 

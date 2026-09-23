@@ -11,7 +11,7 @@ def main() -> None:
     port = get_settings().gateway_port
     uvicorn.run(
         "axiom.gateway.app:app",
-        host="0.0.0.0",
+        host="0.0.0.0",  # noqa: S104 - local dev runner, intentionally reachable on the LAN
         port=port,
         reload=True,
         log_level="info",

@@ -2,17 +2,17 @@
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 import httpx
 import pytest
 
 from axiom.gateway.protocol_handlers import (
-    _RESPONSE_NEVER_FORWARD,
     sanitize_upstream_response_headers,
 )
 
 
 class TestContentEncodingStripped:
-
     def test_content_encoding_stripped(self) -> None:
         h = httpx.Headers({"content-encoding": "gzip", "content-type": "application/json"})
         out = sanitize_upstream_response_headers(h)
@@ -21,8 +21,7 @@ class TestContentEncodingStripped:
 
 
 class TestHopByHopStrippedFromResponse:
-
-    HOP_BY_HOP = [
+    HOP_BY_HOP: ClassVar[list[str]] = [
         "connection",
         "keep-alive",
         "proxy-authenticate",
@@ -41,7 +40,6 @@ class TestHopByHopStrippedFromResponse:
 
 
 class TestSafeHeadersPassThrough:
-
     @pytest.mark.parametrize(
         "header,value",
         [
@@ -58,7 +56,6 @@ class TestSafeHeadersPassThrough:
 
 
 class TestCaseInsensitiveStrip:
-
     @pytest.mark.parametrize("casing", ["content-encoding", "Content-Encoding", "CONTENT-ENCODING"])
     def test_case_insensitive_strip(self, casing: str) -> None:
         h = httpx.Headers({casing: "gzip", "x-request-id": "ok"})

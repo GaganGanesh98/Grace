@@ -14,7 +14,10 @@ from axiom.schemas.governance import GovernRequest
 from axiom.services.governance.context import enrich_context
 from axiom.services.governance.intent import declare_intent
 from axiom.services.governance.policy import clear_policy_cache_for_tests, evaluate_policy
-from axiom.services.governance.receipt import create_pending_receipt, reset_governance_merkle_for_tests
+from axiom.services.governance.receipt import (
+    create_pending_receipt,
+    reset_governance_merkle_for_tests,
+)
 from axiom.services.governance.verdict import render_verdict
 from tests.fixtures.governance import bootstrap_project_with_api_key
 

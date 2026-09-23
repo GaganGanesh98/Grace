@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import ClassVar
 from uuid import UUID
 
 import httpx
@@ -68,9 +69,9 @@ async def check_governance(
 
 
 class BaseTool(ABC):
-    name: str
-    description: str
-    schema: dict[str, object]
+    name: ClassVar[str]
+    description: ClassVar[str]
+    schema: ClassVar[dict[str, object]]
 
     @abstractmethod
     async def execute(self, ctx: ToolExecutionContext, **kwargs: object) -> dict[str, object]:

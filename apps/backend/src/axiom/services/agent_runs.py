@@ -5,20 +5,20 @@ from __future__ import annotations
 import hashlib
 import json
 from datetime import UTC, datetime, timedelta
+from typing import Any
 from uuid import UUID
 
 import structlog
 from jose import jwt
-from sqlalchemy import and_, cast, func, or_, select
-from sqlalchemy import String
+from sqlalchemy import String, and_, cast, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from axiom.config import get_settings
 from axiom.core import errors
 from axiom.models.agent_definition import AgentDefinition
 from axiom.models.agent_run import AgentRun, AgentRunStatus
-from axiom.services.redis_client import get_redis
 from axiom.services.events import schedule_run_completed
+from axiom.services.redis_client import get_redis
 from axiom.utils.ids import new_uuidv7_str
 
 logger = structlog.get_logger(__name__)
@@ -83,7 +83,10 @@ class AgentRunService:
         await self._session.commit()
 
         redis = get_redis()
-        await redis.lpush(
+        # redis-py types the sync and async command sets together, so this looks
+        # like Awaitable[int] | int. typing.cast is unavailable here because the
+        # module already imports sqlalchemy.cast for SQL CAST expressions.
+        await redis.lpush(  # type: ignore[misc]
             QUEUE_PENDING,
             json.dumps({"run_id": str(run.id), "correlation_id": correlation_id}),
         )
@@ -106,7 +109,7 @@ class AgentRunService:
         status: str | None = None,
         q: str | None = None,
     ) -> tuple[list[AgentRun], int]:
-        conds: list = [AgentRun.project_id == project_id]
+        conds: list[Any] = [AgentRun.project_id == project_id]
         if status in {s.value for s in AgentRunStatus}:
             conds.append(AgentRun.status == status)
         if q and q.strip():
@@ -117,8 +120,8 @@ class AgentRunService:
             )
             search = or_(
                 cast(AgentRun.id, String).ilike(term),
-                AgentRun.input_payload["goal"].as_string().ilike(term),  # type: ignore[union-attr]
-                AgentRun.agent_definition_id.in_(ad_sub),  # type: ignore[attr-defined]
+                AgentRun.input_payload["goal"].as_string().ilike(term),
+                AgentRun.agent_definition_id.in_(ad_sub),
             )
             conds.append(search)
         w = and_(*conds)

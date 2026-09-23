@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import json
-from typing import Any
+from collections.abc import Awaitable
+from typing import Any, cast
 from uuid import UUID
 
 from redis.asyncio import Redis
@@ -20,6 +21,6 @@ class EventPublisher:
         chan = f"axiom:agent_runs:events:{run_id}"
         await self._redis.publish(chan, payload)
         log_key = f"axiom:agent_runs:events_log:{run_id}"
-        await self._redis.lpush(log_key, payload)
-        await self._redis.ltrim(log_key, 0, 49)
+        await cast("Awaitable[int]", self._redis.lpush(log_key, payload))
+        await cast("Awaitable[str]", self._redis.ltrim(log_key, 0, 49))
         await self._redis.expire(log_key, 86400)

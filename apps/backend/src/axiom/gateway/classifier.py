@@ -23,7 +23,13 @@ class GatewayClassification:
 def _risk_for_host(host: str) -> str:
     h = host.lower()
     combined = h
-    for pattern in ("smtp", "gmail.googleapis.com", "graph.microsoft.com", "slack.com", "hooks.slack.com"):
+    for pattern in (
+        "smtp",
+        "gmail.googleapis.com",
+        "graph.microsoft.com",
+        "slack.com",
+        "hooks.slack.com",
+    ):
         if pattern in combined:
             return "high"
     return "medium"

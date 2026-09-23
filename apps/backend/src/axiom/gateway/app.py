@@ -7,7 +7,7 @@ import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
-from typing import Annotated, Any
+from typing import Annotated, Any, cast
 from urllib.parse import unquote, urlparse
 from uuid import UUID
 
@@ -67,7 +67,7 @@ def _http_client_for(request: Request) -> httpx.AsyncClient:
     """
     if getattr(request.app.state, "http_client", None) is None:
         request.app.state.http_client = httpx.AsyncClient()
-    return request.app.state.http_client
+    return cast("httpx.AsyncClient", request.app.state.http_client)
 
 
 def _headers_to_str_dict(request: Request) -> dict[str, str]:
@@ -337,7 +337,7 @@ async def _run_governed_proxy(
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     from axiom.services.receipt.keys import get_signing_keys
 
     keys = get_signing_keys()
@@ -709,5 +709,3 @@ async def gateway_llm_proxy(
         path_for_classify=path,
         body=body,
     )
-
-

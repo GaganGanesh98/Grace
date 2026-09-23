@@ -34,7 +34,7 @@ async def test_proxy_forwards_request_to_provider() -> None:
 
 @pytest.mark.asyncio
 async def test_proxy_returns_provider_response() -> None:
-    transport = httpx.MockTransport(lambda request: httpx.Response(201, content=b"created"))
+    transport = httpx.MockTransport(lambda _request: httpx.Response(201, content=b"created"))
     async with httpx.AsyncClient(transport=transport) as client:
         r = await proxy_request(client, "POST", "https://example.com", {}, b"x")
     assert r.status_code == 201
@@ -43,7 +43,7 @@ async def test_proxy_returns_provider_response() -> None:
 
 @pytest.mark.asyncio
 async def test_proxy_handles_provider_error() -> None:
-    transport = httpx.MockTransport(lambda request: httpx.Response(502, content=b"bad"))
+    transport = httpx.MockTransport(lambda _request: httpx.Response(502, content=b"bad"))
     async with httpx.AsyncClient(transport=transport) as client:
         r = await proxy_request(client, "GET", "https://example.com", {}, None)
     assert r.status_code == 502
@@ -70,9 +70,9 @@ def test_proxy_strips_axiom_headers() -> None:
 
 @pytest.mark.asyncio
 async def test_streaming_response_forwards_chunks() -> None:
-    transport = httpx.MockTransport(lambda request: httpx.Response(200, content=b"xy"))
+    transport = httpx.MockTransport(lambda _request: httpx.Response(200, content=b"xy"))
     async with httpx.AsyncClient(transport=transport) as client:
-        resp, aiter = await open_streaming_response(
+        resp, stream_iter = await open_streaming_response(
             client,
             "GET",
             "https://example.com/stream",
@@ -82,7 +82,7 @@ async def test_streaming_response_forwards_chunks() -> None:
         )
         assert resp.status_code == 200
         got = []
-        async for part in aiter:
+        async for part in stream_iter:
             got.append(part)
     assert got == [b"xy"]
 

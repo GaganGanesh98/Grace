@@ -61,8 +61,8 @@ On the first dev start, if `GRACE_WORKER_GATEWAY_API_KEY` is missing from `apps/
 
 `pytest` targets a **separate** Postgres database **`axiom_test`** (same server as dev, port **5433**) and **Redis logical DB 1**, so integration tests and `TRUNCATE` fixtures cannot wipe your **`axiom`** dev data or flush the same Redis DB the running app uses. **`./axiom dev`** creates `axiom_test` if needed and runs Alembic on it after migrating `axiom`.
 
-To run tests without `./axiom dev`, create the DB once:  
-`docker compose exec -T postgres psql -U axiom -d postgres -c "CREATE DATABASE axiom_test OWNER axiom;"`  
+To run tests without `./axiom dev`, create the DB once:
+`docker compose exec -T postgres psql -U axiom -d postgres -c "CREATE DATABASE axiom_test OWNER axiom;"`
 then `cd apps/backend && DATABASE_URL=postgresql+asyncpg://axiom:axiom_dev_only@127.0.0.1:5433/axiom_test uv run alembic upgrade head`.
 
 Only for debugging against the live dev DB: **`GRACE_PYTEST_USE_DEV_DB=1`** (not recommended).

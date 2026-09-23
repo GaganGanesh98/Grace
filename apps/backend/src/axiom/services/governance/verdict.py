@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from axiom.models.governance import GovernanceIntent, GovernanceVerdict
@@ -12,7 +14,7 @@ async def render_verdict(
     db: AsyncSession,
     intent: GovernanceIntent,
     policy_result: PolicyResult,
-    context: dict,
+    context: dict[str, Any],
 ) -> GovernanceVerdict:
     verdict = GovernanceVerdict(
         intent_id=intent.id,

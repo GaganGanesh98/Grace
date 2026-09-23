@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Any
 from urllib.parse import quote
 from uuid import UUID
 
@@ -91,7 +91,7 @@ async def get_command_center_receipt(
         UUID | None,
         Query(description="JWT: required when the user belongs to multiple projects."),
     ] = None,
-) -> dict:
+) -> dict[str, Any]:
     """Full receipt payload for the dashboard drawer (Phase 7.2)."""
     receipt = await db.get(GovernanceReceipt, receipt_id)
     if receipt is None:
@@ -161,7 +161,7 @@ async def download_agent_run_artifact(
     ct = "application/octet-stream"
     safe = quote(filename)
     headers = {
-        "Content-Disposition": f'attachment; filename="{safe}"; filename*=UTF-8\'\'{safe}',
+        "Content-Disposition": f"attachment; filename=\"{safe}\"; filename*=UTF-8''{safe}",
         "Content-Type": ct,
         "Content-Length": str(len(body)),
     }

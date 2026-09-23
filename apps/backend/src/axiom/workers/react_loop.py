@@ -287,7 +287,7 @@ async def run_react_loop(
                 "artifacts": collected_artifacts,
             }
 
-        # parsed["type"] == "action"
+        # Everything below handles the action branch.
         name = str(parsed["name"])
         args = dict(parsed["args"]) if isinstance(parsed.get("args"), dict) else {}
 

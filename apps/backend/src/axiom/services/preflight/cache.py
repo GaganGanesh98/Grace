@@ -112,7 +112,7 @@ class PreflightCache:
         )
         try:
             raw = await self._redis.get(key)
-        except Exception:  # noqa: BLE001 — cache is best-effort
+        except Exception:
             logger.warning("preflight_cache_get_error", key_prefix=self._KEY_PREFIX, exc_info=True)
             return None
         if raw is None:
@@ -164,6 +164,6 @@ class PreflightCache:
         }
         try:
             await self._redis.setex(key, self._ttl, json.dumps(value))
-        except Exception:  # noqa: BLE001
+        except Exception:
             logger.warning("preflight_cache_set_error", key=key, exc_info=True)
             # Silent degradation: next call will recompute

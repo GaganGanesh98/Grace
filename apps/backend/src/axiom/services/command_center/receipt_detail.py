@@ -25,8 +25,9 @@ def build_command_center_receipt_detail(
     verdict: GovernanceVerdict,
 ) -> dict[str, Any]:
     """Shape matches Phase 7.2 GET /v1/receipts contract for the dashboard drawer."""
-    proof = receipt.merkle_proof if isinstance(receipt.merkle_proof, dict) else {}
-    path = proof.get("path") if isinstance(proof.get("path"), list) else []
+    proof: dict[str, Any] = receipt.merkle_proof if isinstance(receipt.merkle_proof, dict) else {}
+    raw_path = proof.get("path")
+    path: list[Any] = raw_path if isinstance(raw_path, list) else []
     depth = len(path)
     leaf_index = proof.get("leaf_index")
     root_hex = receipt.merkle_root.hex() if receipt.merkle_root else ""
@@ -45,8 +46,11 @@ def build_command_center_receipt_detail(
     ed_b64 = base64.b64encode(receipt.ed25519_sig).decode("ascii") if receipt.ed25519_sig else ""
     ml_b64 = base64.b64encode(receipt.ml_dsa_sig).decode("ascii") if receipt.ml_dsa_sig else ""
 
-    exec_data = receipt.execution_data if isinstance(receipt.execution_data, dict) else {}
-    tsa_raw = exec_data.get("tsa") if isinstance(exec_data.get("tsa"), dict) else {}
+    exec_data: dict[str, Any] = (
+        receipt.execution_data if isinstance(receipt.execution_data, dict) else {}
+    )
+    raw_tsa = exec_data.get("tsa")
+    tsa_raw: dict[str, Any] = raw_tsa if isinstance(raw_tsa, dict) else {}
     tsa = {
         "timestamp": tsa_raw.get("timestamp"),
         "verified": bool(tsa_raw.get("verified", False)),

@@ -107,7 +107,7 @@ async def preflight(
                     )
                     for policy, score in matches
                 ]
-            except Exception:  # noqa: BLE001 — advisory context must never fail preflight
+            except Exception:
                 logger.warning("preflight.related_policies_failed", exc_info=True)
 
     return PreflightResponse(

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 import pytest
 
 from axiom.gateway.protocol_handlers import (
@@ -33,7 +35,7 @@ class TestHostNeverLeaks:
 class TestHopByHopStripped:
     """All 8 RFC 7230 §6.1 hop-by-hop headers must be stripped."""
 
-    HOP_BY_HOP = [
+    HOP_BY_HOP: ClassVar[list[str]] = [
         "Connection",
         "Keep-Alive",
         "Proxy-Authenticate",
@@ -177,7 +179,8 @@ class TestProviderForwardHeaders:
             "Content-Type": "application/json",
         }
         out = merge_forward_headers(
-            inbound, provider_forward_headers=frozenset({"openai-beta"}),
+            inbound,
+            provider_forward_headers=frozenset({"openai-beta"}),
         )
         assert out["openai-beta"] == "assistants=v2"
 

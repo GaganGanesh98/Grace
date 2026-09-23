@@ -50,5 +50,8 @@ async def check_gateway_rate_limit(project_id: UUID) -> None:
     if n > limit:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail={"error": "rate_limited", "message": "Too many gateway requests for this project"},
+            detail={
+                "error": "rate_limited",
+                "message": "Too many gateway requests for this project",
+            },
         )

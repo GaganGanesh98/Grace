@@ -183,8 +183,7 @@ class AlgorithmRegistry:
             rs = reg.revoked_since.isoformat() if reg.revoked_since else "unknown date"
             succ = reg.successor or "a supported algorithm"
             msg = (
-                f"{name} is revoked since {rs}: {reg.reason}. "
-                f"Verification not allowed. Use {succ}."
+                f"{name} is revoked since {rs}: {reg.reason}. Verification not allowed. Use {succ}."
             )
             raise CryptoError(msg)
         if reg.verifier is None:

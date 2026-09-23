@@ -91,7 +91,11 @@ async def test_receipt_detail_returns_full_signature_and_merkle(client: AsyncCli
     from axiom.services.governance.context import enrich_context
     from axiom.services.governance.intent import declare_intent
     from axiom.services.governance.policy import clear_policy_cache_for_tests, evaluate_policy
-    from axiom.services.governance.receipt import create_pending_receipt, reset_governance_merkle_for_tests, seal_receipt
+    from axiom.services.governance.receipt import (
+        create_pending_receipt,
+        reset_governance_merkle_for_tests,
+        seal_receipt,
+    )
     from axiom.services.governance.verdict import render_verdict
     from axiom.services.governance.verification import verify_execution
 
@@ -213,7 +217,11 @@ async def test_cross_project_access_returns_403(client: AsyncClient) -> None:
     from axiom.services.governance.context import enrich_context
     from axiom.services.governance.intent import declare_intent
     from axiom.services.governance.policy import clear_policy_cache_for_tests, evaluate_policy
-    from axiom.services.governance.receipt import create_pending_receipt, reset_governance_merkle_for_tests, seal_receipt
+    from axiom.services.governance.receipt import (
+        create_pending_receipt,
+        reset_governance_merkle_for_tests,
+        seal_receipt,
+    )
     from axiom.services.governance.verdict import render_verdict
     from axiom.services.governance.verification import verify_execution
 
@@ -258,7 +266,11 @@ async def test_cross_project_access_returns_403(client: AsyncClient) -> None:
             pr = evaluate_policy(intent, context)
             verdict = await render_verdict(session, intent, pr, context)
             receipt = await create_pending_receipt(session, intent=intent, verdict=verdict)
-            outcome = {"target": intent.target, "action_type": intent.action_type, "risk": intent.risk_declared}
+            outcome = {
+                "target": intent.target,
+                "action_type": intent.action_type,
+                "risk": intent.risk_declared,
+            }
             vres = verify_execution(intent, outcome)
             await seal_receipt(
                 session,

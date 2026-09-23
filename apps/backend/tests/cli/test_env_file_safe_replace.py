@@ -29,9 +29,7 @@ def test_preserves_comments_and_blank_lines(tmp_path: Path) -> None:
     original = b"# header\n\nFOO=bar\n\n"
     p.write_bytes(original)
     replace_or_append(p, "AXIOM_WORKER_GATEWAY_API_KEY", "k")
-    assert p.read_bytes() == (
-        b"# header\n\nFOO=bar\n\nAXIOM_WORKER_GATEWAY_API_KEY=k\n"
-    )
+    assert p.read_bytes() == (b"# header\n\nFOO=bar\n\nAXIOM_WORKER_GATEWAY_API_KEY=k\n")
 
 
 @pytest.mark.parametrize(
