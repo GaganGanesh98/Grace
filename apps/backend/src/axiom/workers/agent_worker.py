@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import asyncio
 import json
+from collections.abc import Awaitable
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, cast
 from uuid import UUID
 
 import httpx
@@ -221,7 +222,7 @@ async def drain_one_from_queue(timeout_seconds: float = 5.0) -> str | None:
     """Blocking pop of the next pending run id (JSON payload with ``run_id``)."""
 
     redis = get_redis()
-    item = await redis.brpop(QUEUE_PENDING, timeout=timeout_seconds)
+    item = await cast("Awaitable[list[Any]]", redis.brpop(QUEUE_PENDING, timeout=timeout_seconds))
     if item is None:
         return None
     _key, raw = item

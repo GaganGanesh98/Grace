@@ -83,7 +83,10 @@ class AgentRunService:
         await self._session.commit()
 
         redis = get_redis()
-        await redis.lpush(
+        # redis-py types the sync and async command sets together, so this looks
+        # like Awaitable[int] | int. typing.cast is unavailable here because the
+        # module already imports sqlalchemy.cast for SQL CAST expressions.
+        await redis.lpush(  # type: ignore[misc]
             QUEUE_PENDING,
             json.dumps({"run_id": str(run.id), "correlation_id": correlation_id}),
         )

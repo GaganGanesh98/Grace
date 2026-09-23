@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Awaitable
+from typing import Any, cast
 from uuid import UUID
 
 import structlog
@@ -21,7 +23,7 @@ async def _load_replay(redis: Redis, run_id: UUID) -> list[str]:
     """Historical JSON strings oldest-first (Redis list is newest-first from LPUSH)."""
 
     key = f"{EVENT_LOG_PREFIX}{run_id}"
-    raw = await redis.lrange(key, 0, 49)
+    raw = await cast("Awaitable[list[Any]]", redis.lrange(key, 0, 49))
     out: list[str] = []
     for item in reversed(raw):
         if isinstance(item, (bytes, bytearray)):

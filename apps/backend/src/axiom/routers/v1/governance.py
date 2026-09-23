@@ -120,8 +120,9 @@ async def _receipt_to_response(
     intent: GovernanceIntent,
     verdict: GovernanceVerdict,
 ) -> EngineReceiptResponse:
-    proof = receipt.merkle_proof if isinstance(receipt.merkle_proof, dict) else {}
-    path = proof.get("path") if isinstance(proof.get("path"), list) else []
+    proof: dict[str, Any] = receipt.merkle_proof if isinstance(receipt.merkle_proof, dict) else {}
+    raw_path = proof.get("path")
+    path: list[Any] = raw_path if isinstance(raw_path, list) else []
     depth = len(path)
     merkle: dict[str, Any] = {
         "leaf": receipt.receipt_hash.hex() if receipt.receipt_hash else "",
@@ -328,8 +329,9 @@ async def governance_report(
         agent_id=str(intent.agent_id),
     )
 
-    proof = receipt.merkle_proof if isinstance(receipt.merkle_proof, dict) else {}
-    path = proof.get("path") if isinstance(proof.get("path"), list) else []
+    proof: dict[str, Any] = receipt.merkle_proof if isinstance(receipt.merkle_proof, dict) else {}
+    raw_path = proof.get("path")
+    path: list[Any] = raw_path if isinstance(raw_path, list) else []
     merkle = {
         "leaf": receipt.receipt_hash.hex() if receipt.receipt_hash else "",
         "root": receipt.merkle_root.hex() if receipt.merkle_root else "",

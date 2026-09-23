@@ -48,6 +48,7 @@ dev = [
     "ruff>=0.11.0",
     "mypy>=1.13.0",
     "types-passlib",
+    "types-PyYAML",
     "types-python-jose",
     "pre-commit>=4.0.0",
     "pip-audit>=2.7.0",
@@ -146,6 +147,14 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "asn1crypto.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "pqcrypto.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "oqs.*"
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
