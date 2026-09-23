@@ -167,9 +167,10 @@ testpaths = ["tests"]
 python_files = "test_*.py"
 addopts = "-ra -q --strict-markers --cov=axiom --cov-branch --cov-report=term-missing --cov-fail-under=80"
 # Without this a hung test blocks until the 6-hour job limit with no clue which
-# one it was; 60s turns that into a normal failure naming the test.
+# one it was. "signal" fails the single hung test and lets the run continue;
+# "thread" dumps stacks but kills the whole process, hiding every later result.
 timeout = 60
-timeout_method = "thread"
+timeout_method = "signal"
 markers = [
     "security: security-focused tests",
     "slow: tests that take > 1s",
