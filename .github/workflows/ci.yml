@@ -73,10 +73,15 @@ jobs:
       - name: Apply migrations
         working-directory: apps/backend
         env:
+          TEST_DATABASE_URL: postgresql+asyncpg://axiom:ci_only@localhost:5432/axiom_test
+          TEST_REDIS_URL: redis://localhost:6379/0
           DATABASE_URL: postgresql+asyncpg://axiom:ci_only@localhost:5432/axiom_test
+          REDIS_URL: redis://localhost:6379/0
           SECRET_KEY: ci-secret-key-not-for-production-use-only-xxxxxxxxxxxxxxxx
           JWT_SECRET: ci-jwt-secret-not-for-production-use-only
           ENCRYPTION_KEY: ci-encryption-key-not-for-production
+          GOOGLE_CLIENT_ID: test-google-client
+          GOOGLE_CLIENT_SECRET: test-google-secret
         run: uv run alembic upgrade head
 
       - name: Pytest with coverage
