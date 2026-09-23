@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Any, Annotated
 from urllib.parse import quote
 from uuid import UUID
 
@@ -91,7 +91,7 @@ async def get_command_center_receipt(
         UUID | None,
         Query(description="JWT: required when the user belongs to multiple projects."),
     ] = None,
-) -> dict:
+) -> dict[str, Any]:
     """Full receipt payload for the dashboard drawer (Phase 7.2)."""
     receipt = await db.get(GovernanceReceipt, receipt_id)
     if receipt is None:

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
-from typing import Literal
+from typing import Any, Literal
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -173,7 +173,7 @@ async def seal_after_success(
     *,
     receipt_id: UUID,
     project_id: UUID,
-    execution_data: dict,
+    execution_data: dict[str, Any],
     executed_at: datetime,
 ) -> None:
     """Load pending receipt and seal after successful provider call."""

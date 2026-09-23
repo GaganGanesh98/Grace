@@ -1,6 +1,7 @@
 """Governance workflow chains — grouping receipts with chain-level seals."""
 
 from __future__ import annotations
+from typing import Any
 
 import hashlib
 from datetime import UTC, datetime, timedelta
@@ -242,7 +243,7 @@ async def list_chains(
 async def list_receipt_summaries_for_chain(
     db: AsyncSession,
     chain_id: UUID,
-) -> list[dict]:
+) -> list[dict[str, Any]]:
     stmt = (
         select(GovernanceReceipt, GovernanceIntent, GovernanceVerdict)
         .join(GovernanceIntent, GovernanceReceipt.intent_id == GovernanceIntent.id)
@@ -251,7 +252,7 @@ async def list_receipt_summaries_for_chain(
         .order_by(GovernanceReceipt.created_at)
     )
     result = await db.execute(stmt)
-    records: list[dict] = []
+    records: list[dict[str, Any]] = []
     for receipt, _intent, verdict in result.all():
         records.append(
             {
@@ -271,7 +272,7 @@ async def list_receipt_summaries_for_chain(
 async def get_chain_with_records(
     db: AsyncSession,
     chain_id: UUID,
-) -> tuple[GovernanceChain, list[dict]]:
+) -> tuple[GovernanceChain, list[dict[str, Any]]]:
     chain = await get_chain(db, chain_id)
     if chain is None:
         msg = "Chain not found"

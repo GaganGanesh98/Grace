@@ -131,10 +131,10 @@ class GovernRequest(BaseModel):
     agent_id: str = Field(..., min_length=1, max_length=255)
     action_type: str = Field(..., min_length=1, max_length=255)
     target: str = Field(..., min_length=1, max_length=1024)
-    parameters: dict = Field(default_factory=dict)
+    parameters: dict[str, Any] = Field(default_factory=dict[str, Any])
     risk: str = Field(..., pattern="^(low|medium|high|critical)$")
     mode: str = Field(default="enforce", pattern="^(enforce|shadow|dry_run)$")
-    metadata: dict = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict[str, Any])
     workflow: str | None = Field(
         None,
         max_length=255,
@@ -149,7 +149,7 @@ class ReportRequest(BaseModel):
     """Agent reports what actually happened after execution."""
 
     receipt_id: str = Field(..., description="Receipt ID from govern response")
-    outcome: dict = Field(..., description="What actually happened")
+    outcome: dict[str, Any] = Field(..., description="What actually happened")
     executed_at: datetime | None = None
 
     model_config = ConfigDict(extra="forbid")
@@ -207,9 +207,9 @@ class ReportResponse(BaseModel):
     receipt_id: str
     status: str
     verification: str
-    mismatches: list[dict]
-    signatures: dict
-    merkle: dict
+    mismatches: list[dict[str, Any]]
+    signatures: dict[str, Any]
+    merkle: dict[str, Any]
 
     model_config = ConfigDict(extra="forbid")
 
@@ -218,16 +218,16 @@ class EngineReceiptResponse(BaseModel):
     """Full receipt returned from GET /v1/governance/receipts/{id}."""
 
     id: str
-    intent: dict
-    verdict: dict
-    execution: dict | None
-    verification: dict
-    signatures: dict
-    merkle: dict
+    intent: dict[str, Any]
+    verdict: dict[str, Any]
+    execution: dict[str, Any] | None
+    verification: dict[str, Any]
+    signatures: dict[str, Any]
+    merkle: dict[str, Any]
     policy_version: str
     sealed_at: datetime | None
     status: str
-    signer_public: dict | None = None
+    signer_public: dict[str, Any] | None = None
     approval_status: str | None = None
     approved_by: str | None = None
     approved_at: datetime | None = None
@@ -289,7 +289,7 @@ class GovernanceEngineVerifyResponse(BaseModel):
     """Returned from POST /v1/governance/verify (independent checks)."""
 
     valid: bool
-    checks: dict
+    checks: dict[str, Any]
     errors: list[str]
 
     model_config = ConfigDict(extra="forbid")
@@ -315,11 +315,11 @@ class ChainSummary(BaseModel):
     compliant: int
     non_compliant: int
     compliance_rate: float
-    chain_signature: dict | None
+    chain_signature: dict[str, Any] | None
     started_at: datetime
     closed_at: datetime | None
     sealed_at: datetime | None
-    records: list[dict]
+    records: list[dict[str, Any]]
 
     model_config = ConfigDict(extra="forbid")
 

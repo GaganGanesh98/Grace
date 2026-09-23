@@ -1,6 +1,7 @@
 """Agent run lifecycle: queue, tokens, cancel (Phase 6.5)."""
 
 from __future__ import annotations
+from typing import Any
 
 import hashlib
 import json
@@ -105,7 +106,7 @@ class AgentRunService:
         status: str | None = None,
         q: str | None = None,
     ) -> tuple[list[AgentRun], int]:
-        conds: list = [AgentRun.project_id == project_id]
+        conds: list[Any] = [AgentRun.project_id == project_id]
         if status in {s.value for s in AgentRunStatus}:
             conds.append(AgentRun.status == status)
         if q and q.strip():
@@ -116,8 +117,8 @@ class AgentRunService:
             )
             search = or_(
                 cast(AgentRun.id, String).ilike(term),
-                AgentRun.input_payload["goal"].as_string().ilike(term),  # type: ignore[union-attr]
-                AgentRun.agent_definition_id.in_(ad_sub),  # type: ignore[attr-defined]
+                AgentRun.input_payload["goal"].as_string().ilike(term),
+                AgentRun.agent_definition_id.in_(ad_sub),
             )
             conds.append(search)
         w = and_(*conds)

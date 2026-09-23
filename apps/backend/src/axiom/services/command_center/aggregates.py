@@ -7,8 +7,9 @@ from datetime import UTC, date, datetime, timedelta
 from uuid import UUID
 
 import structlog
-from sqlalchemy import and_, case, func, or_, select
+from sqlalchemy import Case, ColumnElement, and_, case, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql._typing import ColumnExpressionArgument
 
 from axiom.config import get_settings
 from axiom.models.agent_run import AgentRun, AgentRunStatus
@@ -80,7 +81,7 @@ def _merkle_status(
     return "healthy"
 
 
-def _verdict_approved(v) -> case:  # type: ignore[valid-type]
+def _verdict_approved(v: ColumnExpressionArgument[str]) -> Case[int]:
     return case(
         (
             func.lower(v).in_(("approve", "modify", "allow")),
@@ -90,7 +91,7 @@ def _verdict_approved(v) -> case:  # type: ignore[valid-type]
     )
 
 
-def _verdict_escalated(v) -> case:
+def _verdict_escalated(v: ColumnExpressionArgument[str]) -> Case[int]:
     return case(
         (
             func.lower(v).in_(("escalate", "hold")),
@@ -100,7 +101,7 @@ def _verdict_escalated(v) -> case:
     )
 
 
-def _verdict_denied(v) -> case:
+def _verdict_denied(v: ColumnExpressionArgument[str]) -> Case[int]:
     return case(
         (
             func.lower(v) == "deny",
@@ -110,7 +111,7 @@ def _verdict_denied(v) -> case:
     )
 
 
-def _receipt_has_tsa() -> and_:
+def _receipt_has_tsa() -> ColumnElement[bool]:
     tsa = GovernanceReceipt.execution_data["tsa"]  # JSONB path
     return and_(
         GovernanceReceipt.execution_data.isnot(None),
@@ -284,9 +285,9 @@ class AggregatesService:
             or 0
         )
         return CryptoHealthOut(
-            ed25519_status=_signing_status(t_sealed, n_ed),  # type: ignore[arg-type]
-            mldsa65_status=_signing_status(t_sealed, n_ml),  # type: ignore[arg-type]
-            merkle_status=_merkle_status(t_all, n_m),  # type: ignore[arg-type]
+            ed25519_status=_signing_status(t_sealed, n_ed),
+            mldsa65_status=_signing_status(t_sealed, n_ml),
+            merkle_status=_merkle_status(t_all, n_m),
             next_rotation_days=_next_rotation_days(),
         )
 
