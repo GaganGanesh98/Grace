@@ -32,9 +32,7 @@ from httpx import ASGITransport, AsyncClient
 # integration tests cannot wipe ./axiom dev data. Override with GRACE_PYTEST_USE_DEV_DB=1
 # only when intentionally debugging against the live dev database.
 _use_dev_db = (
-    os.environ.get("GRACE_PYTEST_USE_DEV_DB")
-    or os.environ.get("AXIOM_PYTEST_USE_DEV_DB")
-    or ""
+    os.environ.get("GRACE_PYTEST_USE_DEV_DB") or os.environ.get("AXIOM_PYTEST_USE_DEV_DB") or ""
 ).lower() in ("1", "true", "yes")
 if not _use_dev_db:
     # TEST_DATABASE_URL wins (CI sets it). Otherwise default local axiom_test on :5433.

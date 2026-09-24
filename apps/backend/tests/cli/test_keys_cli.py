@@ -106,10 +106,7 @@ async def test_rotate_warns_when_the_target_is_not_the_configured_active_kek(
     await _store_key(client, auth_headers(fx["user_access"]), "cli-rotate-warn")
     new_kek_b64 = base64.b64encode(secrets.token_bytes(32)).decode()
 
-    assert (
-        await keys_cli._async_main(["rotate", "--new-kek-b64", new_kek_b64])
-        == keys_cli.EXIT_OK
-    )
+    assert await keys_cli._async_main(["rotate", "--new-kek-b64", new_kek_b64]) == keys_cli.EXIT_OK
     out = capsys.readouterr().out
     assert "WARNING" in out
     assert "DRY RUN" in out

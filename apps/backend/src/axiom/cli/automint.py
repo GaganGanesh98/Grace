@@ -57,9 +57,7 @@ def _read_worker_key(env_path: Path) -> str:
 
 
 def _explicit_shell_key() -> bool:
-    return bool(
-        os.environ.get(ENV_KEY, "").strip() or os.environ.get(LEGACY_ENV_KEY, "").strip()
-    )
+    return bool(os.environ.get(ENV_KEY, "").strip() or os.environ.get(LEGACY_ENV_KEY, "").strip())
 
 
 def _automint_disabled_in_file(env_path: Path) -> bool:

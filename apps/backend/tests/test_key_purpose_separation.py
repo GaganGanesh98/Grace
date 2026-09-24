@@ -115,12 +115,9 @@ class TestExplicitKek:
         monkeypatch.setenv(
             "GRACE_VAULT_KEK_B64", base64.b64encode(secrets.token_bytes(32)).decode()
         )
-        monkeypatch.setenv(
-            "GRACE_VAULT_KEK_PREVIOUS_B64", base64.b64encode(retired).decode()
-        )
+        monkeypatch.setenv("GRACE_VAULT_KEK_PREVIOUS_B64", base64.b64encode(retired).decode())
         get_settings.cache_clear()
 
         assert (
-            kek_registry.kek_by_id(kek_registry.Purpose.VAULT, kek_fingerprint(retired))
-            == retired
+            kek_registry.kek_by_id(kek_registry.Purpose.VAULT, kek_fingerprint(retired)) == retired
         )

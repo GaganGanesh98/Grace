@@ -10,10 +10,10 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from axiom.models.agent_definition import AgentDefinition
-from axiom.models.vault import VaultKey
 from axiom.gateway.protocol_handlers import merge_forward_headers, prepare_upstream_request
 from axiom.gateway.provider_registry import get_provider_spec
+from axiom.models.agent_definition import AgentDefinition
+from axiom.models.vault import VaultKey
 from axiom.services import vault as vault_service
 
 logger = structlog.get_logger(__name__)
@@ -80,12 +80,7 @@ async def inject_credentials(
         )
         if ad is not None:
             vk = await db.get(VaultKey, ad.vault_key_id)
-            if (
-                vk is not None
-                and vk.is_active
-                and vk.kind == "llm"
-                and vk.service.lower() == prov
-            ):
+            if vk is not None and vk.is_active and vk.kind == "llm" and vk.service.lower() == prov:
                 raw = vault_service.decrypt_row(vk)
                 resolved = (raw, vk.id)
                 logger.info(
@@ -119,7 +114,8 @@ async def inject_credentials(
     raw_key, vault_key_id = resolved
 
     merged = merge_forward_headers(
-        request_headers, provider_forward_headers=spec.forward_headers,
+        request_headers,
+        provider_forward_headers=spec.forward_headers,
     )
     out_headers, out_url = prepare_upstream_request(spec, raw_key, request_url, merged)
     parsed_out = urlparse(out_url)
@@ -129,7 +125,9 @@ async def inject_credentials(
         provider=prov,
         auth_method=str(spec.auth_method),
         vault_key_id=str(vault_key_id),
-        has_authorization=bool(out_headers.get("Authorization") or out_headers.get("authorization")),
+        has_authorization=bool(
+            out_headers.get("Authorization") or out_headers.get("authorization")
+        ),
         has_x_api_key=bool(out_headers.get("x-api-key")),
         upstream_host=parsed_out.hostname,
         upstream_path=parsed_out.path,

@@ -121,9 +121,9 @@ async def status(db: AsyncSession) -> VaultKeyStatus:
 async def _count_legacy(db: AsyncSession) -> int:
     return int(
         await db.scalar(
-            select(func.count()).select_from(VaultKey).where(
-                VaultKey.scheme == envelope.SCHEME_LEGACY
-            )
+            select(func.count())
+            .select_from(VaultKey)
+            .where(VaultKey.scheme == envelope.SCHEME_LEGACY)
         )
         or 0
     )
@@ -163,9 +163,7 @@ async def backfill_legacy_rows(
             result.skipped += 1
             continue
 
-        sealed = vault_service.seal_credential(
-            plaintext, vault_key_id=row.id, user_id=row.user_id
-        )
+        sealed = vault_service.seal_credential(plaintext, vault_key_id=row.id, user_id=row.user_id)
         row.encrypted_key = sealed.ciphertext
         row.scheme = sealed.scheme
         row.kek_id = sealed.kek_id

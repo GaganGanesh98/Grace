@@ -91,7 +91,9 @@ async def events_stream(
             with contextlib.suppress(Exception):
                 # aclose(), not the deprecated close(): redis-py renamed it, and
                 # the sync alias is scheduled for removal.
-                await pubsub.aclose()
+                # redis-py does not annotate aclose(); the deprecated close()
+                # alias is typed but scheduled for removal.
+                await pubsub.aclose()  # type: ignore[no-untyped-call]
 
     return StreamingResponse(
         body(),

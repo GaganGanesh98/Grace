@@ -225,9 +225,7 @@ async def test_full_rotation_keeps_every_credential_readable(client: AsyncClient
 
     async with session_scope() as session:
         rows = list(
-            await session.scalars(
-                select(VaultKey).where(VaultKey.id.in_(list(expected.keys())))
-            )
+            await session.scalars(select(VaultKey).where(VaultKey.id.in_(list(expected.keys()))))
         )
         assert len(rows) == 3
         for row in rows:
