@@ -197,6 +197,15 @@ async def test_adv_response_always_has_disclaimer(client: AsyncClient) -> None:
     assert "/v1/govern" in d
 
 
+@pytest.mark.skip(
+    reason=(
+        "v0.2.0-engine was never pushed to the repository (git ls-remote --tags "
+        "origin is empty), so this always fails with 'bad revision' regardless of "
+        "environment. Independent of that, the invariant it enforced is already "
+        "superseded: routers/verify.py was deliberately changed post-baseline by "
+        "ADR-028 (the payload_hash_matches fix). See ADR-033."
+    )
+)
 def test_adv_no_phase_2_modifications() -> None:
     root = Path(__file__).resolve().parents[4]
     # Crypto is intentionally allowed to drift from v0.2.0-engine (Phase 1.75B baseline: v0.1.75-crypto).

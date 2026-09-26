@@ -166,7 +166,13 @@ async def test_ci_skips_mint(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) ->
 async def test_explicit_shell_skips(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     p = tmp_path / "e.env"
     _write_minimal_env(p)
+    # _is_ci() checks CI *or* GITHUB_ACTIONS; a real GitHub Actions runner always
+    # sets the latter, so neutralizing only CI still short-circuits to
+    # "skipped_ci" before this test ever reaches the explicit-key path it means
+    # to exercise. Passed locally (where GITHUB_ACTIONS is unset) but failed in
+    # actual CI for exactly that reason.
     monkeypatch.setenv("CI", "")
+    monkeypatch.setenv("GITHUB_ACTIONS", "")
     monkeypatch.setenv("GRACE_WORKER_GATEWAY_API_KEY", "axm_live_manual_override_value_here_xx")
     get_settings.cache_clear()
     out = await ensure_worker_gateway_key(p)
