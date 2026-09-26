@@ -209,7 +209,7 @@ async def seal_receipt(
     try:
         ed_sig = ed25519.sign(keys.ed25519_private, canonical)
         ml_sig = ml_dsa.sign(keys.ml_dsa_private, canonical)
-    except Exception:
+    except Exception:  # noqa: BLE001 — logs and re-raises; must not leave the receipt row inconsistent
         logger.exception("governance.seal.sign_failed", receipt_id=str(receipt.id))
         receipt.status = "failed"
         receipt.updated_at = datetime.now(UTC)

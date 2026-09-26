@@ -80,7 +80,7 @@ async def events_stream(
                     yield _fmt_sse(ev, text)
         except asyncio.CancelledError:
             raise
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001 — logs and re-raises; matches the websocket stream boundary pattern
             logger.warning(
                 "axiom_event.sse_stream_error", project_id=str(project_id), error=str(exc)
             )

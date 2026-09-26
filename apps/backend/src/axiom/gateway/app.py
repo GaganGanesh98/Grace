@@ -207,7 +207,7 @@ async def _run_governed_proxy(
                 async for chunk in stream_bytes:
                     hasher.update(chunk)
                     yield chunk
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001 — outbound call can fail in ways we cannot enumerate; the receipt must still be sealed
                 logger.exception("gateway.stream_failed", receipt_id=str(allow.receipt_id))
                 async with session_scope() as sdb:
                     await seal_after_transport_failure(
@@ -279,7 +279,7 @@ async def _run_governed_proxy(
             {"error": "upstream_timeout", "receipt_id": str(allow.receipt_id)},
             headers=hdr_receipt,
         )
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 — outbound call can fail in ways we cannot enumerate; the receipt must still be sealed
         logger.exception("gateway.proxy_failed", receipt_id=str(allow.receipt_id))
         async with session_scope() as sdb:
             await seal_after_transport_failure(
@@ -568,7 +568,7 @@ async def generic_proxy(
                 status_code = response.status_code
                 async for chunk in stream_bytes:
                     yield chunk
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001 — outbound call can fail in ways we cannot enumerate; the receipt must still be sealed
                 logger.exception("gateway.stream_failed", receipt_id=str(allow.receipt_id))
                 async with session_scope() as sdb:
                     await seal_after_transport_failure(

@@ -196,7 +196,7 @@ async def process_run(run_id: str) -> None:
                 "ok": ok,
             },
         )
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 — one run's failure must not crash the worker; always logged and recorded on the run
         logger.exception("agent_worker.run_failed", run_id=run_id)
         ex_pid: UUID | None = None
         ex_row_id: UUID | None = None

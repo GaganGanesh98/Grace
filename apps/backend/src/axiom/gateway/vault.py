@@ -135,7 +135,7 @@ async def inject_credentials(
 
     try:
         _scrub_key_var(raw_key)
-    except Exception:
+    except Exception:  # noqa: BLE001 — best-effort key scrub, must not fail the request
         logger.exception("vault.scrub_failed")
 
     return out_headers, out_url, vault_key_id

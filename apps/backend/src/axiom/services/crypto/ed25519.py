@@ -84,7 +84,7 @@ def _sign_pem(private_key_pem: SecretStr, message: bytes) -> bytes:
         return private_key.sign(message)
     except CryptoInputError:
         raise
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 — wraps any backend signing failure into SignatureError
         raise SignatureError("Ed25519 signing failed") from exc
     finally:
         zero_memory(pem_copy)
@@ -100,7 +100,7 @@ def _sign_raw(message: bytes, private_key: bytes) -> bytes:
         return sk.sign(message)
     except CryptoInputError:
         raise
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 — wraps any backend signing failure into SignatureError
         raise SignatureError("Ed25519 signing failed") from exc
     finally:
         zero_memory(key_copy)

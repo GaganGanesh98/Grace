@@ -107,7 +107,7 @@ async def preflight(
                     )
                     for policy, score in matches
                 ]
-            except Exception:
+            except Exception:  # noqa: BLE001 — related-policy lookup is advisory, must not block the preflight response
                 logger.warning("preflight.related_policies_failed", exc_info=True)
 
     return PreflightResponse(
