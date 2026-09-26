@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Auto-mint AXIOM_WORKER_GATEWAY_API_KEY into apps/backend/.env (dev only).
+# Auto-mint GRACE_WORKER_GATEWAY_API_KEY into apps/backend/.env (dev only).
 # Sourced from axiom-dev.sh after Postgres is healthy and migrations ran.
 
 _axiom_ensure_worker_gateway_api_key() {
@@ -7,7 +7,7 @@ _axiom_ensure_worker_gateway_api_key() {
     axiom_log_tagged pg green "Worker API key automint skipped (CI)."
     return 0
   fi
-  if [[ -n "${AXIOM_WORKER_GATEWAY_API_KEY:-}" ]]; then
+  if [[ -n "${GRACE_WORKER_GATEWAY_API_KEY:-${AXIOM_WORKER_GATEWAY_API_KEY:-}}" ]]; then
     axiom_log_tagged pg green "Auto-mint skipped (explicit key provided)."
     return 0
   fi

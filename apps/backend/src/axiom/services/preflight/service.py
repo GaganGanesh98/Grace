@@ -116,7 +116,7 @@ class PreflightService:
                 action_canonical_hash_hex=action_hash_hex,
                 mode=mode.value,
             )
-        except Exception:
+        except Exception:  # noqa: BLE001 — preflight cache is best-effort, must not block governance
             logger.warning("preflight_cache_get_unexpected", exc_info=True)
             cache_result = None
         if cache_result is not None:
@@ -195,7 +195,7 @@ class PreflightService:
                     "probably_definitive": probably_definitive,
                 },
             )
-        except Exception:
+        except Exception:  # noqa: BLE001 — preflight cache is best-effort, must not block governance
             logger.warning("preflight_cache_set_unexpected", exc_info=True)
 
         logger.info(

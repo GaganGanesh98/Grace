@@ -16,23 +16,48 @@ def gateway_base_http() -> str:
     return f"http://localhost:{port}"
 
 
-def gateway_llm_post_path(provider: str) -> str:
-    """Return the path segment after ``/v1/{provider}/`` for a completion request."""
+def _bare_model(model: str, provider: str) -> str:
+    """Drop a leading ``<provider>/`` the same way the gateway does on the body.
+
+    Agent definitions store models as ``<provider>/<model>``; Google needs the
+    bare id inside the URL path. Only the first segment is removed, because ids
+    such as ``openai/gpt-oss-120b`` are themselves slash-bearing.
+    """
+    prefix, sep, rest = model.partition("/")
+    if sep and rest and prefix.lower() == provider.lower():
+        return rest
+    return model
+
+
+def gateway_llm_post_path(provider: str, model: str | None = None) -> str:
+    """Return the path segment after ``/v1/{provider}/`` for a completion request.
+
+    Google addresses the model in the URL rather than the body
+    (``ProviderSpec.chat_path`` carries the ``{model}`` placeholder), so the
+    caller's model has to be threaded through. It previously hardcoded
+    ``gemini-pro``, which meant every Google agent silently ran on that model
+    whatever its definition said.
+    """
 
     p = provider.lower()
-    if get_provider_spec(p) is None:
+    spec = get_provider_spec(p)
+    if spec is None:
         msg = f"Unknown LLM provider {provider!r}; not in provider registry"
         raise ValueError(msg)
-    if p == "anthropic":
-        return "messages"
-    if p == "google":
-        return "models/gemini-pro:generateContent"
-    return "chat/completions"
+
+    if "{model}" in spec.chat_path:
+        resolved = _bare_model((model or "").strip(), p) or spec.default_model
+        if not resolved:
+            msg = f"Provider {provider!r} addresses the model in the URL; a model is required"
+            raise ValueError(msg)
+        return spec.chat_path.strip("/").format(model=resolved)
+
+    return spec.chat_path.strip("/")
 
 
-def gateway_llm_url(provider: str) -> str:
+def gateway_llm_url(provider: str, model: str | None = None) -> str:
     """Full URL for POST (OpenAI-compatible or provider-specific via gateway routes)."""
 
     base = gateway_base_http().rstrip("/")
-    sub = gateway_llm_post_path(provider).strip("/")
+    sub = gateway_llm_post_path(provider, model).strip("/")
     return f"{base}/v1/{provider.lower()}/{sub}"

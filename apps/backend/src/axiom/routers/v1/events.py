@@ -80,7 +80,7 @@ async def events_stream(
                     yield _fmt_sse(ev, text)
         except asyncio.CancelledError:
             raise
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001 — logs and re-raises; matches the websocket stream boundary pattern
             logger.warning(
                 "axiom_event.sse_stream_error", project_id=str(project_id), error=str(exc)
             )
@@ -89,7 +89,11 @@ async def events_stream(
             with contextlib.suppress(Exception):
                 await pubsub.unsubscribe(f"{AXIOM_EVENTS_PREFIX}{project_id}")
             with contextlib.suppress(Exception):
-                await pubsub.close()
+                # aclose(), not the deprecated close(): redis-py renamed it, and
+                # the sync alias is scheduled for removal.
+                # redis-py does not annotate aclose(); the deprecated close()
+                # alias is typed but scheduled for removal.
+                await pubsub.aclose()  # type: ignore[no-untyped-call]
 
     return StreamingResponse(
         body(),

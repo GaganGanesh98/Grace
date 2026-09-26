@@ -107,10 +107,10 @@ rather than the next session.
 ### stdio (local agents)
 
 The server runs as a subprocess of the agent runtime. The key is read once from
-`AXIOM_API_KEY`.
+`GRACE_API_KEY` (`AXIOM_API_KEY` is still accepted).
 
 ```bash
-export AXIOM_API_KEY=axm_live_...
+export GRACE_API_KEY=axm_live_...
 export DATABASE_URL=postgresql+asyncpg://...
 axiom-mcp
 ```
@@ -123,7 +123,7 @@ axiom-mcp
     "grace": {
       "command": "axiom-mcp",
       "env": {
-        "AXIOM_API_KEY": "axm_live_your_key_here",
+        "GRACE_API_KEY": "axm_live_your_key_here",
         "DATABASE_URL": "postgresql+asyncpg://axiom:axiom@localhost:5433/axiom",
         "REDIS_URL": "redis://localhost:6380/0"
       }
@@ -174,7 +174,7 @@ Set `AXIOM_MCP_ENABLED=false` to disable the mount entirely.
 ## Trust boundaries
 
 **stdio** has no network hop and no per-request identity. The key is bound for
-the process lifetime. Anything able to read `AXIOM_API_KEY` from the process
+the process lifetime. Anything able to read `GRACE_API_KEY` from the process
 environment could already impersonate it — treat the environment as the trust
 boundary, not the transport.
 

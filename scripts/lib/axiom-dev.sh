@@ -4,23 +4,23 @@
 source "${REPO_ROOT}/scripts/lib/axiom-stop.sh"
 
 _axiom_healthz_ok() {
-  curl -sf "http://127.0.0.1:${AXIOM_BACKEND_PORT}/healthz" 2>/dev/null | grep -q '"ok"' || return 1
+  curl -sf "http://127.0.0.1:${GRACE_BACKEND_PORT}/healthz" 2>/dev/null | grep -q '"ok"' || return 1
 }
 
 _axiom_gateway_healthz_ok() {
-  curl -sf "http://127.0.0.1:${AXIOM_GATEWAY_PORT}/healthz" 2>/dev/null | grep -q '"ok"' || return 1
+  curl -sf "http://127.0.0.1:${GRACE_GATEWAY_PORT}/healthz" 2>/dev/null | grep -q '"ok"' || return 1
 }
 
 _axiom_frontend_http_ok() {
   local code
-  code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 2 "http://127.0.0.1:${AXIOM_FRONTEND_PORT}/" 2>/dev/null || echo 000)"
+  code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 2 "http://127.0.0.1:${GRACE_FRONTEND_PORT}/" 2>/dev/null || echo 000)"
   [[ "${code}" == 200 || "${code}" == 307 ]]
 }
 
 _axiom_worker_ok() {
-  [[ -f "${AXIOM_PID_WORKER}" ]] || return 1
+  [[ -f "${GRACE_PID_WORKER}" ]] || return 1
   local pid
-  pid="$(cat "${AXIOM_PID_WORKER}" 2>/dev/null || true)"
+  pid="$(cat "${GRACE_PID_WORKER}" 2>/dev/null || true)"
   [[ -n "${pid}" ]] || return 1
   kill -0 "${pid}" 2>/dev/null
 }
@@ -37,10 +37,10 @@ _axiom_all_live() {
 }
 
 _axiom_dev_trap() {
-  if ((AXIOM_SHUTTING_DOWN == 1)); then
+  if ((GRACE_SHUTTING_DOWN == 1)); then
     exit 130
   fi
-  AXIOM_SHUTTING_DOWN=1
+  GRACE_SHUTTING_DOWN=1
   axiom_log_tagged pg green "axiom: shutdown (Ctrl+C)"
   axiom_shutdown_sequence
   exit 0
@@ -136,7 +136,7 @@ axiom_run_dev() {
   fi
 
   if ! _axiom_healthz_ok; then
-    if ! axiom_prepare_app_port "${AXIOM_BACKEND_PORT}" backend; then
+    if ! axiom_prepare_app_port "${GRACE_BACKEND_PORT}" backend; then
       axiom_shutdown_sequence
       exit 1
     fi
@@ -148,23 +148,23 @@ axiom_run_dev() {
     fi
     (
       cd "${REPO_ROOT}/apps/backend"
-      uv run uvicorn axiom.main:app --reload --host 0.0.0.0 --port "${AXIOM_BACKEND_PORT}" &
-      echo $! >"${AXIOM_PID_BACKEND}"
-      wait "$(cat "${AXIOM_PID_BACKEND}")"
+      uv run uvicorn axiom.main:app --reload --host 0.0.0.0 --port "${GRACE_BACKEND_PORT}" &
+      echo $! >"${GRACE_PID_BACKEND}"
+      wait "$(cat "${GRACE_PID_BACKEND}")"
     ) 2>&1 | while IFS= read -r line || [[ -n "${line}" ]]; do
       axiom_log_tagged backend cyan "${line}"
     done &
-    if ! wait_for_http "http://127.0.0.1:${AXIOM_BACKEND_PORT}/healthz" 30 "backend /healthz"; then
+    if ! wait_for_http "http://127.0.0.1:${GRACE_BACKEND_PORT}/healthz" 30 "backend /healthz"; then
       axiom_shutdown_sequence
       exit 1
     fi
   else
-    rm -f "${AXIOM_PID_BACKEND}"
-    axiom_log_tagged backend cyan "backend already responding on :${AXIOM_BACKEND_PORT}; skipping start"
+    rm -f "${GRACE_PID_BACKEND}"
+    axiom_log_tagged backend cyan "backend already responding on :${GRACE_BACKEND_PORT}; skipping start"
   fi
 
   if ! _axiom_gateway_healthz_ok; then
-    if ! axiom_prepare_app_port "${AXIOM_GATEWAY_PORT}" gateway; then
+    if ! axiom_prepare_app_port "${GRACE_GATEWAY_PORT}" gateway; then
       axiom_shutdown_sequence
       exit 1
     fi
@@ -176,41 +176,41 @@ axiom_run_dev() {
     fi
     (
       cd "${REPO_ROOT}/apps/backend"
-      uv run uvicorn axiom.gateway.app:app --reload --host 0.0.0.0 --port "${AXIOM_GATEWAY_PORT}" &
-      echo $! >"${AXIOM_PID_GATEWAY}"
-      wait "$(cat "${AXIOM_PID_GATEWAY}")"
+      uv run uvicorn axiom.gateway.app:app --reload --host 0.0.0.0 --port "${GRACE_GATEWAY_PORT}" &
+      echo $! >"${GRACE_PID_GATEWAY}"
+      wait "$(cat "${GRACE_PID_GATEWAY}")"
     ) 2>&1 | while IFS= read -r line || [[ -n "${line}" ]]; do
       axiom_log_tagged gateway yellow "${line}"
     done &
-    if ! wait_for_http "http://127.0.0.1:${AXIOM_GATEWAY_PORT}/healthz" 30 "gateway /healthz"; then
+    if ! wait_for_http "http://127.0.0.1:${GRACE_GATEWAY_PORT}/healthz" 30 "gateway /healthz"; then
       axiom_shutdown_sequence
       exit 1
     fi
   else
-    rm -f "${AXIOM_PID_GATEWAY}"
-    axiom_log_tagged gateway yellow "gateway already responding on :${AXIOM_GATEWAY_PORT}; skipping start"
+    rm -f "${GRACE_PID_GATEWAY}"
+    axiom_log_tagged gateway yellow "gateway already responding on :${GRACE_GATEWAY_PORT}; skipping start"
   fi
 
   if ! _axiom_frontend_http_ok; then
-    if ! axiom_prepare_app_port "${AXIOM_FRONTEND_PORT}" frontend; then
+    if ! axiom_prepare_app_port "${GRACE_FRONTEND_PORT}" frontend; then
       axiom_shutdown_sequence
       exit 1
     fi
     (
       cd "${REPO_ROOT}/apps/frontend"
       npm run dev &
-      echo $! >"${AXIOM_PID_FRONTEND}"
-      wait "$(cat "${AXIOM_PID_FRONTEND}")"
+      echo $! >"${GRACE_PID_FRONTEND}"
+      wait "$(cat "${GRACE_PID_FRONTEND}")"
     ) 2>&1 | while IFS= read -r line || [[ -n "${line}" ]]; do
       axiom_log_tagged frontend magenta "${line}"
     done &
-    if ! wait_for_http "http://127.0.0.1:${AXIOM_FRONTEND_PORT}/" 30 "frontend root"; then
+    if ! wait_for_http "http://127.0.0.1:${GRACE_FRONTEND_PORT}/" 30 "frontend root"; then
       axiom_shutdown_sequence
       exit 1
     fi
   else
-    rm -f "${AXIOM_PID_FRONTEND}"
-    axiom_log_tagged frontend magenta "frontend already responding on :${AXIOM_FRONTEND_PORT}; skipping start"
+    rm -f "${GRACE_PID_FRONTEND}"
+    axiom_log_tagged frontend magenta "frontend already responding on :${GRACE_FRONTEND_PORT}; skipping start"
   fi
 
   if ! _axiom_worker_ok; then
@@ -223,11 +223,11 @@ axiom_run_dev() {
       fi
       (
         cd "${REPO_ROOT}/apps/backend"
-        export DATABASE_URL="${AXIOM_DEV_DATABASE_URL}"
+        export DATABASE_URL="${GRACE_DEV_DATABASE_URL}"
         unset TEST_DATABASE_URL
         .venv/bin/python -m axiom.workers.agent_worker &
-        echo $! >"${AXIOM_PID_WORKER}"
-        wait "$(cat "${AXIOM_PID_WORKER}")"
+        echo $! >"${GRACE_PID_WORKER}"
+        wait "$(cat "${GRACE_PID_WORKER}")"
       ) 2>&1 | while IFS= read -r line || [[ -n "${line}" ]]; do
         axiom_log_tagged worker blue "${line}"
       done &
@@ -240,13 +240,13 @@ axiom_run_dev() {
 
   echo ""
   echo "AXIOM dev is up:"
-  echo "  Backend:  http://127.0.0.1:${AXIOM_BACKEND_PORT}"
-  echo "  Gateway:  http://127.0.0.1:${AXIOM_GATEWAY_PORT}"
-  echo "  API docs: http://127.0.0.1:${AXIOM_BACKEND_PORT}/docs"
-  echo "  Frontend: http://127.0.0.1:${AXIOM_FRONTEND_PORT}"
+  echo "  Backend:  http://127.0.0.1:${GRACE_BACKEND_PORT}"
+  echo "  Gateway:  http://127.0.0.1:${GRACE_GATEWAY_PORT}"
+  echo "  API docs: http://127.0.0.1:${GRACE_BACKEND_PORT}/docs"
+  echo "  Frontend: http://127.0.0.1:${GRACE_FRONTEND_PORT}"
   echo "  Worker:   agent runs queue (see .axiom/worker.pid)"
   echo ""
-  echo "Ensure apps/frontend/.env.local sets API_URL=http://127.0.0.1:${AXIOM_BACKEND_PORT} (see apps/frontend/.env.example)."
+  echo "Ensure apps/frontend/.env.local sets API_URL=http://127.0.0.1:${GRACE_BACKEND_PORT} (see apps/frontend/.env.example)."
   echo "Ctrl+C stops all services; ./axiom stop stops without starting."
 
   while true; do sleep 86400; done &

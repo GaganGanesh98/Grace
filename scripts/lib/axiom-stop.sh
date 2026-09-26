@@ -23,10 +23,10 @@ _axiom_kill_pidfile() {
 
 # Stops Next + uvicorn, then compose stop (preserves volumes).
 axiom_shutdown_sequence() {
-  _axiom_kill_pidfile "${AXIOM_PID_WORKER}"
-  _axiom_kill_pidfile "${AXIOM_PID_FRONTEND}"
-  _axiom_kill_pidfile "${AXIOM_PID_GATEWAY}"
-  _axiom_kill_pidfile "${AXIOM_PID_BACKEND}"
+  _axiom_kill_pidfile "${GRACE_PID_WORKER}"
+  _axiom_kill_pidfile "${GRACE_PID_FRONTEND}"
+  _axiom_kill_pidfile "${GRACE_PID_GATEWAY}"
+  _axiom_kill_pidfile "${GRACE_PID_BACKEND}"
   axiom_compose stop redis postgres 2>/dev/null || true
 }
 

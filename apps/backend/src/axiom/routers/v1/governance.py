@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import base64
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from typing import Annotated, Any
 from uuid import UUID
 
@@ -38,20 +38,12 @@ from axiom.schemas.governance import (
 )
 from axiom.services import projects as projects_service
 from axiom.services.api_key import APIKeyContext
-from axiom.services.escalation import schedule_escalation
-from axiom.services.events import schedule_approval_created, schedule_receipt_sealed
-from axiom.services.governance.chain import (
-    ChainValidationError,
-    auto_close_stale_chains,
-    get_or_create_chain,
-    update_chain_stats,
-)
-from axiom.services.governance.context import enrich_context
-from axiom.services.governance.intent import declare_intent
-from axiom.services.governance.policy import describe_active_governance_policy, evaluate_policy
-from axiom.services.governance.receipt import create_pending_receipt, seal_receipt
+from axiom.services.events import schedule_receipt_sealed
+from axiom.services.governance.chain import update_chain_stats
+from axiom.services.governance.execute import ChainRejectedError, execute_governed_action
+from axiom.services.governance.policy import describe_active_governance_policy
+from axiom.services.governance.receipt import seal_receipt
 from axiom.services.governance.receipt_duration import compute_receipt_duration_ms
-from axiom.services.governance.verdict import render_verdict
 from axiom.services.governance.verification import (
     verify_execution,
     verify_receipt_independent,
@@ -78,12 +70,6 @@ async def get_active_governance_policy(
     settings = project.settings if isinstance(project.settings, dict) else {}
     payload = describe_active_governance_policy(settings)
     return ActiveGovernancePolicyResponse.model_validate(payload)
-
-
-def _mask_verdict(intent: GovernanceIntent, raw: str) -> str:
-    if intent.mode == "shadow":
-        return "allow"
-    return raw
 
 
 def _intent_dict(intent: GovernanceIntent) -> dict[str, Any]:
@@ -188,81 +174,24 @@ async def governance_govern(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> GovernResponse:
     _ = request
-    await auto_close_stale_chains(db, api_ctx.project_id)
     try:
-        chain = await get_or_create_chain(
-            db,
-            api_ctx.project_id,
-            body.agent_id,
-            body.workflow,
-            body.chain_id,
-        )
-    except ChainValidationError as exc:
+        outcome = await execute_governed_action(db, project_id=api_ctx.project_id, request=body)
+    except ChainRejectedError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc) or "Invalid chain",
         ) from None
 
-    intent = await declare_intent(
-        db,
-        api_ctx.project_id,
-        body,
-        chain_id=chain.id if chain else None,
-    )
-    context = await enrich_context(db, intent)
-    policy_result = evaluate_policy(intent, context)
-    verdict = await render_verdict(db, intent, policy_result, context)
-    receipt = await create_pending_receipt(db, intent=intent, verdict=verdict)
-    if verdict.verdict == "hold" and intent.mode != "shadow":
-        receipt.approval_status = "pending"
-        receipt.approval_expires_at = datetime.now(UTC) + timedelta(minutes=30)
-    if chain is not None:
-        await update_chain_stats(db, chain, verdict.verdict, None)
-    await db.commit()
-    if (
-        verdict.verdict == "hold"
-        and intent.mode != "shadow"
-        and receipt.approval_expires_at is not None
-    ):
-        schedule_approval_created(
-            api_ctx.project_id,
-            receipt_id=receipt.id,
-            expires_at=receipt.approval_expires_at,
-        )
-        # Additive: notify the n8n escalation flow (no-op unless ESCALATION_ENABLED).
-        schedule_escalation(api_ctx.project_id, receipt.id)
-
-    masked = _mask_verdict(intent, verdict.verdict)
-    reason = None if intent.mode == "shadow" else verdict.reason
-    if intent.mode == "shadow" and verdict.verdict != "allow":
-        reason = f"Shadow mode: real verdict would be {verdict.verdict}" + (
-            f" ({verdict.reason})" if verdict.reason else ""
-        )
-
-    logger.info(
-        "governance.engine.govern",
-        receipt_id=str(receipt.id),
-        project_id=str(api_ctx.project_id),
-        raw_verdict=verdict.verdict,
-        response_verdict=masked,
-    )
-
-    appr_status = None
-    appr_expires = None
-    if verdict.verdict == "hold" and intent.mode != "shadow":
-        appr_status = "pending"
-        appr_expires = receipt.approval_expires_at
-
     return GovernResponse(
-        receipt_id=str(receipt.id),
-        verdict=masked,
-        reason=reason,
-        policy_version=verdict.policy_version,
-        risk_assessed=verdict.risk_assessed,
-        mode=intent.mode,
-        chain_id=str(chain.id) if chain else None,
-        approval_status=appr_status,
-        approval_expires_at=appr_expires,
+        receipt_id=str(outcome.receipt_id),
+        verdict=outcome.response_verdict,
+        reason=outcome.reason,
+        policy_version=outcome.verdict.policy_version,
+        risk_assessed=outcome.verdict.risk_assessed,
+        mode=outcome.intent.mode,
+        chain_id=str(outcome.chain.id) if outcome.chain else None,
+        approval_status=outcome.approval_status,
+        approval_expires_at=outcome.approval_expires_at,
     )
 
 

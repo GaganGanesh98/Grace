@@ -1,11 +1,20 @@
-# axiom-sdk
+# grace-sdk
 
-Python SDK for AXIOM — post-quantum governance for AI agents.
+Python SDK for Grace — cryptographic governance receipts for AI agent actions.
+
+## Licence
+
+This SDK is **MIT** ([LICENSE](LICENSE)), while the Grace platform in the rest of
+this repository is **AGPL-3.0-only** ([../../LICENSE](../../LICENSE)). The split
+is deliberate, not an oversight: an AGPL client library would place copyleft
+obligations on every application that imports it, which would make the SDK
+unusable for its intended purpose. Permissive client, copyleft server is the
+standard shape for this. See [`docs/legal-posture.md`](../../docs/legal-posture.md) §5.
 
 ## Install
 
 ```bash
-pip install axiom-sdk
+pip install grace-sdk
 ```
 
 Runtime dependency: `requests` for HTTP.

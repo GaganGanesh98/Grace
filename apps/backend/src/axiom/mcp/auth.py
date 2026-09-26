@@ -43,8 +43,11 @@ logger = structlog.get_logger(__name__)
 SCOPE_READ = "mcp:read"
 SCOPE_WRITE = "mcp:write"
 
-#: Environment variable read by the stdio transport.
-API_KEY_ENV_VAR = "AXIOM_API_KEY"
+#: Environment variable read by the stdio transport. ``AXIOM_API_KEY`` is still
+#: accepted — this name appears in every already-configured MCP client, so it is
+#: a client contract, not just a setting (ADR-029).
+API_KEY_ENV_VAR = "GRACE_API_KEY"
+LEGACY_API_KEY_ENV_VAR = "AXIOM_API_KEY"
 
 
 class MCPAuthError(Exception):
@@ -185,4 +188,7 @@ async def reverify_for_write(db: AsyncSession, principal: MCPPrincipal) -> None:
 def api_key_from_env() -> str:
     """Read the stdio transport's API key from the environment."""
 
-    return os.environ.get(API_KEY_ENV_VAR, "").strip()
+    return (
+        os.environ.get(API_KEY_ENV_VAR, "").strip()
+        or os.environ.get(LEGACY_API_KEY_ENV_VAR, "").strip()
+    )

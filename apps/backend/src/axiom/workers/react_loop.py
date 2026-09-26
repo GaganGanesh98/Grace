@@ -66,7 +66,7 @@ async def _post_gateway_completion(
     x_axiom_agent_id: str,
 ) -> tuple[dict[str, Any], str | None]:
     settings = get_settings()
-    url = gateway_llm_url(provider)
+    url = gateway_llm_url(provider, model)
     body: dict[str, Any] = {"model": model, "messages": messages}
     headers = {
         "Authorization": f"Bearer {gateway_api_key}",

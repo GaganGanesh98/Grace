@@ -117,7 +117,7 @@ def _embed_sync(texts: list[str]) -> list[list[float]]:
         vectors = _get_provider().embed(texts)
     except EmbeddingError:
         raise
-    except Exception as exc:  # provider/model/HTTP failure
+    except Exception as exc:  # noqa: BLE001 — provider/model/HTTP failure, wrapped as EmbeddingError
         raise EmbeddingError(str(exc)) from exc
     for vector in vectors:
         if len(vector) != EMBEDDING_DIM:

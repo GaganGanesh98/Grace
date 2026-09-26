@@ -44,6 +44,7 @@ def automint_env_path(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     _write_minimal_env(p)
     monkeypatch.setenv("CI", "")
     monkeypatch.setenv("GITHUB_ACTIONS", "")
+    monkeypatch.delenv("GRACE_WORKER_GATEWAY_API_KEY", raising=False)
     monkeypatch.delenv("AXIOM_WORKER_GATEWAY_API_KEY", raising=False)
     get_settings.cache_clear()
     return p
@@ -54,7 +55,7 @@ async def test_mint_creates_dev_user_project_and_key(automint_env_path: Path) ->
     await ensure_worker_gateway_key(automint_env_path)
     secret_line = None
     for line in automint_env_path.read_text(encoding="utf-8").splitlines():
-        if line.startswith("AXIOM_WORKER_GATEWAY_API_KEY="):
+        if line.startswith("GRACE_WORKER_GATEWAY_API_KEY="):
             secret_line = line.split("=", 1)[1]
             break
     assert secret_line is not None
@@ -106,8 +107,8 @@ async def test_mint_replaces_stale_key(automint_env_path: Path) -> None:
     text = automint_env_path.read_text(encoding="utf-8")
     lines = []
     for line in text.splitlines():
-        if line.startswith("AXIOM_WORKER_GATEWAY_API_KEY="):
-            lines.append(f"AXIOM_WORKER_GATEWAY_API_KEY={stale}")
+        if line.startswith("GRACE_WORKER_GATEWAY_API_KEY="):
+            lines.append(f"GRACE_WORKER_GATEWAY_API_KEY={stale}")
         else:
             lines.append(line)
     automint_env_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -115,7 +116,7 @@ async def test_mint_replaces_stale_key(automint_env_path: Path) -> None:
     await ensure_worker_gateway_key(automint_env_path)
     written = None
     for line in automint_env_path.read_text(encoding="utf-8").splitlines():
-        if line.startswith("AXIOM_WORKER_GATEWAY_API_KEY="):
+        if line.startswith("GRACE_WORKER_GATEWAY_API_KEY="):
             written = line.split("=", 1)[1]
             break
     assert written is not None
@@ -154,18 +155,19 @@ async def test_ci_skips_mint(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) ->
     p = tmp_path / "e.env"
     _write_minimal_env(p)
     monkeypatch.setenv("CI", "true")
+    monkeypatch.delenv("GRACE_WORKER_GATEWAY_API_KEY", raising=False)
     monkeypatch.delenv("AXIOM_WORKER_GATEWAY_API_KEY", raising=False)
     get_settings.cache_clear()
     out = await ensure_worker_gateway_key(p)
     assert out == "skipped_ci"
-    assert "AXIOM_WORKER_GATEWAY_API_KEY" not in p.read_text(encoding="utf-8")
+    assert "GRACE_WORKER_GATEWAY_API_KEY" not in p.read_text(encoding="utf-8")
 
 
 async def test_explicit_shell_skips(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     p = tmp_path / "e.env"
     _write_minimal_env(p)
     monkeypatch.setenv("CI", "")
-    monkeypatch.setenv("AXIOM_WORKER_GATEWAY_API_KEY", "axm_live_manual_override_value_here_xx")
+    monkeypatch.setenv("GRACE_WORKER_GATEWAY_API_KEY", "axm_live_manual_override_value_here_xx")
     get_settings.cache_clear()
     out = await ensure_worker_gateway_key(p)
     assert out == "skipped_explicit"

@@ -16,7 +16,7 @@ echo "automint: Python module import OK"
 
 (
   export CI=true
-  unset AXIOM_WORKER_GATEWAY_API_KEY
+  unset GRACE_WORKER_GATEWAY_API_KEY AXIOM_WORKER_GATEWAY_API_KEY
   cd apps/backend
   uv run python -m axiom.cli.automint ensure
 )
@@ -28,7 +28,7 @@ if [[ -f "${env_path}" ]]; then
   (
     export CI=true
     export GITHUB_ACTIONS=
-    unset AXIOM_WORKER_GATEWAY_API_KEY
+    unset GRACE_WORKER_GATEWAY_API_KEY AXIOM_WORKER_GATEWAY_API_KEY
     cd "${REPO_ROOT}/apps/backend"
     uv run python -m axiom.cli.automint ensure
   )

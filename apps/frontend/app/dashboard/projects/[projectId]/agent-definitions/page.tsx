@@ -1,15 +1,17 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo, useState, type ReactElement } from "react";
 import { toast } from "sonner";
 
-import { AgentForm } from "@/components/agent-definitions/agent-form";
+import { AgentCreatePanel } from "@/components/agent-definitions/agent-create-panel";
 import { AgentList } from "@/components/agent-definitions/agent-list";
 import { useProjectWorkspace } from "@/components/project-workspace-provider";
 import { useAgentDefinitions, useArchiveAgentDefinition, useCreateAgentDefinition } from "@/hooks/use-agent-definitions";
+import { dashboardKeys } from "@/lib/dashboard-query-keys";
+import { fetchLlmProviders } from "@/lib/providers-api";
 import { listVaultKeys } from "@/lib/vault-api";
 
 export default function AgentDefinitionsPage(): ReactElement {
@@ -21,10 +23,16 @@ export default function AgentDefinitionsPage(): ReactElement {
     [projects, projectId],
   );
 
+  const queryClient = useQueryClient();
   const defs = useAgentDefinitions(projectId);
   const vault = useQuery({
-    queryKey: ["axiom", "vault-keys", "llm"],
+    queryKey: dashboardKeys.llmVaultKeys,
     queryFn: () => listVaultKeys({ kind: "llm" }),
+  });
+  const providers = useQuery({
+    queryKey: dashboardKeys.llmProviders,
+    queryFn: () => fetchLlmProviders(),
+    staleTime: 60 * 60 * 1000,
   });
   const createDef = useCreateAgentDefinition(projectId);
   const archive = useArchiveAgentDefinition(projectId);
@@ -48,10 +56,16 @@ export default function AgentDefinitionsPage(): ReactElement {
 
       <section className="space-y-4">
         <h2 className="font-mono text-axiom-12 uppercase tracking-[2px] text-[#6B7490]">Create agent</h2>
-        <AgentForm
+        <AgentCreatePanel
           vaultKeys={vault.data ?? []}
+          providers={providers.data ?? []}
+          vaultLoading={vault.isPending}
+          vaultError={vault.error ? vault.error.message : null}
           isSubmitting={createDef.isPending}
           submitError={formErr}
+          onCredentialCreated={() => {
+            void queryClient.invalidateQueries({ queryKey: dashboardKeys.llmVaultKeys });
+          }}
           onSubmit={async (body) => {
             setFormErr(null);
             try {

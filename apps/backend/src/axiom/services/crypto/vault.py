@@ -17,7 +17,22 @@ __all__ = ["CryptoInputError", "DecryptionError", "NonceReuseError", "decrypt", 
 
 # In-process nonce registry: detects RNG collisions or pathological repeats. Does not
 # persist across restarts and does not defend against intentional cross-session reuse.
+#
+# Bounded on purpose. A 96-bit random nonce collision is not the risk this defends
+# against — a broken RNG is, and a broken RNG shows up in the first few thousand
+# draws. An unbounded set in a long-lived worker is a real leak; this is not.
+_NONCE_WINDOW = 8192
 _seen_nonces: set[bytes] = set()
+
+
+def _remember_nonce(nonce: bytes) -> None:
+    if nonce in _seen_nonces:
+        raise NonceReuseError(
+            "AES-GCM nonce collision in-process — RNG failure or reuse guard triggered",
+        )
+    if len(_seen_nonces) >= _NONCE_WINDOW:
+        _seen_nonces.clear()
+    _seen_nonces.add(nonce)
 
 
 def encrypt(plaintext: bytes, key: bytes) -> bytes:
@@ -26,11 +41,7 @@ def encrypt(plaintext: bytes, key: bytes) -> bytes:
     validate_bytes(key, "key", exact_len=32)
     key_fp = hashlib.sha256(key).hexdigest()[:16]
     nonce = secrets.token_bytes(12)
-    if nonce in _seen_nonces:
-        raise NonceReuseError(
-            "AES-GCM nonce collision in-process — RNG failure or reuse guard triggered",
-        )
-    _seen_nonces.add(nonce)
+    _remember_nonce(nonce)
     aesgcm = AESGCM(key)
     try:
         ct = aesgcm.encrypt(nonce, plaintext, None)

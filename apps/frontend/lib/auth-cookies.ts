@@ -6,8 +6,13 @@ export const REFRESH_TOKEN_COOKIE = "refresh_token";
 const ACCESS_MAX_AGE_SECONDS = 60 * 60;
 const REFRESH_MAX_AGE_SECONDS = 30 * 24 * 60 * 60;
 
+/** GRACE_* wins; the AXIOM_* spelling is the Phase 8.2 compatibility window. */
+function envVar(name: string): string | undefined {
+  return process.env[`GRACE_${name}`] ?? process.env[`AXIOM_${name}`];
+}
+
 function secureFlag(): boolean {
-  const v = process.env.AXIOM_COOKIE_SECURE?.trim().toLowerCase();
+  const v = envVar("COOKIE_SECURE")?.trim().toLowerCase();
   if (v === "true") {
     return true;
   }
@@ -18,7 +23,7 @@ function secureFlag(): boolean {
 }
 
 function sameSite(): "lax" | "strict" | "none" {
-  const raw = process.env.AXIOM_COOKIE_SAMESITE?.trim().toLowerCase();
+  const raw = envVar("COOKIE_SAMESITE")?.trim().toLowerCase();
   if (raw === "strict" || raw === "none" || raw === "lax") {
     return raw;
   }
@@ -32,7 +37,7 @@ function baseCookieOpts(): {
   secure: boolean;
   domain?: string;
 } {
-  const domain = process.env.AXIOM_COOKIE_DOMAIN?.trim();
+  const domain = envVar("COOKIE_DOMAIN")?.trim();
   const opts: {
     httpOnly: boolean;
     sameSite: "lax" | "strict" | "none";

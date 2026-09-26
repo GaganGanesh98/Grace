@@ -3,6 +3,10 @@ name = "grace-backend"
 version = "0.1.0"
 description = "Cryptographic governance proof layer for AI agents"
 readme = "README.md"
+license = "AGPL-3.0-only"
+authors = [
+    { name = "Gagan Ganesh" },
+]
 requires-python = ">=3.13,<3.14"
 dependencies = [
     "cryptography>=43.0.0",
@@ -116,20 +120,31 @@ ignore = [
 "tests/receipt/test_keys_multiprocess.py" = ["S603"]
 # Preflight degrades gracefully: a Redis or policy-lookup failure must never
 # break the request path, so these catch broadly and log with exc_info=True.
-"src/axiom/routers/preflight.py" = ["BLE001"]
-"src/axiom/services/preflight/cache.py" = ["BLE001"]
-"src/axiom/services/preflight/service.py" = ["BLE001"]
-# runner.py catches Exception and logs with exc_info=True; ruff's BLE001
-# heuristic doesn't fire, but our `test_no_silent_errors` security gate
-# still demands a visible noqa marker. Silence RUF100 only for that file.
+# BLE001 is disabled file-wide here, which makes an inline `# noqa: BLE001`
+# marker "unused" from ruff's own view -- silence RUF100 too so the marker our
+# `test_no_silent_errors` security gate requires can stay on the line.
+"src/axiom/routers/preflight.py" = ["BLE001", "RUF100"]
+"src/axiom/services/preflight/cache.py" = ["BLE001", "RUF100"]
+"src/axiom/services/preflight/service.py" = ["BLE001", "RUF100"]
+# Each catches Exception at a deliberate boundary (worker/stream supervisor,
+# best-effort scrub or cache op, or wrap-into-a-domain-exception) and always
+# logs or re-raises -- never silent. Ruff's BLE001 heuristic doesn't fire on
+# these call shapes, but our `test_no_silent_errors` security gate still
+# demands a visible noqa marker. Silence RUF100 only for that reason.
 "src/axiom/services/pipeline/runner.py" = ["RUF100"]
 "src/axiom/services/pipeline/preflight_runner.py" = ["RUF100"]
+"src/axiom/gateway/app.py" = ["RUF100"]
+"src/axiom/gateway/vault.py" = ["RUF100"]
+"src/axiom/workers/agent_worker.py" = ["RUF100"]
+"src/axiom/routers/v1/events.py" = ["RUF100"]
+"src/axiom/services/embeddings/service.py" = ["RUF100"]
+"src/axiom/services/governance/receipt.py" = ["RUF100"]
 # Crypto primitives are byte-locked post Phase 1.75. Phase 2 must not
 # modify their contents (including import-group whitespace). Silence
 # Ruff's I001 (import sort) on these files so a future cosmetic drift
-# doesn't force a touch.
+# doesn't force a touch. ed25519.py also needs RUF100 -- see the block above.
 "src/axiom/services/crypto/aes_gcm.py" = ["I001"]
-"src/axiom/services/crypto/ed25519.py" = ["I001"]
+"src/axiom/services/crypto/ed25519.py" = ["I001", "RUF100"]
 "src/axiom/services/crypto/hybrid.py" = ["I001"]
 "src/axiom/services/crypto/vault.py" = ["I001"]
 "src/axiom/schemas/auth.py" = ["S105"]

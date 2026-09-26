@@ -9,9 +9,16 @@ When your AI agent screws up and your lawyer asks what it did, Grace has a signe
 - RFC 6962 Merkle audit chain
 - AES-256-GCM encrypted evidence vault
 - Public verification endpoint (no account required)
-- Court-admissible PDF export
+- Tamper-evident PDF evidence export
 
 Status: In active development.
+
+**Claims and limits:** Grace produces tamper-evident, independently verifiable
+evidence. It does not — and cannot — certify that evidence as admissible in any
+particular forum; admissibility is decided by a court under the applicable
+procedural rules. See **[docs/legal-posture.md](docs/legal-posture.md)** for what
+Grace claims, what it explicitly does not, and what remains outstanding before
+stronger claims could be made.
 
 ## Local development (Phase 1)
 
@@ -23,5 +30,15 @@ Status: In active development.
 6. Frontend only: `cd apps/frontend && npm run dev`.
 
 Architecture and ADRs: `docs/architecture.md`, `docs/decisions.md`.
+
+## Licence
+
+Grace is licensed under the **GNU Affero General Public License v3.0** — see
+[LICENSE](LICENSE). If you run a modified version of Grace as a network service,
+AGPL §13 requires you to offer that modified source to its users.
+
+The client SDK in `packages/axiom-sdk` is deliberately licensed **MIT** instead,
+so that integrating Grace into an application does not place that application
+under copyleft. This split is intentional; see `docs/legal-posture.md`.
 
 © 2026 Gagan Ganesh

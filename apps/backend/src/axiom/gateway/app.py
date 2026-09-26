@@ -18,7 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from axiom.config import get_settings
+from axiom.config import deprecated_env_vars, get_settings
 from axiom.db import get_db, session_scope
 from axiom.gateway.classifier import (
     GatewayClassification,
@@ -48,6 +48,7 @@ from axiom.gateway.vault import inject_credentials
 from axiom.middleware.body_size import BodySizeLimitMiddleware
 from axiom.services import vault as vault_service
 from axiom.services.api_key import APIKeyContext
+from axiom.services.crypto import kek_registry
 from axiom.services.governance.receipt import load_governance_merkle_from_db
 from axiom.services.redis_client import close_redis
 
@@ -206,7 +207,7 @@ async def _run_governed_proxy(
                 async for chunk in stream_bytes:
                     hasher.update(chunk)
                     yield chunk
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001 — outbound call can fail in ways we cannot enumerate; the receipt must still be sealed
                 logger.exception("gateway.stream_failed", receipt_id=str(allow.receipt_id))
                 async with session_scope() as sdb:
                     await seal_after_transport_failure(
@@ -278,7 +279,7 @@ async def _run_governed_proxy(
             {"error": "upstream_timeout", "receipt_id": str(allow.receipt_id)},
             headers=hdr_receipt,
         )
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 — outbound call can fail in ways we cannot enumerate; the receipt must still be sealed
         logger.exception("gateway.proxy_failed", receipt_id=str(allow.receipt_id))
         async with session_scope() as sdb:
             await seal_after_transport_failure(
@@ -340,7 +341,20 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     from axiom.services.receipt.keys import get_signing_keys
 
     keys = get_signing_keys()
-    logger.info("axiom.gateway.startup", evidence_key_id=keys.evidence_key_id[:16])
+    # Same guard as the API: the gateway decrypts vault credentials too.
+    kek_registry.assert_purpose_separation()
+    stale_env = deprecated_env_vars()
+    if stale_env:
+        logger.warning(
+            "grace.env.deprecated_axiom_vars",
+            count=len(stale_env),
+            variables=[f"{old} -> {new}" for old, new in stale_env],
+        )
+    logger.info(
+        "axiom.gateway.startup",
+        evidence_key_id=keys.evidence_key_id[:16],
+        vault_kek_id=kek_registry.active_kek(kek_registry.Purpose.VAULT)[1][:16],
+    )
     async with httpx.AsyncClient() as client:
         app.state.http_client = client
         async with session_scope() as db:
@@ -554,7 +568,7 @@ async def generic_proxy(
                 status_code = response.status_code
                 async for chunk in stream_bytes:
                     yield chunk
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001 — outbound call can fail in ways we cannot enumerate; the receipt must still be sealed
                 logger.exception("gateway.stream_failed", receipt_id=str(allow.receipt_id))
                 async with session_scope() as sdb:
                     await seal_after_transport_failure(
