@@ -25,6 +25,7 @@ GRACE_SHUTTING_DOWN=0
 source "${REPO_ROOT}/scripts/lib/axiom-ports.sh"
 
 require_docker_group() {
+  [[ "$(uname -s)" == "Darwin" ]] && return 0
   if ! groups | grep -qw docker; then
     cat <<'EOF' >&2
 ✗ Your user is not in the docker group.

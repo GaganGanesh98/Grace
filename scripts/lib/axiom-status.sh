@@ -95,7 +95,7 @@ axiom_run_status() {
     json=1
   fi
 
-  if ! groups | grep -qw docker; then
+  if [[ "$(uname -s)" != "Darwin" ]] && ! groups | grep -qw docker; then
     cat <<'EOF' >&2
 ✗ Your user is not in the docker group.
   Run this once, then log out and back in (or newgrp docker):
