@@ -10,9 +10,9 @@ import type { CryptoSigningStatus, MerkleStatus } from "@/lib/command-center-typ
 import { CommandCenterRequestError } from "@/lib/command-center-api";
 import { useCryptoHealthQuery } from "@/lib/queries/command-center";
 
-const GREEN = "#6db862";
-const AMBER = "#d4a030";
-const RED = "#da1e28";
+const GREEN = "var(--success)";
+const AMBER = "var(--warning)";
+const RED = "var(--danger)";
 
 type CryptoHealthCardProps = { projectId: string | null };
 
@@ -42,12 +42,12 @@ function signingDisplay(
     return { check: "yes", text: "all signed", textColor: "var(--axiom-success)" };
   }
   if (s === "partial") {
-    return { check: "amber", text: "partial", textColor: AMBER };
+    return { check: "amber", text: "partial", textColor: "var(--warning-strong)" };
   }
   if (s === "no_data") {
     return { check: "muted", text: "no sealed receipts yet", textColor: "var(--axiom-text-dim)" };
   }
-  return { check: "red", text: "no signatures yet", textColor: RED };
+  return { check: "red", text: "no signatures yet", textColor: "var(--danger-strong)" };
 }
 
 function SigningRow({ label, status }: { label: string; status: CryptoSigningStatus }): ReactElement {

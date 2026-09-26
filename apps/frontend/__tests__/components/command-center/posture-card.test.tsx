@@ -52,9 +52,7 @@ describe("PostureCard", () => {
   it("uses green fill when violations are 0", () => {
     mockReturn({ data: { calls_governed: 5, runs_completed: 1, violations: 0 } });
     const { container } = render(<PostureCard projectId="p1" />);
-    const ring = container.querySelector(
-      "div[style*=\"#6db862\"], div[style*='6db862']",
-    );
+    const ring = container.querySelector("div[style*='var(--success)']");
     expect(ring).toBeTruthy();
     expect(screen.getByText("100%")).toBeTruthy();
   });
@@ -62,16 +60,15 @@ describe("PostureCard", () => {
   it("uses amber ring for 1-4 violations", () => {
     mockReturn({ data: { calls_governed: 20, runs_completed: 0, violations: 2 } });
     const { container } = render(<PostureCard projectId="p1" />);
-    const ring = container.querySelector("div[style*='#d4a030'], div[style*='d4a030']");
+    const ring = container.querySelector("div[style*='var(--warning)']");
     expect(ring).toBeTruthy();
   });
 
   it("uses red ring for 5+ violations", () => {
     mockReturn({ data: { calls_governed: 20, runs_completed: 0, violations: 7 } });
     const { container } = render(<PostureCard projectId="p1" />);
-    // Phase 8.0: the ad-hoc #e05050 was folded onto the canonical denied
-    // border token (--status-denied-border, #da1e28).
-    const ring = container.querySelector("div[style*=\"#da1e28\"], div[style*='da1e28']");
+    // Phase 8.3: ring colours are theme tokens so they follow Midnight/Daylight.
+    const ring = container.querySelector("div[style*='var(--danger)']");
     expect(ring).toBeTruthy();
   });
 

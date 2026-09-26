@@ -4,9 +4,9 @@ import type { UiVerdict } from "@/lib/governance-display";
 import { cn } from "@/lib/utils";
 
 const styles: Record<UiVerdict, string> = {
-  AUTHORIZED: "border-emerald-500/40 bg-emerald-500/10 text-[#34D399]",
-  HELD: "border-amber-500/40 bg-amber-500/10 text-[#FBBF24]",
-  DENIED: "border-red-500/40 bg-red-500/10 text-[#F87171]",
+  AUTHORIZED: "border-emerald-500/40 bg-emerald-500/10 text-status-ok-fg",
+  HELD: "border-amber-500/40 bg-amber-500/10 text-status-held-fg",
+  DENIED: "border-red-500/40 bg-red-500/10 text-status-denied-fg",
 };
 
 export function VerdictBadge({

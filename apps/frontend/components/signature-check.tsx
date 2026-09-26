@@ -14,12 +14,12 @@ export function SignatureCheck({
   return (
     <div
       className={cn(
-        "rounded-lg border border-[rgba(255,255,255,0.06)] bg-[#0A0A14] px-4 py-3",
+        "rounded-lg border border-border bg-card px-4 py-3",
         className,
       )}
     >
-      <div className="font-mono text-axiom-13 uppercase tracking-wide text-[#A0A8BC]">{label}</div>
-      <div className={cn("mt-1 font-mono text-axiom-15", ok ? "text-[#34D399]" : "text-[#F87171]")}>
+      <div className="font-mono text-axiom-13 uppercase tracking-wide text-text-secondary">{label}</div>
+      <div className={cn("mt-1 font-mono text-axiom-15", ok ? "text-status-ok-fg" : "text-status-denied-fg")}>
         {ok ? "✓ valid" : "✗ invalid"}
       </div>
     </div>

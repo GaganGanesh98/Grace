@@ -100,28 +100,28 @@ export default function LedgerPage(): ReactElement {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-axiom-24 font-medium text-[#F0F2F8]">Governance ledger</h1>
-        <p className="mt-2 max-w-3xl text-axiom-15 text-[#A0A8BC]">
+        <h1 className="text-axiom-24 font-medium text-text-primary">Governance ledger</h1>
+        <p className="mt-2 max-w-3xl text-axiom-15 text-text-secondary">
           Records are grouped by workflow chain. Only receipts attached to a chain appear here (there is no
           global receipt list API yet).
         </p>
       </header>
 
       {!activeProjectId ? (
-        <div className="rounded-md border border-border-subtle bg-surface-card px-4 py-3 text-axiom-15 text-[#F0F2F8]">
+        <div className="rounded-md border border-border-subtle bg-surface-card px-4 py-3 text-axiom-15 text-text-primary">
           Select or create a project in the workspace to load the ledger.
         </div>
       ) : null}
 
       {error ? (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-axiom-15 text-[#F87171]">
+        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-axiom-15 text-status-denied-fg">
           {error}
         </div>
       ) : null}
 
       <div className="flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-end">
         <div>
-          <div className="mb-2 font-mono text-axiom-13 uppercase tracking-wide text-[#A0A8BC]">Verdict</div>
+          <div className="mb-2 font-mono text-axiom-13 uppercase tracking-wide text-text-secondary">Verdict</div>
           <div className="flex flex-wrap gap-2">
             {(
               [
@@ -140,7 +140,7 @@ export default function LedgerPage(): ReactElement {
                   pill,
                   verdict === k
                     ? "border-text-primary bg-surface-elevated text-text-primary"
-                    : "border-[rgba(255,255,255,0.08)] bg-transparent text-[#A0A8BC]",
+                    : "border-border bg-transparent text-text-secondary",
                 )}
                 onClick={() => {
                   setVerdict(k);
@@ -152,7 +152,7 @@ export default function LedgerPage(): ReactElement {
           </div>
         </div>
         <div>
-          <div className="mb-2 font-mono text-axiom-13 uppercase tracking-wide text-[#A0A8BC]">
+          <div className="mb-2 font-mono text-axiom-13 uppercase tracking-wide text-text-secondary">
             Verification
           </div>
           <div className="flex flex-wrap gap-2">
@@ -172,7 +172,7 @@ export default function LedgerPage(): ReactElement {
                   pill,
                   verify === k
                     ? "border-text-primary bg-surface-elevated text-text-primary"
-                    : "border-[rgba(255,255,255,0.08)] bg-transparent text-[#A0A8BC]",
+                    : "border-border bg-transparent text-text-secondary",
                 )}
                 onClick={() => {
                   setVerify(k);
@@ -184,7 +184,7 @@ export default function LedgerPage(): ReactElement {
           </div>
         </div>
         <div>
-          <div className="mb-2 font-mono text-axiom-13 uppercase tracking-wide text-[#A0A8BC]">Date range</div>
+          <div className="mb-2 font-mono text-axiom-13 uppercase tracking-wide text-text-secondary">Date range</div>
           <div className="flex flex-wrap gap-2">
             {(
               [
@@ -203,7 +203,7 @@ export default function LedgerPage(): ReactElement {
                   pill,
                   range === k
                     ? "border-text-primary bg-surface-elevated text-text-primary"
-                    : "border-[rgba(255,255,255,0.08)] bg-transparent text-[#A0A8BC]",
+                    : "border-border bg-transparent text-text-secondary",
                 )}
                 onClick={() => {
                   setRange(k);
@@ -216,7 +216,7 @@ export default function LedgerPage(): ReactElement {
         </div>
         {range === "custom" ? (
           <div className="flex flex-wrap items-end gap-2">
-            <label className="flex flex-col gap-1 font-mono text-axiom-12 text-[#A0A8BC]">
+            <label className="flex flex-col gap-1 font-mono text-axiom-12 text-text-secondary">
               From
               <input
                 type="date"
@@ -224,10 +224,10 @@ export default function LedgerPage(): ReactElement {
                 onChange={(e) => {
                   setCustomFrom(e.target.value);
                 }}
-                className="rounded border border-[rgba(255,255,255,0.08)] bg-[#0A0A14] px-2 py-1 text-axiom-14 text-[#F0F2F8]"
+                className="rounded border border-border bg-card px-2 py-1 text-axiom-14 text-text-primary"
               />
             </label>
-            <label className="flex flex-col gap-1 font-mono text-axiom-12 text-[#A0A8BC]">
+            <label className="flex flex-col gap-1 font-mono text-axiom-12 text-text-secondary">
               To
               <input
                 type="date"
@@ -235,7 +235,7 @@ export default function LedgerPage(): ReactElement {
                 onChange={(e) => {
                   setCustomTo(e.target.value);
                 }}
-                className="rounded border border-[rgba(255,255,255,0.08)] bg-[#0A0A14] px-2 py-1 text-axiom-14 text-[#F0F2F8]"
+                className="rounded border border-border bg-card px-2 py-1 text-axiom-14 text-text-primary"
               />
             </label>
           </div>
@@ -244,13 +244,13 @@ export default function LedgerPage(): ReactElement {
 
       {loading ? (
         <div className="space-y-3">
-          <div className="h-12 animate-pulse rounded-lg bg-[#0A0A14]" />
-          <div className="h-40 animate-pulse rounded-lg bg-[#0A0A14]" />
+          <div className="h-12 animate-pulse rounded-lg bg-secondary" />
+          <div className="h-40 animate-pulse rounded-lg bg-secondary" />
         </div>
       ) : null}
 
       {!loading && activeProjectId && visibleChains.length === 0 ? (
-        <p className="text-axiom-15 text-[#6B7490]">No records match the current filters.</p>
+        <p className="text-axiom-15 text-text-tertiary">No records match the current filters.</p>
       ) : null}
 
       <div className="space-y-4">

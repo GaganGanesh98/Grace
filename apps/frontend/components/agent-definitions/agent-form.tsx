@@ -117,7 +117,7 @@ export function AgentForm({
 
   return (
     <form
-      className="space-y-4 rounded-lg border border-[rgba(255,255,255,0.08)] bg-[#0b0c0e] p-6"
+      className="space-y-4 rounded-lg border border-border bg-[var(--surface-muted)] p-6"
       onSubmit={handleSubmit(async (vals) => {
         const vk = vaultKeys.find((x) => x.id === vals.vault_key_id);
         if (!vk) {
@@ -167,21 +167,21 @@ export function AgentForm({
       )}
 
       <div>
-        <Label htmlFor="agent-name" className="font-mono text-axiom-11 uppercase text-[#82878f]">
+        <Label htmlFor="agent-name" className="font-mono text-axiom-11 uppercase text-text-tertiary">
           Name
         </Label>
         <Controller
           name="name"
           control={control}
           render={({ field }) => (
-            <Input {...field} id="agent-name" className="mt-1 border-[rgba(255,255,255,0.1)] bg-[#08090b]" />
+            <Input {...field} id="agent-name" className="mt-1 border-border bg-[var(--surface-muted)]" />
           )}
         />
         {errors.name ? <p className="mt-1 text-axiom-13 text-red-400">{errors.name.message}</p> : null}
       </div>
 
       <div>
-        <Label htmlFor="agent-vault-key" className="font-mono text-axiom-11 uppercase text-[#82878f]">
+        <Label htmlFor="agent-vault-key" className="font-mono text-axiom-11 uppercase text-text-tertiary">
           Vault key
         </Label>
         <Controller
@@ -193,7 +193,7 @@ export function AgentForm({
               id="agent-vault-key"
               disabled={!hasKeys}
               aria-invalid={Boolean(errors.vault_key_id)}
-              className="mt-1 w-full rounded-md border border-[rgba(255,255,255,0.1)] bg-[#08090b] px-3 py-2 font-mono text-axiom-14 text-[#ecedef] disabled:opacity-60"
+              className="mt-1 w-full rounded-md border border-border bg-[var(--surface-muted)] px-3 py-2 font-mono text-axiom-14 text-text-primary disabled:opacity-60"
             >
               {hasKeys ? null : <option value="">No LLM credentials in vault</option>}
               {vaultKeys.map((k) => (
@@ -213,7 +213,7 @@ export function AgentForm({
       </div>
 
       <div>
-        <Label htmlFor="agent-model" className="font-mono text-axiom-11 uppercase text-[#82878f]">
+        <Label htmlFor="agent-model" className="font-mono text-axiom-11 uppercase text-text-tertiary">
           Model
         </Label>
         {modelOptions.length > 0 ? (
@@ -221,7 +221,7 @@ export function AgentForm({
             id="agent-model"
             value={modelSelectValue}
             aria-invalid={Boolean(errors.model)}
-            className="mt-1 w-full rounded-md border border-[rgba(255,255,255,0.1)] bg-[#08090b] px-3 py-2 font-mono text-axiom-14 text-[#ecedef]"
+            className="mt-1 w-full rounded-md border border-border bg-[var(--surface-muted)] px-3 py-2 font-mono text-axiom-14 text-text-primary"
             onChange={(e) => {
               if (e.target.value === CUSTOM_MODEL) {
                 setCustomModel(true);
@@ -254,13 +254,13 @@ export function AgentForm({
                   {...field}
                   id={modelOptions.length > 0 ? "agent-model-custom" : "agent-model"}
                   placeholder={selectedKey ? `${selectedKey.service}/model-id` : "provider/model-id"}
-                  className="mt-1 border-[rgba(255,255,255,0.1)] bg-[#08090b]"
+                  className="mt-1 border-border bg-[var(--surface-muted)]"
                 />
               </>
             )}
           />
         ) : null}
-        <p className="mt-1 text-axiom-11 text-[#82878f]">
+        <p className="mt-1 text-axiom-11 text-text-tertiary">
           {provider
             ? `Models for ${provider.label}. The provider prefix is stripped before the call.`
             : "Use provider/model-id — the provider prefix must match the selected credential."}
@@ -273,7 +273,7 @@ export function AgentForm({
       </div>
 
       <div>
-        <Label htmlFor="agent-system-prompt" className="font-mono text-axiom-11 uppercase text-[#82878f]">
+        <Label htmlFor="agent-system-prompt" className="font-mono text-axiom-11 uppercase text-text-tertiary">
           System prompt
         </Label>
         <Controller
@@ -284,7 +284,7 @@ export function AgentForm({
               {...field}
               id="agent-system-prompt"
               rows={4}
-              className="mt-1 w-full rounded-md border border-[rgba(255,255,255,0.1)] bg-[#08090b] px-3 py-2 text-axiom-14 text-[#ecedef]"
+              className="mt-1 w-full rounded-md border border-border bg-[var(--surface-muted)] px-3 py-2 text-axiom-14 text-text-primary"
             />
           )}
         />
@@ -293,7 +293,7 @@ export function AgentForm({
         ) : null}
       </div>
 
-      <p className="font-mono text-axiom-11 uppercase text-[#82878f]">
+      <p className="font-mono text-axiom-11 uppercase text-text-tertiary">
         Tools bundled: http_fetch, web_search, file_write (Phase 6.5 default)
       </p>
 
@@ -307,7 +307,7 @@ export function AgentForm({
               setHardEnforcement(e.target.checked);
             }}
           />
-          <span className="text-axiom-12 text-[#ecedef]">Hard enforcement</span>
+          <span className="text-axiom-12 text-text-primary">Hard enforcement</span>
         </label>
       ) : null}
 
@@ -315,7 +315,7 @@ export function AgentForm({
 
       <Button
         type="submit"
-        className="bg-neutral-100 text-text-inverse hover:bg-white"
+        className="bg-primary text-primary-foreground hover:bg-[var(--primary-hover)]"
         disabled={isSubmitting || !hasKeys}
         title={hasKeys ? undefined : "Add an LLM provider credential to your vault first."}
         aria-describedby={hasKeys ? undefined : EMPTY_VAULT_HINT_ID}

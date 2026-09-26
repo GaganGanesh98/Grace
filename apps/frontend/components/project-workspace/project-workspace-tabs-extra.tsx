@@ -105,7 +105,7 @@ export function AgentsTabPanel(): ReactElement {
                     e.stopPropagation();
                     router.push(`/dashboard/projects/${projectId}?preselectAgent=${a.id}`);
                   }}
-                  className="bg-[var(--axiom-electric)] px-3 py-1 font-mono text-axiom-11 text-black"
+                  className="bg-primary px-3 py-1 font-mono text-axiom-11 text-primary-foreground"
                 >
                   Run
                 </button>
@@ -436,7 +436,7 @@ export function PoliciesTabPanel(): ReactElement {
                     await patchPolicy(projectId, p.id, { is_active: true });
                     await qc.invalidateQueries({ queryKey: dashboardKeys.projectPolicies(projectId) });
                   }}
-                  className="bg-[var(--axiom-electric)] px-2 text-black"
+                  className="bg-primary px-2 text-primary-foreground"
                 >
                   Activate
                 </button>
@@ -513,7 +513,7 @@ function NewPolicyForm({
         <button type="button" onClick={onCancel}>
           Cancel
         </button>
-        <button className="bg-[var(--axiom-electric)] text-black" type="submit">
+        <button className="bg-primary text-primary-foreground" type="submit">
           Create &amp; edit rules
         </button>
       </div>
@@ -656,7 +656,7 @@ export function SettingsTabPanel(): ReactElement {
           </div>
           <button
             type="button"
-            className="bg-[var(--axiom-electric)] px-3 py-1 text-black"
+            className="bg-primary px-3 py-1 text-primary-foreground"
             onClick={() => pmut.mutate({ name: n, description: d || null })}
           >
             Save changes

@@ -22,15 +22,15 @@ export function ProjectCardAgentsSection({
 }: ProjectCardAgentsSectionProps): ReactElement {
   return (
     <div className="px-4 py-4">
-      <h3 className="font-mono text-axiom-13 font-medium uppercase tracking-[1px] text-[#A0A8BC]">
+      <h3 className="font-mono text-axiom-13 font-medium uppercase tracking-[1px] text-text-secondary">
         AGENTS ({definitionCount === "…" ? "…" : definitionCount})
       </h3>
       {definitionCount === "…" ? (
-        <div className="mt-3 h-4 w-32 max-w-full animate-pulse rounded bg-[#0A0A14]" aria-hidden />
+        <div className="mt-3 h-4 w-32 max-w-full animate-pulse rounded bg-secondary" aria-hidden />
       ) : definitionCount === 0 ? (
-        <p className="mt-3 text-axiom-14 text-[#6B7490]">No agents yet.</p>
+        <p className="mt-3 text-axiom-14 text-text-tertiary">No agents yet.</p>
       ) : (
-        <p className="mt-3 text-axiom-14 text-[#6B7490]">
+        <p className="mt-3 text-axiom-14 text-text-tertiary">
           <Link
             href={`/dashboard/projects/${projectId}/agent-definitions`}
             className="text-[var(--axiom-electric)] hover:underline"
@@ -42,7 +42,7 @@ export function ProjectCardAgentsSection({
       )}
       {isActive ? (
         <>
-          <h4 className="mt-6 font-mono text-axiom-11 font-medium uppercase tracking-[1px] text-[#6B7490]">
+          <h4 className="mt-6 font-mono text-axiom-11 font-medium uppercase tracking-[1px] text-text-tertiary">
             Governance activity
           </h4>
           <ul className="mt-4 space-y-3">
@@ -51,19 +51,19 @@ export function ProjectCardAgentsSection({
                 key={a.id}
                 className="flex flex-wrap items-center justify-between gap-2 font-mono text-axiom-13"
               >
-                <span className="text-[#F0F2F8]">{a.id}</span>
-                <span className="text-[#A0A8BC]">
+                <span className="text-text-primary">{a.id}</span>
+                <span className="text-text-secondary">
                   {a.actions} actions · {a.last}
                 </span>
               </li>
             ))}
             {receiptAgents.length === 0 ? (
-              <li className="text-axiom-14 text-[#6B7490]">No governance receipts indexed yet.</li>
+              <li className="text-axiom-14 text-text-tertiary">No governance receipts indexed yet.</li>
             ) : null}
           </ul>
         </>
       ) : (
-        <p className="mt-3 text-axiom-14 text-[#6B7490]">
+        <p className="mt-3 text-axiom-14 text-text-tertiary">
           Set this project as active to load governance activity from receipts.
         </p>
       )}

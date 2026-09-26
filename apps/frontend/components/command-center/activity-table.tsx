@@ -118,10 +118,10 @@ export function ActivityTable({
               const { label, tone } = verdictDisplay(r.verdict.verdict);
               const bgChip =
                 tone === "ok"
-                  ? "bg-[rgba(109,184,98,0.15)] text-[var(--axiom-success)]"
+                  ? "bg-status-ok-bg text-[var(--axiom-success)]"
                   : tone === "bad"
-                    ? "bg-[rgba(224,80,80,0.12)] text-[var(--axiom-danger)]"
-                    : "bg-[rgba(212,160,48,0.12)] text-[var(--axiom-warn)]";
+                    ? "bg-status-denied-bg text-[var(--axiom-danger)]"
+                    : "bg-status-held-bg text-[var(--axiom-warn)]";
               return (
                 <tr
                   key={r.id}

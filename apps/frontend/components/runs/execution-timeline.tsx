@@ -39,7 +39,7 @@ function summarize(ev: RunStreamEvent): { title: string; detail?: string; varian
 export function ExecutionTimeline({ events }: ExecutionTimelineProps): ReactElement {
   if (events.length === 0) {
     return (
-      <p className="font-mono text-axiom-13 uppercase tracking-wide text-[#82878f]">
+      <p className="font-mono text-axiom-13 uppercase tracking-wide text-text-tertiary">
         Waiting for events…
       </p>
     );
@@ -51,19 +51,19 @@ export function ExecutionTimeline({ events }: ExecutionTimelineProps): ReactElem
         const s = summarize(ev);
         return (
           <li key={`${s.title}-${i}`} className="relative">
-            <span className="absolute -left-[21px] top-1.5 flex h-[18px] w-[18px] items-center justify-center rounded-pill border border-[var(--axiom-electric)] bg-[#08090b] font-mono text-axiom-10 text-[var(--axiom-electric)]">
+            <span className="absolute -left-[21px] top-1.5 flex h-[18px] w-[18px] items-center justify-center rounded-pill border border-[var(--axiom-electric)] bg-[var(--surface-muted)] font-mono text-axiom-10 text-[var(--axiom-electric)]">
               {(i + 1).toString().padStart(2, "0")}
             </span>
             <p
               className={cn(
                 "font-mono text-axiom-13 uppercase tracking-wide",
-                s.variant === "deny" ? "text-amber-400" : "text-[#ecedef]",
+                s.variant === "deny" ? "text-amber-400" : "text-text-primary",
               )}
             >
               {s.title}
             </p>
             {s.detail ? (
-              <pre className="mt-1 max-h-32 overflow-auto whitespace-pre-wrap break-all font-mono text-axiom-11 text-[#a8adb5]">
+              <pre className="mt-1 max-h-32 overflow-auto whitespace-pre-wrap break-all font-mono text-axiom-11 text-text-secondary">
                 {s.detail}
               </pre>
             ) : null}

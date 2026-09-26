@@ -155,7 +155,7 @@ export function AddCredentialModal({ open, onClose, onCreated }: AddCredentialMo
           </button>
         </div>
 
-        <form className="mt-6 space-y-4" onSubmit={onSubmit}>
+        <form method="post" className="mt-6 space-y-4" onSubmit={onSubmit}>
           <div>
             <Label htmlFor="credential-name" className="text-micro uppercase tracking-[0.06em] text-text-secondary">
               NAME
@@ -241,7 +241,7 @@ export function AddCredentialModal({ open, onClose, onCreated }: AddCredentialMo
                       className={cn(
                         "border-r border-border px-3 py-2 text-micro uppercase tracking-[0.06em] transition-colors last:border-r-0",
                         kindOverride === kind
-                          ? "bg-neutral-100 text-text-inverse"
+                          ? "bg-accent text-accent-foreground"
                           : "bg-transparent text-text-secondary hover:bg-surface-elevated hover:text-text-primary",
                       )}
                       onClick={() => setKindOverride(kind)}

@@ -33,7 +33,7 @@ export function ApiKeyDisplay({
 
   return (
     <div className={cn("flex items-center gap-2", className)}>
-      <code className="font-mono text-axiom-13 text-[#A0A8BC]">{masked}</code>
+      <code className="font-mono text-axiom-13 text-text-secondary">{masked}</code>
       <Button
         type="button"
         variant="secondary"

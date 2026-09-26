@@ -80,7 +80,7 @@ export default function LedgerDetailPage(): ReactElement {
   if (!activeProjectId) {
     return (
       <div className="space-y-4">
-        <p className="text-axiom-15 text-[#A0A8BC]">Select a project to view this record.</p>
+        <p className="text-axiom-15 text-text-secondary">Select a project to view this record.</p>
         <Button type="button" variant="secondary" onClick={() => router.push("/dashboard/projects")}>
           Projects
         </Button>
@@ -91,8 +91,8 @@ export default function LedgerDetailPage(): ReactElement {
   if (loading) {
     return (
       <div className="space-y-4">
-        <div className="h-10 w-2/3 max-w-md animate-pulse rounded bg-[#0A0A14]" />
-        <div className="h-96 animate-pulse rounded-lg bg-[#0A0A14]" />
+        <div className="h-10 w-2/3 max-w-md animate-pulse rounded bg-secondary" />
+        <div className="h-96 animate-pulse rounded-lg bg-secondary" />
       </div>
     );
   }
@@ -100,7 +100,7 @@ export default function LedgerDetailPage(): ReactElement {
   if (error || !receipt) {
     return (
       <div className="space-y-4">
-        <p className="text-axiom-15 text-[#F87171]">{error ?? "Record not found"}</p>
+        <p className="text-axiom-15 text-status-denied-fg">{error ?? "Record not found"}</p>
         <div className="flex flex-wrap gap-2">
           <Button type="button" variant="secondary" onClick={() => void receiptQuery.refetch()}>
             Retry
@@ -122,14 +122,14 @@ export default function LedgerDetailPage(): ReactElement {
         <div>
           <button
             type="button"
-            className="mb-3 rounded-sm border border-transparent bg-transparent px-2 py-1 font-mono text-axiom-13 text-[#A0A8BC] hover:border-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.03)] hover:text-[var(--axiom-electric)] hover:underline"
+            className="mb-3 rounded-sm border border-transparent bg-transparent px-2 py-1 font-mono text-axiom-13 text-text-secondary hover:border-[var(--border-emphasis)] hover:bg-secondary hover:text-[var(--axiom-electric)] hover:underline"
             onClick={() => router.push("/dashboard/ledger")}
           >
             ← Back to ledger
           </button>
-          <h1 className="font-mono text-axiom-20 font-medium text-[#F0F2F8]">{formatRecordId(receipt.id)}</h1>
-          <p className="mt-2 font-mono text-axiom-14 text-[#A0A8BC]">{receipt.intent.agent_id}</p>
-          <p className="mt-1 font-mono text-axiom-13 text-[#6B7490]">
+          <h1 className="font-mono text-axiom-20 font-medium text-text-primary">{formatRecordId(receipt.id)}</h1>
+          <p className="mt-2 font-mono text-axiom-14 text-text-secondary">{receipt.intent.agent_id}</p>
+          <p className="mt-1 font-mono text-axiom-13 text-text-tertiary">
             {new Date(receipt.intent.created_at).toLocaleString()}
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
@@ -154,8 +154,8 @@ export default function LedgerDetailPage(): ReactElement {
       </div>
 
       {verifyResult ? (
-        <div className="rounded-md border border-border-subtle bg-[#0A0A14] p-4">
-          <div className="mb-2 font-mono text-axiom-13 uppercase tracking-wide text-[#A0A8BC]">
+        <div className="rounded-md border border-border-subtle bg-card p-4">
+          <div className="mb-2 font-mono text-axiom-13 uppercase tracking-wide text-text-secondary">
             Verify result
           </div>
           <CodeBlock>{JSON.stringify(verifyResult, null, 2)}</CodeBlock>
@@ -163,13 +163,13 @@ export default function LedgerDetailPage(): ReactElement {
       ) : null}
 
       <section>
-        <h2 className="mb-6 font-mono text-axiom-16 font-medium uppercase tracking-[1px] text-[#F0F2F8]">
+        <h2 className="mb-6 font-mono text-axiom-16 font-medium uppercase tracking-[1px] text-text-primary">
           Governance pipeline
         </h2>
         <GovernancePipeline receipt={receipt} />
       </section>
 
-      <p className="font-mono text-axiom-12 text-[#6B7490]">
+      <p className="font-mono text-axiom-12 text-text-tertiary">
         Public viewers need a share token:{" "}
         <Link className="text-[var(--axiom-electric)] hover:underline" href={`/verify/${id}`}>
           {`/verify/${id}`}

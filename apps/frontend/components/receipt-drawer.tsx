@@ -158,10 +158,10 @@ export function ReceiptDrawer({
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="relative flex h-full w-full max-w-[520px] flex-col border-l border-[rgba(255,255,255,0.08)] bg-[#0A0A14] shadow-2xl outline-none"
+        className="relative flex h-full w-full max-w-[520px] flex-col border-l border-border bg-card shadow-2xl outline-none"
       >
-        <header className="flex shrink-0 items-center justify-between border-b border-[rgba(255,255,255,0.06)] px-5 py-4">
-          <h2 id={panelId} className="font-mono text-axiom-16 font-medium uppercase tracking-[1px] text-[#F0F2F8]">
+        <header className="flex shrink-0 items-center justify-between border-b border-border px-5 py-4">
+          <h2 id={panelId} className="font-mono text-axiom-16 font-medium uppercase tracking-[1px] text-text-primary">
             Governance receipt
           </h2>
           <Button type="button" variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={handleClose} aria-label="Close">
@@ -173,17 +173,17 @@ export function ReceiptDrawer({
           {loading ? (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-20 animate-pulse rounded-lg bg-[rgba(255,255,255,0.04)]" />
+                <div key={i} className="h-20 animate-pulse rounded-lg bg-secondary" />
               ))}
             </div>
           ) : null}
 
           {error ? (
-            <div className="rounded-lg border border-[rgba(248,113,113,0.35)] bg-[rgba(248,113,113,0.08)] p-4">
-              <p className="font-mono text-axiom-13 font-medium text-[#F87171]">Could not load receipt</p>
-              <p className="mt-2 font-mono text-axiom-13 text-[#A0A8BC]">{error.message}</p>
+            <div className="rounded-lg border border-[color:color-mix(in_oklab,var(--danger)_35%,transparent)] bg-status-denied-bg p-4">
+              <p className="font-mono text-axiom-13 font-medium text-status-denied-fg">Could not load receipt</p>
+              <p className="mt-2 font-mono text-axiom-13 text-text-secondary">{error.message}</p>
               {error.diagnostic ? (
-                <pre className="mt-3 max-h-40 overflow-auto whitespace-pre-wrap break-all font-mono text-axiom-12 text-[#6B7490]">
+                <pre className="mt-3 max-h-40 overflow-auto whitespace-pre-wrap break-all font-mono text-axiom-12 text-text-tertiary">
                   {error.diagnostic}
                 </pre>
               ) : null}
@@ -194,15 +194,15 @@ export function ReceiptDrawer({
             <div className="space-y-6">
               <div className="flex flex-wrap items-center gap-2">
                 <VerdictBadge verdict={toUiVerdict(detail.verdict)} />
-                <span className="font-mono text-axiom-12 text-[#6B7490]">{detail.action_type}</span>
+                <span className="font-mono text-axiom-12 text-text-tertiary">{detail.action_type}</span>
               </div>
 
               <section>
-                <h3 className="font-mono text-axiom-16 font-medium uppercase tracking-[1px] text-[#F0F2F8]">
+                <h3 className="font-mono text-axiom-16 font-medium uppercase tracking-[1px] text-text-primary">
                   Receipt ID
                 </h3>
                 <div className="mt-2 flex items-start gap-2">
-                  <code className="break-all font-mono text-axiom-13 text-[#A0A8BC]">{detail.receipt_id}</code>
+                  <code className="break-all font-mono text-axiom-13 text-text-secondary">{detail.receipt_id}</code>
                   <Button
                     type="button"
                     variant="ghost"
@@ -214,35 +214,35 @@ export function ReceiptDrawer({
                       setTimeout(() => setCopied(false), 2000);
                     }}
                   >
-                    {copied ? <Check className="h-3.5 w-3.5 text-[#34D399]" /> : <Copy className="h-3.5 w-3.5" />}
+                    {copied ? <Check className="h-3.5 w-3.5 text-status-ok-fg" /> : <Copy className="h-3.5 w-3.5" />}
                   </Button>
                 </div>
               </section>
 
-              <section className="rounded-lg border border-[rgba(255,255,255,0.06)] p-4">
-                <h3 className="font-mono text-axiom-16 font-medium uppercase tracking-[1px] text-[#F0F2F8]">
+              <section className="rounded-lg border border-border p-4">
+                <h3 className="font-mono text-axiom-16 font-medium uppercase tracking-[1px] text-text-primary">
                   Signatures
                 </h3>
-                <div className="mt-3 grid grid-cols-2 gap-3 font-mono text-axiom-13 text-[#A0A8BC]">
+                <div className="mt-3 grid grid-cols-2 gap-3 font-mono text-axiom-13 text-text-secondary">
                   <div>
                     Ed25519{" "}
-                    <span className={detail.signatures.ed25519.verified ? "text-[#34D399]" : "text-[#F87171]"}>
+                    <span className={detail.signatures.ed25519.verified ? "text-status-ok-fg" : "text-status-denied-fg"}>
                       {detail.signatures.ed25519.verified ? "✓ verified" : "✗"}
                     </span>
                   </div>
                   <div>
                     ML-DSA-65{" "}
-                    <span className={detail.signatures.ml_dsa_65.verified ? "text-[#34D399]" : "text-[#F87171]"}>
+                    <span className={detail.signatures.ml_dsa_65.verified ? "text-status-ok-fg" : "text-status-denied-fg"}>
                       {detail.signatures.ml_dsa_65.verified ? "✓ verified" : "✗"}
                     </span>
                   </div>
                 </div>
               </section>
 
-              <section className="rounded-lg border border-[rgba(255,255,255,0.06)] p-4">
-                <h3 className="font-mono text-axiom-16 font-medium uppercase tracking-[1px] text-[#F0F2F8]">Merkle</h3>
+              <section className="rounded-lg border border-border p-4">
+                <h3 className="font-mono text-axiom-16 font-medium uppercase tracking-[1px] text-text-primary">Merkle</h3>
                 <p
-                  className="mt-2 font-mono text-axiom-13 text-[#A0A8BC]"
+                  className="mt-2 font-mono text-axiom-13 text-text-secondary"
                   title={detail.merkle.root_hash || undefined}
                 >
                   Leaf #{detail.merkle.leaf_index ?? "—"} · Depth {detail.merkle.depth} · Root{" "}
@@ -250,30 +250,30 @@ export function ReceiptDrawer({
                 </p>
               </section>
 
-              <section className="rounded-lg border border-[rgba(255,255,255,0.06)] p-4">
-                <h3 className="font-mono text-axiom-16 font-medium uppercase tracking-[1px] text-[#F0F2F8]">
+              <section className="rounded-lg border border-border p-4">
+                <h3 className="font-mono text-axiom-16 font-medium uppercase tracking-[1px] text-text-primary">
                   RFC 3161 timestamp
                 </h3>
-                <p className="mt-2 font-mono text-axiom-13 text-[#A0A8BC]">
+                <p className="mt-2 font-mono text-axiom-13 text-text-secondary">
                   {detail.tsa.verified ? "✓" : "—"} · {detail.tsa.timestamp ?? "—"} · Authority:{" "}
                   {detail.tsa.authority ?? "—"}
                 </p>
               </section>
 
               <section>
-                <h3 className="font-mono text-axiom-16 font-medium uppercase tracking-[1px] text-[#F0F2F8]">
+                <h3 className="font-mono text-axiom-16 font-medium uppercase tracking-[1px] text-text-primary">
                   Governance pipeline
                 </h3>
-                <ol className="mt-3 list-decimal space-y-3 pl-5 font-mono text-axiom-13 text-[#A0A8BC]">
+                <ol className="mt-3 list-decimal space-y-3 pl-5 font-mono text-axiom-13 text-text-secondary">
                   {detail.pipeline.map((st) => (
                     <li key={st.stage} className="marker:text-[var(--axiom-electric)]">
-                      <div className="font-medium text-[#F0F2F8]">
+                      <div className="font-medium text-text-primary">
                         {st.stage}. {st.name}
                       </div>
-                      <div className="text-axiom-13 text-[#A0A8BC]">{st.outcome}</div>
+                      <div className="text-axiom-13 text-text-secondary">{st.outcome}</div>
                       <details className="mt-1">
-                        <summary className="cursor-pointer text-axiom-12 text-[#6B7490]">Evidence</summary>
-                        <pre className="mt-2 max-h-32 overflow-auto whitespace-pre-wrap break-all text-axiom-12 text-[#6B7490]">
+                        <summary className="cursor-pointer text-axiom-12 text-text-tertiary">Evidence</summary>
+                        <pre className="mt-2 max-h-32 overflow-auto whitespace-pre-wrap break-all text-axiom-12 text-text-tertiary">
                           {JSON.stringify(st.evidence, null, 2)}
                         </pre>
                       </details>
@@ -283,11 +283,11 @@ export function ReceiptDrawer({
               </section>
 
               <section>
-                <h3 className="font-mono text-axiom-16 font-medium uppercase tracking-[1px] text-[#F0F2F8]">
+                <h3 className="font-mono text-axiom-16 font-medium uppercase tracking-[1px] text-text-primary">
                   Artifacts
                 </h3>
                 {artifacts.length === 0 ? (
-                  <p className="mt-2 font-mono text-axiom-13 text-[#6B7490]">No artifacts produced by this action</p>
+                  <p className="mt-2 font-mono text-axiom-13 text-text-tertiary">No artifacts produced by this action</p>
                 ) : (
                   <ul className="mt-2 space-y-2">
                     {artifacts.map((a, i) => (
@@ -298,7 +298,7 @@ export function ReceiptDrawer({
                         >
                           {a.path}
                         </a>
-                        <span className="ml-2 font-mono text-axiom-12 text-[#6B7490]">
+                        <span className="ml-2 font-mono text-axiom-12 text-text-tertiary">
                           {a.content_type} · {a.size_bytes} bytes
                         </span>
                       </li>
@@ -308,17 +308,17 @@ export function ReceiptDrawer({
               </section>
 
               <section>
-                <h3 className="font-mono text-axiom-16 font-medium uppercase tracking-[1px] text-[#F0F2F8]">Previews</h3>
+                <h3 className="font-mono text-axiom-16 font-medium uppercase tracking-[1px] text-text-primary">Previews</h3>
                 <div className="mt-2 space-y-2">
                   <div>
-                    <div className="font-mono text-axiom-12 uppercase tracking-wide text-[#6B7490]">Request</div>
-                    <pre className="mt-1 max-h-28 overflow-auto whitespace-pre-wrap break-all font-mono text-axiom-13 text-[#A0A8BC]">
+                    <div className="font-mono text-axiom-12 uppercase tracking-wide text-text-tertiary">Request</div>
+                    <pre className="mt-1 max-h-28 overflow-auto whitespace-pre-wrap break-all font-mono text-axiom-13 text-text-secondary">
                       {detail.request_preview}
                     </pre>
                   </div>
                   <div>
-                    <div className="font-mono text-axiom-12 uppercase tracking-wide text-[#6B7490]">Response</div>
-                    <pre className="mt-1 max-h-28 overflow-auto whitespace-pre-wrap break-all font-mono text-axiom-13 text-[#A0A8BC]">
+                    <div className="font-mono text-axiom-12 uppercase tracking-wide text-text-tertiary">Response</div>
+                    <pre className="mt-1 max-h-28 overflow-auto whitespace-pre-wrap break-all font-mono text-axiom-13 text-text-secondary">
                       {detail.response_preview}
                     </pre>
                   </div>
@@ -331,7 +331,7 @@ export function ReceiptDrawer({
           ) : null}
         </div>
 
-        <footer className="shrink-0 border-t border-[rgba(255,255,255,0.06)] px-5 py-3">
+        <footer className="shrink-0 border-t border-border px-5 py-3">
           <Link
             href={`/dashboard/ledger/${encodeURIComponent(receiptId)}`}
             className="font-mono text-axiom-13 text-[var(--axiom-electric)] hover:underline"

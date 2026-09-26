@@ -226,7 +226,7 @@ function CommandCenterInner(): ReactElement {
   if (projectsError) {
     return (
       <div
-        className="rounded-lg border border-[var(--axiom-danger)]/30 bg-[rgba(224,80,80,0.08)] px-4 py-3 text-axiom-15 text-[var(--axiom-danger)]"
+        className="rounded-lg border border-[var(--axiom-danger)]/30 bg-status-denied-bg px-4 py-3 text-axiom-15 text-[var(--axiom-danger)]"
         role="alert"
       >
         Could not load projects: {projectsError.message}
@@ -253,7 +253,7 @@ function CommandCenterInner(): ReactElement {
               placeholder="Production"
               value={newProjectName}
               onChange={(ev) => setNewProjectName(ev.target.value)}
-              className="border border-[var(--axiom-border)] bg-[#04040a] text-[var(--axiom-text)]"
+              className="border border-[var(--axiom-border)] bg-[var(--surface-muted)] text-[var(--axiom-text)]"
               autoComplete="off"
             />
           </div>
@@ -280,7 +280,7 @@ function CommandCenterInner(): ReactElement {
   if (hasProjects && !activeProjectId) {
     return (
       <div
-        className="rounded-lg border border-[var(--axiom-warn)]/30 bg-[rgba(212,160,48,0.08)] px-4 py-3 text-axiom-15 text-[var(--axiom-text)]"
+        className="rounded-lg border border-[var(--axiom-warn)]/30 bg-status-held-bg px-4 py-3 text-axiom-15 text-[var(--axiom-text)]"
         role="status"
       >
         Select a project from the sidebar to load the command center.
@@ -291,7 +291,7 @@ function CommandCenterInner(): ReactElement {
   if (error) {
     return (
       <div
-        className="rounded-lg border border-[var(--axiom-danger)]/30 bg-[rgba(224,80,80,0.08)] px-4 py-3 text-axiom-15 text-[var(--axiom-danger)]"
+        className="rounded-lg border border-[var(--axiom-danger)]/30 bg-status-denied-bg px-4 py-3 text-axiom-15 text-[var(--axiom-danger)]"
         role="alert"
       >
         {error}
@@ -341,7 +341,7 @@ function CommandCenterInner(): ReactElement {
   if (agentDefError) {
     return (
       <div
-        className="rounded-lg border border-[var(--axiom-warn)]/30 bg-[rgba(212,160,48,0.08)] px-4 py-3 text-axiom-15 text-[var(--axiom-text)]"
+        className="rounded-lg border border-[var(--axiom-warn)]/30 bg-status-held-bg px-4 py-3 text-axiom-15 text-[var(--axiom-text)]"
         role="alert"
       >
         {agentDefError} — the command center could not load agent scope metadata

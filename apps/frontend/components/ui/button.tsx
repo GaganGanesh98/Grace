@@ -3,25 +3,29 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+// Phase 8.3 redesign: sans-serif, sentence case, 8px radius and a 1px hover
+// lift. The variant/size API is unchanged so existing call sites keep working.
+// Colours come from the theme tokens in globals.css, so every variant follows
+// Midnight/Daylight without per-theme classes here.
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap font-[family-name:var(--font-mono)] outline-none transition-colors duration-fast ease-default focus-visible:outline focus-visible:outline-2 focus-visible:outline-neutral-100 focus-visible:outline-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button inline-flex shrink-0 items-center justify-center gap-[7px] whitespace-nowrap rounded-md border font-[family-name:var(--font-sans)] text-[13px] font-semibold outline-none transition-[transform,background-color,border-color,color] duration-fast ease-out hover:enabled:-translate-y-px focus-visible:ring-[3px] focus-visible:ring-[color:color-mix(in_oklab,var(--ring)_28%,transparent)] focus-visible:border-[var(--ring)] disabled:cursor-not-allowed disabled:opacity-[0.42] motion-reduce:transition-none motion-reduce:hover:enabled:translate-y-0 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
         primary:
-          "rounded-sm border border-transparent bg-neutral-100 px-4 py-2 text-body font-semibold uppercase tracking-[1px] [color:var(--text-inverse)] hover:bg-white active:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-40",
+          "h-9 border-transparent bg-primary px-3 text-primary-foreground hover:enabled:bg-[var(--primary-hover)]",
         secondary:
-          "rounded-sm border border-border bg-transparent px-4 py-2 text-body font-medium uppercase tracking-[1px] [color:var(--text-primary)] hover:border-border-strong hover:bg-surface-elevated active:bg-neutral-800 disabled:opacity-40",
+          "h-9 border-border bg-secondary px-3 text-secondary-foreground hover:enabled:border-[var(--border-emphasis)]",
         danger:
-          "rounded-sm border border-status-denied-border bg-transparent px-3 py-1.5 text-micro uppercase tracking-[1px] [color:var(--status-denied-fg)] hover:border-status-denied-fg hover:bg-status-denied-bg disabled:opacity-40",
+          "h-9 border-[color:color-mix(in_oklab,var(--danger)_25%,var(--border))] bg-[var(--danger-soft)] px-3 text-[var(--danger-strong)]",
         ghost:
-          "rounded-sm border border-transparent bg-transparent px-3 py-1.5 text-body font-medium uppercase tracking-[1px] [color:var(--text-secondary)] hover:bg-surface-elevated hover:[color:var(--text-primary)] disabled:opacity-40",
+          "h-9 border-transparent bg-transparent px-3 text-muted-foreground hover:enabled:bg-secondary hover:enabled:text-foreground",
       },
       size: {
         default: "",
-        sm: "!min-h-0 rounded-sm !px-3 !py-1.5 !text-micro",
-        icon: "h-8 min-h-8 min-w-8 justify-center p-0 [&_svg:not([class*='size-'])]:size-4",
-        "icon-sm": "h-7 min-h-7 min-w-7 justify-center p-0 text-[11px] [&_svg:not([class*='size-'])]:size-3.5",
+        sm: "!h-[30px] !px-2.5 !text-xs",
+        icon: "!h-9 !w-9 !p-0",
+        "icon-sm": "!h-[30px] !w-[30px] !p-0 [&_svg:not([class*='size-'])]:size-3.5",
       },
     },
     defaultVariants: {

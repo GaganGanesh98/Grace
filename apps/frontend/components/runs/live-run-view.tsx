@@ -20,7 +20,7 @@ export function LiveRunView({ run, ws }: LiveRunViewProps): ReactElement {
   return (
     <div className="space-y-8">
       <section>
-        <h2 className="font-mono text-axiom-12 uppercase tracking-[2px] text-[#6B7490]">Live execution</h2>
+        <h2 className="font-mono text-axiom-12 uppercase tracking-[2px] text-text-tertiary">Live execution</h2>
         {ws.errorMessage ? (
           <p className="mt-2 text-axiom-14 text-red-400">{ws.errorMessage}</p>
         ) : null}
@@ -34,13 +34,13 @@ export function LiveRunView({ run, ws }: LiveRunViewProps): ReactElement {
 
       {done ? (
         <section>
-          <h2 className="font-mono text-axiom-12 uppercase tracking-[2px] text-[#6B7490]">Results</h2>
+          <h2 className="font-mono text-axiom-12 uppercase tracking-[2px] text-text-tertiary">Results</h2>
           <div className="mt-4">
             <ResultsView run={run} />
           </div>
         </section>
       ) : (
-        <p className="font-mono text-axiom-13 uppercase tracking-wide text-[#6B7490]">Run in progress…</p>
+        <p className="font-mono text-axiom-13 uppercase tracking-wide text-text-tertiary">Run in progress…</p>
       )}
     </div>
   );

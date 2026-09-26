@@ -77,27 +77,27 @@ export default function AgentRunDetailPage(): ReactElement {
       </Link>
 
       {runQ.isPending ? (
-        <div className="h-40 animate-pulse rounded-lg bg-[#0A0A14]" />
+        <div className="h-40 animate-pulse rounded-lg bg-secondary" />
       ) : runQ.error ? (
         <p className="text-red-400">{runQ.error.message}</p>
       ) : !run ? (
-        <p className="text-[#6B7490]">Not found.</p>
+        <p className="text-text-tertiary">Not found.</p>
       ) : (
         <>
           <div>
-            <p className="font-mono text-axiom-11 uppercase text-[#6B7490]">Run</p>
-            <h1 className="mt-2 break-all font-mono text-axiom-18 text-[#F0F2F8]">{run.id}</h1>
-            <p className="mt-2 font-mono text-axiom-13 uppercase text-[#A0A8BC]">Status: {run.status}</p>
+            <p className="font-mono text-axiom-11 uppercase text-text-tertiary">Run</p>
+            <h1 className="mt-2 break-all font-mono text-axiom-18 text-text-primary">{run.id}</h1>
+            <p className="mt-2 font-mono text-axiom-13 uppercase text-text-secondary">Status: {run.status}</p>
           </div>
 
           {!token ? (
-            <p className="font-mono text-axiom-13 text-[#6B7490]">Connecting stream…</p>
+            <p className="font-mono text-axiom-13 text-text-tertiary">Connecting stream…</p>
           ) : (
             <LiveRunView run={run} ws={ws} />
           )}
 
           <section>
-            <h2 className="font-mono text-axiom-12 uppercase tracking-[2px] text-[#6B7490]">Artifacts</h2>
+            <h2 className="font-mono text-axiom-12 uppercase tracking-[2px] text-text-tertiary">Artifacts</h2>
             <div className="mt-3">
               <ArtifactsGrid paths={artifactPaths} />
             </div>

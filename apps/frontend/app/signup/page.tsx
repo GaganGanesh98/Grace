@@ -45,7 +45,7 @@ export default function SignupPage(): ReactElement {
           <CardTitle>Create account</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <form className="space-y-4" onSubmit={(e) => void handleSubmit(onSubmit)(e)}>
+          <form method="post" className="space-y-4" onSubmit={(e) => void handleSubmit(onSubmit)(e)}>
             <AuthTextField
               autoComplete="name"
               control={control}
