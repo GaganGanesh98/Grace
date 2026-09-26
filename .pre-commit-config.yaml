@@ -48,8 +48,17 @@ repos:
 
   - repo: local
     hooks:
+      # cli/keys.py's _out() intentionally prints a human-readable status/rotation
+      # report for an operator running `axiom keys ...` during an incident (see
+      # docs/runbooks/key-rotation.md) -- structlog's renderer would prepend a
+      # timestamp/level to every line and collapse the blank-line separators the
+      # report depends on for readability. Same rationale as --exclude=compliance.py
+      # above, but grep's own --exclude matches by basename only and there are two
+      # other, unrelated keys.py files in the tree (crypto/keys.py, receipt/keys.py)
+      # that must stay covered -- so the exemption is a path-anchored `grep -v`
+      # stage rather than a second --exclude=keys.py.
       - id: no-print-statements
         name: Block print() in source code
-        entry: bash -c 'if grep -rnE "^[^#]*\\bprint\\(" apps/backend/src/axiom/ --exclude-dir=__pycache__ --exclude=compliance.py; then echo "print() found - use structlog logger"; exit 1; fi'
+        entry: bash -c 'if grep -rnE "^[^#]*\\bprint\\(" apps/backend/src/axiom/ --exclude-dir=__pycache__ --exclude=compliance.py | grep -v "^apps/backend/src/axiom/cli/keys.py:"; then echo "print() found - use structlog logger"; exit 1; fi'
         language: system
         pass_filenames: false
