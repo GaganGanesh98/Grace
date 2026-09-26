@@ -90,7 +90,7 @@ export default function LoginPage(): ReactElement {
           <h1 className={styles.heading}>Resume session.</h1>
           <p className={styles.tagline}>VERIFICATION LAYER · AUTONOMOUS SYSTEMS</p>
 
-          <form noValidate onSubmit={(e) => void handleSubmit(onSubmit)(e)}>
+          <form method="post" noValidate onSubmit={(e) => void handleSubmit(onSubmit)(e)}>
             <div className={styles.fieldGroup}>
               <div className={styles.labelRow}>
                 <label className={styles.labelText} htmlFor="email">

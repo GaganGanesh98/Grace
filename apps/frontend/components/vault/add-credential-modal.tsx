@@ -155,7 +155,7 @@ export function AddCredentialModal({ open, onClose, onCreated }: AddCredentialMo
           </button>
         </div>
 
-        <form className="mt-6 space-y-4" onSubmit={onSubmit}>
+        <form method="post" className="mt-6 space-y-4" onSubmit={onSubmit}>
           <div>
             <Label htmlFor="credential-name" className="text-micro uppercase tracking-[0.06em] text-text-secondary">
               NAME
