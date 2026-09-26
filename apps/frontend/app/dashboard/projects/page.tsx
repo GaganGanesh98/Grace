@@ -91,18 +91,18 @@ function ProjectsPageInner(): ReactElement {
 
   return (
     <div className="space-y-10">
-      <nav className="font-mono text-axiom-12 uppercase tracking-[1px] text-[#6B7490]">
+      <nav className="font-mono text-axiom-12 uppercase tracking-[1px] text-text-tertiary">
         <Link className="text-[var(--axiom-electric)] hover:underline" href="/dashboard">
           Command center
         </Link>
         <span className="mx-2">/</span>
-        <span className="text-[#A0A8BC]">Projects</span>
+        <span className="text-text-secondary">Projects</span>
       </nav>
 
       <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-axiom-24 font-medium text-[#F0F2F8]">Projects</h1>
-          <p className="mt-2 max-w-2xl text-axiom-15 text-[#A0A8BC]">
+          <h1 className="text-axiom-24 font-medium text-text-primary">Projects</h1>
+          <p className="mt-2 max-w-2xl text-axiom-15 text-text-secondary">
             Manage projects, API keys, and agents
           </p>
         </div>
@@ -118,26 +118,26 @@ function ProjectsPageInner(): ReactElement {
 
       {showCreateProject ? (
         <section className="max-w-xl space-y-4 rounded-md border border-border-subtle bg-surface-card p-4">
-          <h2 className="font-mono text-axiom-14 font-medium uppercase tracking-[1px] text-[#F0F2F8]">
+          <h2 className="font-mono text-axiom-14 font-medium uppercase tracking-[1px] text-text-primary">
             New project
           </h2>
           <form onSubmit={(e) => void submitCreateProject(e)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="proj-name" className="text-[#A0A8BC]">
+              <Label htmlFor="proj-name" className="text-text-secondary">
                 Name
               </Label>
               <Input
                 id="proj-name"
                 value={newProjectName}
                 onChange={(ev) => setNewProjectName(ev.target.value)}
-                className="border-[rgba(255,255,255,0.08)] bg-[#04040a] text-[#F0F2F8]"
+                className="border-border bg-[var(--surface-muted)] text-text-primary"
                 placeholder="Production"
                 autoComplete="off"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="proj-desc" className="text-[#A0A8BC]">
-                Description <span className="font-normal text-[#6B7490]">(optional)</span>
+              <Label htmlFor="proj-desc" className="text-text-secondary">
+                Description <span className="font-normal text-text-tertiary">(optional)</span>
               </Label>
               <textarea
                 id="proj-desc"
@@ -166,11 +166,11 @@ function ProjectsPageInner(): ReactElement {
       ) : null}
 
       {projectsLoading ? (
-        <div className="h-40 animate-pulse rounded-md bg-[#0A0A14]" />
+        <div className="h-40 animate-pulse rounded-md bg-secondary" />
       ) : sortedProjects.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-md border border-[rgba(255,255,255,0.06)] bg-[#0A0A14] px-6 py-16 text-center">
-          <Folders className="h-12 w-12 text-[#6B7490]" aria-hidden />
-          <p className="mt-4 text-axiom-18 font-medium text-[#F0F2F8]">No projects yet</p>
+        <div className="flex flex-col items-center justify-center rounded-md border border-border bg-card px-6 py-16 text-center">
+          <Folders className="h-12 w-12 text-text-tertiary" aria-hidden />
+          <p className="mt-4 text-axiom-18 font-medium text-text-primary">No projects yet</p>
           <Button type="button" className="mt-6" onClick={() => setShowCreateProject(true)}>
             CREATE YOUR FIRST PROJECT
           </Button>
@@ -185,14 +185,14 @@ function ProjectsPageInner(): ReactElement {
               <Link
                 key={p.id}
                 href={`/dashboard/projects/${p.id}`}
-                className="flex w-full items-center justify-between gap-3 rounded-md border border-[rgba(255,255,255,0.08)] bg-[#0A0A14] px-4 py-4 text-left transition hover:border-border-strong"
+                className="flex w-full items-center justify-between gap-3 rounded-md border border-border bg-card px-4 py-4 text-left transition hover:border-border-strong"
               >
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className={isActive ? "text-[var(--axiom-electric)]" : "text-[#6B7490]"} aria-hidden>
+                    <span className={isActive ? "text-[var(--axiom-electric)]" : "text-text-tertiary"} aria-hidden>
                       {isActive ? "●" : "○"}
                     </span>
-                    <span className="font-[family-name:var(--font-sans)] text-axiom-18 font-medium text-[#F0F2F8]">
+                    <span className="font-[family-name:var(--font-sans)] text-axiom-18 font-medium text-text-primary">
                       {p.name}
                     </span>
                     {isActive ? (
@@ -201,14 +201,14 @@ function ProjectsPageInner(): ReactElement {
                       </span>
                     ) : null}
                   </div>
-                  <p className="mt-1 truncate font-mono text-axiom-12 text-[#A0A8BC]">{p.id}</p>
-                  <p className="mt-0.5 font-mono text-axiom-12 text-[#6B7490]">
+                  <p className="mt-1 truncate font-mono text-axiom-12 text-text-secondary">{p.id}</p>
+                  <p className="mt-0.5 font-mono text-axiom-12 text-text-tertiary">
                     Created {new Date(p.created_at).toLocaleString()}
                   </p>
                 </div>
-                <div className="flex shrink-0 items-center gap-2 font-mono text-axiom-12 text-[#A0A8BC]">
+                <div className="flex shrink-0 items-center gap-2 font-mono text-axiom-12 text-text-secondary">
                   {keys.length} keys · {defN === "…" ? "…" : defN} agents
-                  <ChevronRight className="h-4 w-4 text-[#6B7490]" aria-hidden />
+                  <ChevronRight className="h-4 w-4 text-text-tertiary" aria-hidden />
                 </div>
               </Link>
             );
@@ -224,8 +224,8 @@ export default function ProjectsPage(): ReactElement {
     <Suspense
       fallback={
         <div className="space-y-6">
-          <div className="h-8 w-48 animate-pulse rounded bg-[#0A0A14]" />
-          <div className="h-40 animate-pulse rounded-md bg-[#0A0A14]" />
+          <div className="h-8 w-48 animate-pulse rounded bg-secondary" />
+          <div className="h-40 animate-pulse rounded-md bg-secondary" />
         </div>
       }
     >

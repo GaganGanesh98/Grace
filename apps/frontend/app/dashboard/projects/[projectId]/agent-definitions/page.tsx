@@ -48,14 +48,14 @@ export default function AgentDefinitionsPage(): ReactElement {
         >
           ← Projects
         </Link>
-        <p className="mt-4 font-mono text-axiom-11 uppercase tracking-[2px] text-[#6B7490]">Agents</p>
-        <h1 className="mt-2 font-mono text-axiom-22 font-medium uppercase tracking-wide text-[#F0F2F8]">
+        <p className="mt-4 font-mono text-axiom-11 uppercase tracking-[2px] text-text-tertiary">Agents</p>
+        <h1 className="mt-2 font-mono text-axiom-22 font-medium uppercase tracking-wide text-text-primary">
           {projectName}
         </h1>
       </div>
 
       <section className="space-y-4">
-        <h2 className="font-mono text-axiom-12 uppercase tracking-[2px] text-[#6B7490]">Create agent</h2>
+        <h2 className="font-mono text-axiom-12 uppercase tracking-[2px] text-text-tertiary">Create agent</h2>
         <AgentCreatePanel
           vaultKeys={vault.data ?? []}
           providers={providers.data ?? []}
@@ -81,11 +81,11 @@ export default function AgentDefinitionsPage(): ReactElement {
       </section>
 
       <section className="space-y-4">
-        <h2 className="font-mono text-axiom-12 uppercase tracking-[2px] text-[#6B7490]">Your agents</h2>
+        <h2 className="font-mono text-axiom-12 uppercase tracking-[2px] text-text-tertiary">Your agents</h2>
         {defs.error ? (
           <p className="text-red-400">{defs.error.message}</p>
         ) : defs.isPending ? (
-          <div className="h-24 animate-pulse rounded-lg bg-[#0A0A14]" />
+          <div className="h-24 animate-pulse rounded-lg bg-secondary" />
         ) : (
           <AgentList
             projectId={projectId}

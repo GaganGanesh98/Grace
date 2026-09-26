@@ -38,7 +38,7 @@ export function ConnectionIndicator(): ReactElement {
       : () => {};
 
   return (
-    <div className="flex w-full items-center justify-center border-t border-[var(--axiom-border)] py-1.5">
+    <div className="flex w-full items-center justify-center py-1.5">
       <span className="sr-only">{tooltipFor(status)}</span>
       <button
         type="button"

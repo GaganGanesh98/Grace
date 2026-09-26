@@ -31,17 +31,17 @@ export default function AgentDefinitionDetailPage(): ReactElement {
       </Link>
 
       {q.isPending ? (
-        <div className="h-32 animate-pulse rounded-lg bg-[#0b0c0e]" />
+        <div className="h-32 animate-pulse rounded-lg bg-[var(--surface-muted)]" />
       ) : q.error ? (
         <p className="text-red-400">{q.error.message}</p>
       ) : !q.data ? (
-        <p className="text-[#82878f]">Not found.</p>
+        <p className="text-text-tertiary">Not found.</p>
       ) : (
         <>
           <div>
-            <p className="font-mono text-axiom-11 uppercase text-[#82878f]">Agent</p>
-            <h1 className="mt-2 font-mono text-axiom-24 font-medium text-[#ecedef]">{q.data.name}</h1>
-            <p className="mt-2 font-mono text-axiom-14 text-[#a8adb5]">{q.data.model}</p>
+            <p className="font-mono text-axiom-11 uppercase text-text-tertiary">Agent</p>
+            <h1 className="mt-2 font-mono text-axiom-24 font-medium text-text-primary">{q.data.name}</h1>
+            <p className="mt-2 font-mono text-axiom-14 text-text-secondary">{q.data.model}</p>
             {q.data.is_archived ? (
               <p className="mt-2 font-mono text-axiom-13 uppercase text-amber-400">Archived — run disabled</p>
             ) : null}
@@ -51,7 +51,7 @@ export default function AgentDefinitionDetailPage(): ReactElement {
             <div className="flex flex-wrap gap-3">
               <Button
                 type="button"
-                className="bg-neutral-100 text-text-inverse hover:bg-white"
+                className="bg-primary text-primary-foreground hover:bg-[var(--primary-hover)]"
                 onClick={() => {
                   setOpen(true);
                 }}
@@ -70,18 +70,18 @@ export default function AgentDefinitionDetailPage(): ReactElement {
           aria-modal="true"
           aria-labelledby="run-goal-title"
         >
-          <div className="w-full max-w-lg rounded-lg border border-border-subtle bg-[#08090b] p-6">
-            <h2 id="run-goal-title" className="font-mono text-axiom-14 uppercase tracking-wide text-[#ecedef]">
+          <div className="w-full max-w-lg rounded-lg border border-border-subtle bg-[var(--surface-muted)] p-6">
+            <h2 id="run-goal-title" className="font-mono text-axiom-14 uppercase tracking-wide text-text-primary">
               Run goal
             </h2>
             <div className="mt-4">
-              <Label className="font-mono text-axiom-11 uppercase text-[#82878f]">Goal</Label>
+              <Label className="font-mono text-axiom-11 uppercase text-text-tertiary">Goal</Label>
               <Input
                 value={goal}
                 onChange={(e) => {
                   setGoal(e.target.value);
                 }}
-                className="mt-2 border-[rgba(255,255,255,0.1)] bg-[#0b0c0e]"
+                className="mt-2 border-border bg-[var(--surface-muted)]"
                 placeholder="What should the agent do?"
               />
             </div>
@@ -98,7 +98,7 @@ export default function AgentDefinitionDetailPage(): ReactElement {
               <Button
                 type="button"
                 data-testid="start-agent-run"
-                className="bg-neutral-100 text-text-inverse hover:bg-white"
+                className="bg-primary text-primary-foreground hover:bg-[var(--primary-hover)]"
                 disabled={createRun.isPending || !goal.trim()}
                 onClick={() => {
                   createRun.mutate(

@@ -155,7 +155,7 @@ export function ProjectWorkspaceShell({ children }: { children: ReactNode }): Re
             <button
               type="button"
               onClick={onInvite}
-              className="inline-flex h-9 items-center justify-center bg-[var(--axiom-electric)] px-4 font-mono text-axiom-11 font-medium uppercase tracking-wider text-black transition hover:brightness-110"
+              className="inline-flex h-9 items-center justify-center bg-primary px-4 font-mono text-axiom-11 font-medium uppercase tracking-wider text-primary-foreground transition hover:bg-[var(--primary-hover)]"
             >
               + Invite
             </button>
@@ -326,7 +326,7 @@ function InviteMemberModal({
                 setPending(false);
               }
             }}
-            className="bg-[var(--axiom-electric)] px-4 py-2 font-mono text-axiom-12 font-medium uppercase text-black"
+            className="bg-primary px-4 py-2 font-mono text-axiom-12 font-medium uppercase text-primary-foreground"
           >
             Send invite
           </button>

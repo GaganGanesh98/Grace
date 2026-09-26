@@ -4,8 +4,8 @@ import type { UiVerification } from "@/lib/governance-display";
 import { cn } from "@/lib/utils";
 
 const styles: Record<UiVerification, string> = {
-  COMPLIANT: "border-emerald-500/40 bg-emerald-500/10 text-[#34D399]",
-  "NON-COMPLIANT": "border-red-500/40 bg-red-500/10 text-[#F87171]",
+  COMPLIANT: "border-emerald-500/40 bg-emerald-500/10 text-status-ok-fg",
+  "NON-COMPLIANT": "border-red-500/40 bg-red-500/10 text-status-denied-fg",
   PENDING: "border-status-neutral-border bg-status-neutral-bg text-status-neutral-fg",
 };
 

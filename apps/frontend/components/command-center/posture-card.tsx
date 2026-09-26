@@ -8,20 +8,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { CommandCenterRequestError } from "@/lib/command-center-api";
 import { usePostureQuery } from "@/lib/queries/command-center";
 
-const GREEN = "#6db862";
-const AMBER = "#d4a030";
-const RED = "#da1e28";
-
 type PostureCardProps = { projectId: string | null };
 
-function ringColor(violations: number): string {
+// The ring is a graphical mark (3:1 against the card); the percentage is text
+// and needs the -strong variant (4.5:1). See scripts/check-contrast.py.
+function postureTone(violations: number): "success" | "warning" | "danger" {
   if (violations === 0) {
-    return GREEN;
+    return "success";
   }
   if (violations < 5) {
-    return AMBER;
+    return "warning";
   }
-  return RED;
+  return "danger";
 }
 
 function postureDisplayPercent(calls: number, violations: number): number {
@@ -65,7 +63,8 @@ export function PostureCard({ projectId }: PostureCardProps): ReactElement {
 
     const { violations, calls_governed: cg } = data;
     const pct = postureDisplayPercent(cg, violations);
-    const arcColor = ringColor(violations);
+    const tone = postureTone(violations);
+    const arcColor = `var(--${tone})`;
     const fillDeg = (pct / 100) * 360;
     return (
       <>
@@ -80,7 +79,7 @@ export function PostureCard({ projectId }: PostureCardProps): ReactElement {
             <div className="absolute inset-2.5 flex items-center justify-center rounded-full bg-[var(--axiom-bg-card)]">
               <span
                 className="text-axiom-18 font-mono"
-                style={{ color: arcColor }}
+                style={{ color: `var(--${tone}-strong)` }}
               >{`${pct}%`}</span>
             </div>
           </div>

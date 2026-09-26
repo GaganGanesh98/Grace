@@ -33,22 +33,22 @@ export function ResultsView({ run }: ResultsViewProps): ReactElement {
       : [];
 
   return (
-    <div className="space-y-4 rounded-lg border border-[rgba(255,255,255,0.08)] bg-[#0A0A14] p-6">
+    <div className="space-y-4 rounded-lg border border-border bg-card p-6">
       <div>
-        <p className="font-mono text-axiom-11 uppercase tracking-wide text-[#6B7490]">Status</p>
-        <p className="mt-1 font-mono text-axiom-16 text-[#F0F2F8]">{run.status}</p>
+        <p className="font-mono text-axiom-11 uppercase tracking-wide text-text-tertiary">Status</p>
+        <p className="mt-1 font-mono text-axiom-16 text-text-primary">{run.status}</p>
         {run.error_message ? (
           <p className="mt-2 text-axiom-14 text-red-400">{run.error_message}</p>
         ) : null}
       </div>
 
       <div>
-        <p className="font-mono text-axiom-11 uppercase tracking-wide text-[#6B7490]">Final answer</p>
-        <p className="mt-2 whitespace-pre-wrap text-axiom-15 text-[#F0F2F8]">{text || "—"}</p>
+        <p className="font-mono text-axiom-11 uppercase tracking-wide text-text-tertiary">Final answer</p>
+        <p className="mt-2 whitespace-pre-wrap text-axiom-15 text-text-primary">{text || "—"}</p>
       </div>
 
       <div>
-        <p className="font-mono text-axiom-11 uppercase tracking-wide text-[#6B7490]">Receipts</p>
+        <p className="font-mono text-axiom-11 uppercase tracking-wide text-text-tertiary">Receipts</p>
         <ul className="mt-2 space-y-1">
           {Array.isArray(receiptIds) && receiptIds.length > 0 ? (
             receiptIds.map((rid) => (
@@ -62,24 +62,24 @@ export function ResultsView({ run }: ResultsViewProps): ReactElement {
               </li>
             ))
           ) : (
-            <li className="text-axiom-14 text-[#6B7490]">—</li>
+            <li className="text-axiom-14 text-text-tertiary">—</li>
           )}
         </ul>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <p className="font-mono text-axiom-11 uppercase tracking-wide text-[#6B7490]">Duration</p>
-          <p className="mt-1 font-mono text-axiom-14 text-[#F0F2F8]">{durationMs(run)}</p>
+          <p className="font-mono text-axiom-11 uppercase tracking-wide text-text-tertiary">Duration</p>
+          <p className="mt-1 font-mono text-axiom-14 text-text-primary">{durationMs(run)}</p>
         </div>
         <div>
-          <p className="font-mono text-axiom-11 uppercase tracking-wide text-[#6B7490]">Correlation</p>
-          <p className="mt-1 break-all font-mono text-axiom-12 text-[#A0A8BC]">{run.correlation_id}</p>
+          <p className="font-mono text-axiom-11 uppercase tracking-wide text-text-tertiary">Correlation</p>
+          <p className="mt-1 break-all font-mono text-axiom-12 text-text-secondary">{run.correlation_id}</p>
         </div>
       </div>
 
       {run.status === "cancelled" && run.completed_at ? (
-        <p className="font-mono text-axiom-13 text-[#A0A8BC]">Cancelled at {run.completed_at}</p>
+        <p className="font-mono text-axiom-13 text-text-secondary">Cancelled at {run.completed_at}</p>
       ) : null}
     </div>
   );

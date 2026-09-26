@@ -59,7 +59,7 @@ describe("user-facing agent labels (dashboard + components)", () => {
   });
 
   it("keeps positive Agents copy on key surfaces", () => {
-    const sidebar = readFileSync(join(FE_ROOT, "components/command-center/sidebar.tsx"), "utf8");
+    const sidebar = readFileSync(join(FE_ROOT, "components/shell/nav-config.ts"), "utf8");
     expect(sidebar).toMatch(/\bAgents\b/);
     const listPage = readFileSync(
       join(FE_ROOT, "app/dashboard/projects/[projectId]/agent-definitions/page.tsx"),

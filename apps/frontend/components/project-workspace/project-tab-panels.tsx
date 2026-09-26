@@ -194,7 +194,7 @@ export function OverviewTabPanel(): ReactElement {
                 type="button"
                 onClick={onRun}
                 disabled={create.isPending}
-                className="bg-[var(--axiom-electric)] px-5 py-2 font-mono text-axiom-12 font-medium uppercase text-black"
+                className="bg-primary px-5 py-2 font-mono text-axiom-12 font-medium uppercase text-primary-foreground"
               >
                 Run agent
               </button>

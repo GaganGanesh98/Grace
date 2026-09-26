@@ -15,9 +15,9 @@ function Kv({
   v: string | number | boolean | null | undefined;
 }): ReactElement {
   return (
-    <div className="grid grid-cols-[minmax(0,180px)_1fr] gap-x-4 gap-y-1 border-b border-[rgba(255,255,255,0.04)] py-2 last:border-0">
-      <div className="font-mono text-axiom-13 text-[#6B7490]">{k}</div>
-      <div className="break-all font-mono text-axiom-13 text-[#A0A8BC]">{String(v ?? "—")}</div>
+    <div className="grid grid-cols-[minmax(0,180px)_1fr] gap-x-4 gap-y-1 border-b border-border py-2 last:border-0">
+      <div className="font-mono text-axiom-13 text-text-tertiary">{k}</div>
+      <div className="break-all font-mono text-axiom-13 text-text-secondary">{String(v ?? "—")}</div>
     </div>
   );
 }
@@ -45,7 +45,7 @@ export function GovernancePipeline({ receipt }: { receipt: GovernanceReceiptReco
       <PipelineStage index={2} title="Risk context assessment">
         <div className="space-y-0">
           {Object.keys(ctx).length === 0 ? (
-            <p className="text-axiom-15 text-[#A0A8BC]">No additional context attached.</p>
+            <p className="text-axiom-15 text-text-secondary">No additional context attached.</p>
           ) : (
             Object.entries(ctx).map(([key, val]) => (
               <Kv key={key} k={key} v={typeof val === "object" ? JSON.stringify(val) : String(val)} />
@@ -57,10 +57,10 @@ export function GovernancePipeline({ receipt }: { receipt: GovernanceReceiptReco
       <PipelineStage index={3} title="Policy evaluation">
         <div className="space-y-3">
           <Kv k="policy_version" v={verdict.policy_version} />
-          <div className="font-mono text-axiom-13 uppercase tracking-wide text-[#A0A8BC]">Rules checked</div>
+          <div className="font-mono text-axiom-13 uppercase tracking-wide text-text-secondary">Rules checked</div>
           <ul className="space-y-2">
             {rules.length === 0 ? (
-              <li className="font-mono text-axiom-13 text-[#6B7490]">—</li>
+              <li className="font-mono text-axiom-13 text-text-tertiary">—</li>
             ) : (
               rules.map((r, i) => {
                 const rule = r as Record<string, unknown>;
@@ -70,8 +70,8 @@ export function GovernancePipeline({ receipt }: { receipt: GovernanceReceiptReco
                     key={i}
                     className={
                       matched
-                        ? "rounded border border-border-strong bg-surface-elevated px-3 py-2 font-mono text-axiom-13 text-[#F0F2F8]"
-                        : "rounded border border-[rgba(255,255,255,0.06)] px-3 py-2 font-mono text-axiom-13 text-[#A0A8BC]"
+                        ? "rounded border border-border-strong bg-surface-elevated px-3 py-2 font-mono text-axiom-13 text-text-primary"
+                        : "rounded border border-border px-3 py-2 font-mono text-axiom-13 text-text-secondary"
                     }
                   >
                     {JSON.stringify(r)}
@@ -87,7 +87,7 @@ export function GovernancePipeline({ receipt }: { receipt: GovernanceReceiptReco
         <div className="flex flex-wrap items-center gap-4">
           <VerdictBadge verdict={uiV} />
           {verdict.reason ? (
-            <p className="max-w-xl text-axiom-15 text-[#F0F2F8]">{verdict.reason}</p>
+            <p className="max-w-xl text-axiom-15 text-text-primary">{verdict.reason}</p>
           ) : null}
         </div>
       </PipelineStage>
@@ -96,7 +96,7 @@ export function GovernancePipeline({ receipt }: { receipt: GovernanceReceiptReco
         {receipt.execution && Object.keys(receipt.execution).length > 0 ? (
           <CodeBlock>{JSON.stringify(receipt.execution, null, 2)}</CodeBlock>
         ) : (
-          <p className="text-axiom-15 text-[#A0A8BC]">No execution payload recorded yet.</p>
+          <p className="text-axiom-15 text-text-secondary">No execution payload recorded yet.</p>
         )}
       </PipelineStage>
 
@@ -104,7 +104,7 @@ export function GovernancePipeline({ receipt }: { receipt: GovernanceReceiptReco
         <div className="space-y-3">
           <VerificationBadge status={uiVer} />
           {Array.isArray(receipt.verification?.mismatches) && receipt.verification.mismatches.length > 0 ? (
-            <ul className="list-inside list-disc space-y-1 font-mono text-axiom-13 text-[#F87171]">
+            <ul className="list-inside list-disc space-y-1 font-mono text-axiom-13 text-status-denied-fg">
               {receipt.verification.mismatches.map((m, i) => (
                 <li key={i}>{JSON.stringify(m)}</li>
               ))}

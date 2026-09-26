@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -67,18 +67,25 @@ describe("Phase 7.7.0 design tokens migration", () => {
     expect(html).toContain("__font_mono_variable");
   });
 
-  it("renders primary buttons with the white token background", () => {
+  // Phase 8.3: primary actions use the violet --primary token in both themes.
+  it("renders primary buttons with the primary token background", () => {
     render(<Button variant="primary">Create project</Button>);
 
-    expect(screen.getByRole("button", { name: /create project/i }).className).toContain("bg-neutral-100");
+    const className = screen.getByRole("button", { name: /create project/i }).className;
+    expect(className).toContain("bg-primary");
+    expect(className).toContain("text-primary-foreground");
   });
 
-  it("uses a white left border for the active sidebar item", async () => {
-    const { CommandCenterSidebar } = await import("@/components/command-center/sidebar");
+  it("marks the active sidebar item with aria-current and the accent tokens", async () => {
+    const { AppShell } = await import("@/components/shell/app-shell");
 
-    render(<CommandCenterSidebar />);
+    render(<AppShell>content</AppShell>);
 
-    expect(screen.getByRole("link", { name: /projects/i }).className).toContain("border-l-text-primary");
+    const nav = screen.getByRole("navigation", { name: "Main" });
+    const active = within(nav).getByRole("link", { name: /^projects$/i });
+    expect(active.getAttribute("aria-current")).toBe("page");
+    expect(active.className).toContain("bg-accent");
+    expect(within(nav).getByRole("link", { name: /^receipts$/i }).getAttribute("aria-current")).toBeNull();
   });
 
   it("defines live-dot as the live-breath animation", () => {

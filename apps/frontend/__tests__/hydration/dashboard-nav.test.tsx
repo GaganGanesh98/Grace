@@ -9,7 +9,7 @@ import {
   ProjectWorkspaceProvider,
   useProjectWorkspace,
 } from "@/components/project-workspace-provider";
-import { Sidebar } from "@/components/sidebar";
+import { AppShell } from "@/components/shell/app-shell";
 
 vi.mock("next/navigation", () => ({
   usePathname: (): string => "/dashboard",
@@ -44,7 +44,7 @@ function shell(): ReactElement {
     <QueryClientProvider client={qc}>
       <ProjectWorkspaceProvider>
         <GraceEventsProvider>
-          <Sidebar />
+          <AppShell>content</AppShell>
         </GraceEventsProvider>
       </ProjectWorkspaceProvider>
     </QueryClientProvider>
@@ -52,7 +52,7 @@ function shell(): ReactElement {
 }
 
 describe("dashboard nav hydration", () => {
-  it("server HTML matches between two renderToString passes (stable sidebar markup)", () => {
+  it("server HTML matches between two renderToString passes (stable app shell markup)", () => {
     const a = renderToString(shell());
     const b = renderToString(shell());
     expect(a).toBe(b);

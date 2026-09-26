@@ -112,7 +112,7 @@ export default function ApprovalsPage(): ReactElement {
 
       {error ? (
         <div
-          className="rounded-lg border border-[var(--axiom-danger)]/30 bg-[rgba(224,80,80,0.08)] px-4 py-3 text-axiom-15 text-[var(--axiom-danger)]"
+          className="rounded-lg border border-[var(--axiom-danger)]/30 bg-status-denied-bg px-4 py-3 text-axiom-15 text-[var(--axiom-danger)]"
           role="alert"
         >
           {error}
@@ -151,7 +151,7 @@ export default function ApprovalsPage(): ReactElement {
                 size="sm"
                 disabled={Boolean(processing)}
                 className={cn(
-                  "border border-[rgba(109,184,98,0.35)] bg-[rgba(109,184,98,0.12)] text-axiom-12 text-[var(--axiom-success)] hover:bg-[rgba(109,184,98,0.18)]",
+                  "border border-[color:color-mix(in_oklab,var(--success)_35%,transparent)] bg-status-ok-bg text-axiom-12 text-[var(--axiom-success)] hover:bg-[color:color-mix(in_oklab,var(--success)_24%,transparent)]",
                 )}
                 onClick={() => void handleApprove(r.receipt_id)}
               >

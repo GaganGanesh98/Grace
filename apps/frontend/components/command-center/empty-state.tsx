@@ -99,7 +99,7 @@ export function EmptyStateCommandCenter({
       </div>
       <div className="flex flex-col items-center gap-2">
         <Link
-          className="inline-flex min-h-10 items-center justify-center rounded-sm border border-transparent bg-neutral-100 px-4 font-mono text-axiom-12 font-semibold tracking-wide text-text-inverse outline-none transition-colors hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-neutral-100 focus-visible:outline-offset-2"
+          className="inline-flex min-h-10 items-center justify-center rounded-sm border border-transparent bg-primary px-4 font-mono text-axiom-12 font-semibold tracking-wide text-primary-foreground outline-none transition-colors hover:bg-[var(--primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-neutral-100 focus-visible:outline-offset-2"
           href={primaryCta.href}
         >
           {primaryCta.label}
