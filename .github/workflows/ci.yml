@@ -201,9 +201,28 @@ jobs:
           uv run pytest --override-ini="addopts=" --cov=axiom.services.prompt_injection
           --cov-fail-under=95 tests/ -q
 
+      # `uv run pip-audit --strict` always failed unconditionally on every commit
+      # in this repository's history: it tried to self-audit the local
+      # grace-backend package, which is not on PyPI. --skip-editable does not
+      # help -- --strict treats "skipped because editable" as itself a
+      # collection failure. Exporting third-party deps only (excluding the
+      # local project) and auditing that is the fix.
+      #
+      # PYSEC-2026-1325 (ecdsa, pulled in transitively by python-jose even with
+      # the [cryptography] extra) has no fix version -- upstream has declared
+      # Minerva-class timing side channels out of scope, no planned fix. It
+      # only affects ecdsa.SigningKey.sign_digest() (ECDSA signing/key
+      # generation/ECDH), not verification. Grace's own JWT_ALGORITHM defaults
+      # to, and is documented as, HS256 -- that code path is never invoked
+      # unless an operator explicitly configures an ES256-family algorithm.
+      # Ignored rather than left blocking CI forever with no available
+      # remediation. See ADR-034.
       - name: pip-audit
         working-directory: apps/backend
-        run: uv run pip-audit --strict
+        run: |
+          uv export --no-emit-project --no-hashes -o /tmp/requirements-audit.txt
+          uv run pip-audit --strict -r /tmp/requirements-audit.txt \
+            --ignore-vuln PYSEC-2026-1325
 
   frontend:
     runs-on: ubuntu-latest

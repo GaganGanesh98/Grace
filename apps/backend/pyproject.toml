@@ -9,21 +9,21 @@ authors = [
 ]
 requires-python = ">=3.13,<3.14"
 dependencies = [
-    "cryptography>=43.0.0",
+    "cryptography>=50.0.0",  # floor covers GHSA-537c-gmf6-5ccf, PYSEC-2026-3552/3553/3554
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.32.0",
     "sqlalchemy[asyncio]>=2.0.36",
     "asyncpg>=0.30.0",
     "alembic>=1.14.0",
     "pydantic>=2.10.0",
-    "pydantic-settings>=2.7.0",
+    "pydantic-settings>=2.14.2",  # floor covers CVE-2026-58203
     "python-jose[cryptography]>=3.3.0",
     "passlib[bcrypt]>=1.7.4",
     "bcrypt>=4.0.0,<5",
-    "authlib>=1.4.0",
+    "authlib>=1.6.12",  # floor covers PYSEC-2026-188
     "httpx>=0.28.0",
     "redis>=5.2.0",
-    "python-multipart>=0.0.20",
+    "python-multipart>=0.0.31",  # floor covers PYSEC-2026-3036/3037/3039/3040
     "email-validator>=2.2.0",
     "greenlet>=3.1.0",
     "structlog>=24.4.0",
