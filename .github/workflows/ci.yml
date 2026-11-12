@@ -211,7 +211,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: TruffleHog
-        uses: trufflesecurity/trufflehog@v3.84.2
+        uses: trufflesecurity/trufflehog@v3.96.0
         with:
           path: ./
           # On pull_request, diff-scan base..head. On push, base and head would
